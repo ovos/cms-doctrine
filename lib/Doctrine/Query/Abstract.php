@@ -2465,7 +2465,7 @@ abstract class Doctrine_Query_Abstract
      * @param array $tableAliases
      * @return $this
      */
-    public function addDependences($sqlPart = null, array $tableAliases)
+    public function addDependences($sqlPart, array $tableAliases)
     {
         foreach($tableAliases as $tableAlias) {
             $this->addDependency($sqlPart, $tableAlias);
