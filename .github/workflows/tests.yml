@@ -1,18 +1,19 @@
 name: Tests
 
 on:
-  - pull_request
-  - push
+  pull_request: ~
+  push:
+    branches:
+      - master
 
 jobs:
   test:
-    name: PHP ${{ matrix.php }}
+    name: "PHP ${{ matrix.php }}${{ matrix.allow-failure && ' (allowing failures - php version not supported yet)' || '' }}"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        php: ['5.3', '5.4', '5.5', '5.6', '7.0', '7.1', '7.2', '7.3', '7.4']
-        allow-failure: [false]
+        php: ['5.3', '5.4', '5.5', '5.6', '7.0', '7.1', '7.2', '7.3', '7.4', '8.0', '8.1']
         include:
           - php: '8.0'
             allow-failure: true
@@ -27,9 +28,14 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          extensions: apcu
+          ini-values: apc.enable_cli=1
+        env:
+            fail-fast: true
 
-      - name: "Run Tests${{ matrix.allow-failure && ' (allowing failures, php version not supported yet)' }}"
+      - name: Display APC versions (if installed)
+        run: php -r "echo phpversion('apc');"
+
+      - name: "Run Tests"
         run: |
           php ./tests/run.php
         continue-on-error: "${{ matrix.allow-failure == true }}"
