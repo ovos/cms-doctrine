@@ -12,12 +12,12 @@ jobs:
       fail-fast: false
       matrix:
         php: ['5.3', '5.4', '5.5', '5.6', '7.0', '7.1', '7.2', '7.3', '7.4']
-        experimental: [false]
+        allow-failure: [false]
         include:
-          - php: 8.0
-            experimental: true
-          - php: 8.1
-            experimental: true
+          - php: '8.0'
+            allow-failure: true
+          - php: '8.1'
+            allow-failure: true
 
     steps:
       - name: Checkout Code
@@ -27,8 +27,9 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
+          extensions: apcu
 
-      - name: "Run Tests (Experimental: ${{ matrix.experimental }})"
+      - name: "Run Tests${{ matrix.allow-failure && ' (allowing failures, php version not supported yet)' }}"
         run: |
           php ./tests/run.php
-        continue-on-error: "${{ matrix.experimental == true }}"
+        continue-on-error: "${{ matrix.allow-failure == true }}"
