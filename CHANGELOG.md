@@ -1,3 +1,7 @@
+1.3.3
+-----
+- php 8.0 compatibility fixes [#8](https://github.com/ovos/doctrine1/pull/8)
+
 1.3.2
 -----
 - fixed Doctrine_Validator_HtmlColor class name to match the filename and fix compatibility with psr-0 autoloading
