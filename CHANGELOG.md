@@ -1,6 +1,6 @@
 1.3.3
 -----
-- php 8.0 compatibility fix [#8](https://github.com/ovos/doctrine1/pull/8)
+- php 8.0 compatibility fixes [#8](https://github.com/ovos/doctrine1/pull/8)
 
 1.3.2
 -----
