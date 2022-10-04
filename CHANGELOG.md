@@ -1,17 +1,18 @@
-1.3.3
------
+1.3.3 (2022-10-04)
+------------------
 - php 8.0 compatibility fixes [#8](https://github.com/ovos/doctrine1/pull/8)
+- migrate test runs from travis to github actions [#10](https://github.com/ovos/doctrine1/pull/10)
 
-1.3.2
------
+1.3.2 (2020-08-13)
+------------------
 - fixed Doctrine_Validator_HtmlColor class name to match the filename and fix compatibility with psr-0 autoloading
 
-1.3.1
------
+1.3.1 (2019-11-16)
+------------------
 - fixed MySQL8 compatibility issue - `row_number` is now a reserved word [#5](https://github.com/ovos/doctrine1/pull/5)
 
-1.3.0
------
+1.3.0 (2019-05-29)
+------------------
 - php 7.3 and mysql 5.7 compatible
 - **[BC BREAK]** modified doctrine collection & record serialization - store less data in cache, but losing the feature of keeping state of modified data
 - **[BC BREAK]** [OV1] fixed orderBy handling in relations - for ordering m2m relations by columns in `refClass` use `refOrderBy`!
