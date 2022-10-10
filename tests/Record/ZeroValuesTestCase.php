@@ -53,7 +53,9 @@ class Doctrine_Record_ZeroValues_TestCase extends Doctrine_UnitTestCase
     {
         $users = $this->dbh->query('SELECT * FROM zero_value_test')->fetchAll(PDO::FETCH_ASSOC);
 
-        $this->assertIdentical($users[0]['is_super_admin'], '0');
+        // SQLite: In PHP 8.1, the mapping of database types to PHP's native types has been greatly improved.
+        // For instance, it has been made sure that an INT value from an SQL result is translated to a PHP integer value where it had been a string previously.
+        $this->assertIdentical($users[0]['is_super_admin'], PHP_VERSION_ID >= 80100 ? 0 : '0');
     }
 
     public function testZeroValuesMaintained2()

@@ -79,7 +79,7 @@ class Doctrine_Record_Listener implements Doctrine_Record_Listener_Interface
 
         return null; 
     }
-	
+
     public function preSerialize(Doctrine_Event $event)
     { }
 

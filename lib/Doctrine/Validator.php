@@ -127,6 +127,8 @@ class Doctrine_Validator extends Doctrine_Locator_Injectable
      */
     public static function getStringLength($string)
     {
+        $string = (string)$string;
+
         if (function_exists('mb_strlen')) {
             return mb_strlen($string, 'utf8');
         } else {

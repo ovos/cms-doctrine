@@ -48,6 +48,11 @@ abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
         return isset($this->_queryComponents[$alias]['map']) ? $this->_queryComponents[$alias]['map'] : null;
     }
 
+    protected function _rtrim($value)
+    {
+        return is_string($value) ? rtrim($value) : $value;
+    }
+
     public function hydrateResultSet($stmt)
     {
         // Used variables during hydration
@@ -120,7 +125,7 @@ abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
             $table = $this->_queryComponents[$rootAlias]['table'];
         
             if ($table->getConnection()->getAttribute(Doctrine_Core::ATTR_PORTABILITY) & Doctrine_Core::PORTABILITY_RTRIM) {
-                array_map('rtrim', $data);
+                array_map(array($this, '_rtrim'), $data);
             }
         
             $id = $idTemplate; // initialize the id-memory

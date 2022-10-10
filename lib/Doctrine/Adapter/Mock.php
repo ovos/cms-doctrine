@@ -61,6 +61,11 @@ class Doctrine_Adapter_Mock implements Doctrine_Adapter_Interface, Countable
     private $_lastInsertIdFail = false;
 
     /**
+     * @var int
+     */
+    protected $_count;
+
+    /**
      * Doctrine mock adapter constructor
      *
      * <code>
@@ -238,6 +243,7 @@ class Doctrine_Adapter_Mock implements Doctrine_Adapter_Interface, Countable
      *
      * @return integer $count
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return count($this->_queries);

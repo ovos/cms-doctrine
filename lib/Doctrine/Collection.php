@@ -145,9 +145,20 @@ class Doctrine_Collection extends Doctrine_Access implements Countable, Iterator
     /**
      * This method is automatically called when this Doctrine_Collection is serialized
      *
-     * @return array
+     * @return string
      */
     public function serialize()
+    {
+        return serialize($this->__serialize());
+    }
+
+    /**
+     * As of PHP 8.1.0, a class which implements Serializable without also implementing __serialize() and __unserialize() will generate a deprecation warning.
+     * @see https://php.watch/versions/8.1/serializable-deprecated
+     *
+     * @return array
+     */
+    public function __serialize()
     {
         $vars = get_object_vars($this);
 
@@ -165,7 +176,7 @@ class Doctrine_Collection extends Doctrine_Access implements Countable, Iterator
 
         $vars['_table'] = $vars['_table']->getComponentName();
 
-        return serialize($vars);
+        return $vars;
     }
 
     /**
@@ -175,10 +186,19 @@ class Doctrine_Collection extends Doctrine_Access implements Countable, Iterator
      */
     public function unserialize($serialized)
     {
+        $this->__unserialize(unserialize($serialized));
+    }
+    
+    /**
+     * As of PHP 8.1.0, a class which implements Serializable without also implementing __serialize() and __unserialize() will generate a deprecation warning.
+     * @see https://php.watch/versions/8.1/serializable-deprecated
+     *
+     * @param array $array
+     */
+    public function __unserialize(array $array)
+    {
         $manager    = Doctrine_Manager::getInstance();
         $connection    = $manager->getCurrentConnection();
-
-        $array = unserialize($serialized);
 
         foreach ($array as $name => $values) {
             $this->$name = $values;
@@ -425,6 +445,7 @@ class Doctrine_Collection extends Doctrine_Access implements Countable, Iterator
      *
      * @return integer
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return count($this->data);
@@ -1047,6 +1068,7 @@ class Doctrine_Collection extends Doctrine_Access implements Countable, Iterator
      *
      * @return Iterator
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         $data = $this->data;

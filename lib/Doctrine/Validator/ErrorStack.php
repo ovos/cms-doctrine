@@ -148,6 +148,7 @@ class Doctrine_Validator_ErrorStack extends Doctrine_Access implements Countable
      *
      * @return unknown
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new ArrayIterator($this->_errors);
@@ -163,6 +164,7 @@ class Doctrine_Validator_ErrorStack extends Doctrine_Access implements Countable
      *
      * @return integer
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return count($this->_errors);

@@ -1154,6 +1154,7 @@ abstract class Doctrine_Connection extends Doctrine_Configurable implements Coun
      *
      * @return ArrayIterator        SPL ArrayIterator object
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new ArrayIterator($this->tables);
@@ -1164,6 +1165,7 @@ abstract class Doctrine_Connection extends Doctrine_Configurable implements Coun
      *
      * @return integer
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return $this->_count;
@@ -1560,14 +1562,26 @@ abstract class Doctrine_Connection extends Doctrine_Configurable implements Coun
     /**
      * Serialize. Remove database connection(pdo) since it cannot be serialized
      *
-     * @return string $serialized
+     * @return string
      */
     public function serialize()
+    {
+        return serialize($this->__serialize());
+    }
+    
+    /**
+     * As of PHP 8.1.0, a class which implements Serializable without also implementing __serialize() and __unserialize() will generate a deprecation warning.
+     * @see https://php.watch/versions/8.1/serializable-deprecated
+     *
+     * @return array
+     */
+    public function __serialize()
     {
         $vars = get_object_vars($this);
         $vars['dbh'] = null;
         $vars['isConnected'] = false;
-        return serialize($vars);
+
+        return $vars;
     }
 
     /**
@@ -1578,8 +1592,17 @@ abstract class Doctrine_Connection extends Doctrine_Configurable implements Coun
      */
     public function unserialize($serialized)
     {
-        $array = unserialize($serialized);
-
+        $this->__unserialize(unserialize($serialized));
+    }
+    
+    /**
+     * As of PHP 8.1.0, a class which implements Serializable without also implementing __serialize() and __unserialize() will generate a deprecation warning.
+     * @see https://php.watch/versions/8.1/serializable-deprecated
+     *
+     * @param array $array
+     */
+    public function __unserialize(array $array)
+    {
         foreach ($array as $name => $values) {
             $this->$name = $values;
         }
