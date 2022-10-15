@@ -36,6 +36,7 @@
 abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
 {
     protected $_tables = array();
+    protected $_rootAlias;
 
     /**
      * Gets the custom field used for indexing for the specified component alias.

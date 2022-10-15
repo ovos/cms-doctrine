@@ -54,8 +54,12 @@ class Doctrine_UnitTestCase extends UnitTestCase
     protected $transaction;
     protected $_name;
 
-
     protected $init = false;
+
+    protected $query;
+    protected $exc;
+    protected $sequence;
+    protected $import;
 
     public function getName()
     {

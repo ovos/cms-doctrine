@@ -3,7 +3,17 @@
  * Test to ensure LocalKey Relations allow 0 for id value
  */
 class Doctrine_Ticket_982_TestCase extends Doctrine_UnitTestCase
-{    
+{
+    /**
+     * @var T982_MyModel
+     */
+    private $myModelOne;
+
+    /**
+     * @var T982_MyModel
+     */
+    private $myModelTwo;
+
     public function prepareTables()
     {
         $this->tables = array();

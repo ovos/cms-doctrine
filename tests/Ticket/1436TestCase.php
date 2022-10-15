@@ -32,6 +32,10 @@
  */
 class Doctrine_Ticket_1436_TestCase extends Doctrine_UnitTestCase
 {
+    private $group_one;
+    private $group_two;
+    private $group_three;
+
     public function prepareTables()
     {
         parent::prepareTables();

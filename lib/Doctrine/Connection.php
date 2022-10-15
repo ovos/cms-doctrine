@@ -1255,7 +1255,6 @@ abstract class Doctrine_Connection extends Doctrine_Configurable implements Coun
     public function evictTables()
     {
         $this->tables = array();
-        $this->exported = array();
     }
 
     /**

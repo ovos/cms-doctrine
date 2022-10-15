@@ -32,6 +32,10 @@
  */
 class Doctrine_AuditLog_TestCase extends Doctrine_UnitTestCase
 {
+    /**
+     * @var Doctrine_Connection_Profiler
+     */
+    private $profiler;
 
     public function prepareData()
     { }

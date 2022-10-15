@@ -88,6 +88,11 @@ class Doctrine_Import_Builder extends Doctrine_Builder
     protected $_generateTableClasses = false;
 
     /**
+     * @var boolean
+     */
+    protected $_generateAccessors = false;
+
+    /**
      * Prefix to use for generated base classes
      *
      * @var string

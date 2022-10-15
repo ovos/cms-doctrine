@@ -35,7 +35,17 @@ class Doctrine_Task_BuildAllLoad extends Doctrine_Task
     public $description          =   'Calls build-all, and load-data',
            $requiredArguments    =   array(),
            $optionalArguments    =   array();
-    
+
+    /**
+     * @var Doctrine_Task_BuildAll
+     */
+    protected $buildAll;
+
+    /**
+     * @var Doctrine_Task_LoadData
+     */
+    protected $loadData;
+
     public function __construct($dispatcher = null)
     {
         parent::__construct($dispatcher);

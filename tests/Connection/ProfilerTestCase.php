@@ -33,6 +33,11 @@
  */
 class Doctrine_Connection_Profiler_TestCase extends Doctrine_UnitTestCase 
 {
+    /**
+     * @var Doctrine_Connection_Profiler
+     */
+    private $profiler;
+
     public function prepareTables()
     {}
     public function prepareData() 

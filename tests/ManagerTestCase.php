@@ -31,6 +31,26 @@
  * @version     $Revision$
  */
 class Doctrine_Manager_TestCase extends Doctrine_UnitTestCase {
+    /**
+     * @var string
+     */
+    protected $conn1_database;
+
+    /**
+     * @var string
+     */
+    protected $conn2_database;
+
+    /**
+     * @var Doctrine_Connection
+     */
+    protected $conn1;
+
+    /**
+     * @var Doctrine_Connection
+     */
+    protected $conn2;
+
     public function testGetInstance() {
         $this->assertTrue(Doctrine_Manager::getInstance() instanceOf Doctrine_Manager);
     }

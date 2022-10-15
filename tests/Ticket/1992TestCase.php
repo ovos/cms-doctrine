@@ -32,6 +32,21 @@
  */
 class Doctrine_Ticket_1992_TestCase extends Doctrine_UnitTestCase 
 {
+    /**
+     * @var Ticket_1992_Person
+     */
+    private $person;
+
+    /**
+     * @var Ticket_1992_Profile
+     */
+    private $profile1;
+
+    /**
+     * @var Ticket_1992_Profile
+     */
+    private $profile2;
+
     public function prepareTables()
     {
         $this->tables[] = 'Ticket_1992_Person';

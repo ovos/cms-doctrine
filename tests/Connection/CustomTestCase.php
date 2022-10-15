@@ -32,6 +32,16 @@
  */
 class Doctrine_Connection_Custom_TestCase extends Doctrine_UnitTestCase 
 {
+    /**
+     * @var Doctrine_Connection
+     */
+    protected $_conn;
+
+    /**
+     * @var Doctrine_Adapter_Interface
+     */
+    protected $_dbh;
+
     public function setUp()
     {
         $manager = Doctrine_Manager::getInstance();

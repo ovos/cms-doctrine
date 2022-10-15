@@ -2,6 +2,11 @@
 
 class Doctrine_Ticket_2158_TestCase extends Doctrine_UnitTestCase
 {
+    /**
+     * @var T2158_Model1
+     */
+    private $myModel;
+
     public function prepareTables()
     {
         $this->tables[] = "T2158_Model1";

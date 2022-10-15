@@ -32,6 +32,11 @@
  */
 class Doctrine_Search_File_TestCase extends Doctrine_UnitTestCase
 {
+    /**
+     * @var Doctrine_Search_File
+     */
+    private $_search;
+
     public function prepareData()
     { }
     public function prepareTables()
