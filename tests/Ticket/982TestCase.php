@@ -35,30 +35,32 @@ class Doctrine_Ticket_982_TestCase extends Doctrine_UnitTestCase
         $this->conn->getTable('T982_MyModel')->clear();
         
         $myModelZero = $this->conn->getTable('T982_MyModel')->find(0);
-        
-		$this->assertIdentical($myModelZero->id, '0');
-		$this->assertIdentical($myModelZero->parentid, '0');
+
+        // SQLite: In PHP 8.1, the mapping of database types to PHP's native types has been greatly improved.
+        // For instance, it has been made sure that an INT value from an SQL result is translated to a PHP integer value where it had been a string previously.
+		$this->assertIdentical($myModelZero->id, PHP_VERSION_ID >= 80100 ? 0 : '0');
+		$this->assertIdentical($myModelZero->parentid, PHP_VERSION_ID >= 80100 ? 0 : '0');
 		$this->assertTrue($myModelZero->parent->exists());
-		$this->assertTrue(ctype_digit($myModelZero->parent->id));
+		$this->assertTrue(ctype_digit((string)$myModelZero->parent->id));
 		$this->assertIdentical($myModelZero, $myModelZero->parent);
-		$this->assertIdentical($myModelZero->parent->id, '0');
-		$this->assertIdentical($myModelZero->parent->parentid, '0');		
+		$this->assertIdentical($myModelZero->parent->id, PHP_VERSION_ID >= 80100 ? 0 : '0');
+		$this->assertIdentical($myModelZero->parent->parentid, PHP_VERSION_ID >= 80100 ? 0 : '0');
         
         $myModelOne = $this->conn->getTable('T982_MyModel')->find(1);
-        
-        $this->assertIdentical($myModelOne->id, '1');
-		$this->assertIdentical($myModelOne->parentid, '0');
+
+        $this->assertIdentical($myModelOne->id, PHP_VERSION_ID >= 80100 ? 1 : '1');
+		$this->assertIdentical($myModelOne->parentid, PHP_VERSION_ID >= 80100 ? 0 : '0');
 		$this->assertTrue($myModelOne->parent->exists());
-		$this->assertTrue(ctype_digit($myModelOne->parent->id));
-		$this->assertIdentical($myModelOne->parent->id, '0');
-		$this->assertIdentical($myModelOne->parent->parentid, '0');
+		$this->assertTrue(ctype_digit((string)$myModelOne->parent->id));
+		$this->assertIdentical($myModelOne->parent->id, PHP_VERSION_ID >= 80100 ? 0 : '0');
+		$this->assertIdentical($myModelOne->parent->parentid, PHP_VERSION_ID >= 80100 ? 0 : '0');
 		
 		$myModelTwo = $this->conn->getTable('T982_MyModel')->find(2);
 
-        $this->assertIdentical($myModelTwo->id, '2');
-		$this->assertIdentical($myModelTwo->parentid, '1');
-		$this->assertIdentical($myModelTwo->parent->id, '1');
-		$this->assertIdentical($myModelTwo->parent->parentid, '0');
+        $this->assertIdentical($myModelTwo->id, PHP_VERSION_ID >= 80100 ? 2 : '2');
+		$this->assertIdentical($myModelTwo->parentid, PHP_VERSION_ID >= 80100 ? 1 : '1');
+		$this->assertIdentical($myModelTwo->parent->id, PHP_VERSION_ID >= 80100 ? 1 : '1');
+		$this->assertIdentical($myModelTwo->parent->parentid, PHP_VERSION_ID >= 80100 ? 0 : '0');
 		
    }
 }

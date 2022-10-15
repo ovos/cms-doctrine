@@ -1956,6 +1956,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
      *
      * @return integer number of records in the table
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return $this->createQuery()->count();

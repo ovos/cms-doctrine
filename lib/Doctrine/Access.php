@@ -100,6 +100,7 @@ abstract class Doctrine_Access extends Doctrine_Locator_Injectable implements Ar
      * @param   mixed $offset
      * @return  boolean Whether or not this object contains $offset
      */
+    #[\ReturnTypeWillChange]
     public function offsetExists($offset)
     {
         return $this->contains($offset);
@@ -112,6 +113,7 @@ abstract class Doctrine_Access extends Doctrine_Locator_Injectable implements Ar
      * @param   mixed $offset
      * @return  mixed
      */
+    #[\ReturnTypeWillChange]
     public function offsetGet($offset)
     {
         return $this->get($offset);
@@ -125,6 +127,7 @@ abstract class Doctrine_Access extends Doctrine_Locator_Injectable implements Ar
      * @param   mixed $value
      * @return  void
      */
+    #[\ReturnTypeWillChange]
     public function offsetSet($offset, $value)
     {
         if ( ! isset($offset)) {
@@ -140,6 +143,7 @@ abstract class Doctrine_Access extends Doctrine_Locator_Injectable implements Ar
      * @see   set, offsetSet, __set
      * @param mixed $offset
      */
+    #[\ReturnTypeWillChange]
     public function offsetUnset($offset)
     {
         return $this->remove($offset);

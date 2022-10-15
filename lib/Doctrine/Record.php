@@ -201,7 +201,7 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
      *
      * @var array
      */
-    protected $_invokedSaveHooks = false;
+    protected $_invokedSaveHooks = array();
 
     /**
      * @var integer $index                  this index is used for creating object identifiers
@@ -887,18 +887,28 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
      */
     public function serialize()
     {
+        return serialize($this->__serialize());
+    }
+
+    /**
+     * As of PHP 8.1.0, a class which implements Serializable without also implementing __serialize() and __unserialize() will generate a deprecation warning.
+     * @see https://php.watch/versions/8.1/serializable-deprecated
+     *
+     * @return array
+     */
+    public function __serialize()
+    {
         $event = new Doctrine_Event($this, Doctrine_Event::RECORD_SERIALIZE);
 
         $this->preSerialize($event);
         $this->getTable()->getRecordListener()->preSerialize($event);
 
         $vars = $this->getSerializeVars();
-        $str = serialize($vars);
 
         $this->postSerialize($event);
         $this->getTable()->getRecordListener()->postSerialize($event);
 
-        return $str;
+        return $vars;
     }
 
     /**
@@ -910,8 +920,19 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
      */
     public function unserialize($serialized)
     {
+        $this->__unserialize(unserialize($serialized));
+    }
+
+    /**
+     * As of PHP 8.1.0, a class which implements Serializable without also implementing __serialize() and __unserialize() will generate a deprecation warning.
+     * @see https://php.watch/versions/8.1/serializable-deprecated
+     *
+     * @param array $array
+     */
+    public function __unserialize(array $array)
+    {
         $event = new Doctrine_Event($this, Doctrine_Event::RECORD_UNSERIALIZE);
-        
+
         $manager    = Doctrine_Manager::getInstance();
         $connection = $manager->getConnectionForComponent(get_class($this));
 
@@ -919,8 +940,6 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
         
         $this->preUnserialize($event);
         $this->getTable()->getRecordListener()->preUnserialize($event);
-
-        $array = unserialize($serialized);
 
         foreach($array as $k => $v) {
             $this->$k = $v;
@@ -1612,7 +1631,7 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
             return $old * 100 != $new * 100;
         } else if (in_array($type, array('integer', 'int')) && is_numeric($old) && is_numeric($new)) {
             return $old != $new;
-        } else if ($type == 'timestamp' || $type == 'date') {
+        } else if (($type == 'timestamp' || $type == 'date') && is_string($old) && is_string($new)) {
             $oldStrToTime = strtotime($old);
             $newStrToTime = strtotime($new);
             if ($oldStrToTime && $newStrToTime) {
@@ -1960,6 +1979,7 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
      *
      * @return integer          the number of columns in this record
      */
+    #[\ReturnTypeWillChange]
     public function count()
     {
         return count($this->_data);
@@ -2272,6 +2292,7 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
      * implements IteratorAggregate interface
      * @return Doctrine_Record_Iterator     iterator through data
      */
+    #[\ReturnTypeWillChange]
     public function getIterator()
     {
         return new Doctrine_Record_Iterator($this);

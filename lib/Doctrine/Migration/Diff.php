@@ -318,7 +318,9 @@ class Doctrine_Migration_Diff
                 $info[$key] = $this->_cleanModelInformation($value);
             }
             return $info;
-        } else {
+        }
+
+        if (is_string($info)) {
             $find = array(
                 self::$_toPrefix,
                 self::$_fromPrefix,
@@ -327,8 +329,10 @@ class Doctrine_Migration_Diff
                 Doctrine_Inflector::tableize(self::$_toPrefix),
                 Doctrine_Inflector::tableize(self::$_fromPrefix)
             );
-            return str_replace($find, null, $info);
+            return str_replace($find, '', $info);
         }
+
+        return $info;
     }
 
     /**
