@@ -1,7 +1,7 @@
 {
     "name": "ovos/doctrine1",
     "type": "library",
-    "description": "PHP 5 Doctrine1 Object Relational Mapper (ORM)",
+    "description": "Doctrine v1, Database ORM, PHP 5.3-8.2 compatible",
     "keywords": [
         "php",
         "doctrine1",

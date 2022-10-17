@@ -1,3 +1,7 @@
+1.3.4 (2022-10-17)
+- php 8.2 compatibility fixes [#12](https://github.com/ovos/doctrine1/pull/12)
+- php 8.1 compatibility fixes [#11](https://github.com/ovos/doctrine1/pull/11)
+
 1.3.3 (2022-10-04)
 ------------------
 - php 8.0 compatibility fixes [#8](https://github.com/ovos/doctrine1/pull/8)
