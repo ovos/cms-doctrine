@@ -5,7 +5,7 @@ Doctrine 1
 
 #### [Documentation](https://www.doctrine-project.org/projects/doctrine1/en/latest/index.html) ↗
 
-This is a fork of [doctrine/doctrine1](https://github.com/doctrine/doctrine1), adjusted for compatibility with php 5.3-8.2
+This is a fork of [doctrine/doctrine1](https://github.com/doctrine/doctrine1), adjusted for compatibility with php 5.3-8.3
 and mysql 5.7 and 8.0. Tested only with mysql.
 
 It will be maintained as long as we are using it.
