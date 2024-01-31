@@ -36,29 +36,29 @@ class Doctrine_Ticket_OV25_TestCase extends Doctrine_UnitTestCase
 {
     public function prepareTables()
     {
-        $this->tables[] = 'Ticket_OV1_User';
-        $this->tables[] = 'Ticket_OV1_Role';
-        $this->tables[] = 'Ticket_OV1_UserRole';
-        $this->tables[] = 'Ticket_OV1_RoleReference';
+        $this->tables[] = 'Ticket_OV25_User';
+        $this->tables[] = 'Ticket_OV25_Role';
+        $this->tables[] = 'Ticket_OV25_UserRole';
+        $this->tables[] = 'Ticket_OV25_RoleReference';
         parent::prepareTables();
     }
 
    public function prepareData()
    {
-		$user = new Ticket_OV1_User();
+		$user = new Ticket_OV25_User();
 		$user->username = 'username';
 		$user->password = 'password';
 		$user->save();
 
-		$role = new Ticket_OV1_Role();
+		$role = new Ticket_OV25_Role();
 		$role->name = 'admin';
 		$role->save();
         
-        $role = new Ticket_OV1_Role();
+        $role = new Ticket_OV25_Role();
         $role->name = 'photographer';
         $role->save();
 
-		$userRole = new Ticket_OV1_UserRole();
+		$userRole = new Ticket_OV25_UserRole();
 		$userRole->id_user = $user->id;
 		$userRole->id_role = $role->id;
 		$userRole->position = 1;
@@ -71,7 +71,7 @@ class Doctrine_Ticket_OV25_TestCase extends Doctrine_UnitTestCase
 	
     public function testTest()
     {
-       $user = Doctrine_Core::getTable('Ticket_OV1_User')->find(1);
+       $user = Doctrine_Core::getTable('Ticket_OV25_User')->find(1);
        $user->fromArray(array('Roles' => array(1, 2)));
        $this->assertTrue($user->Roles->isModified());
    }
@@ -87,7 +87,7 @@ class Ticket_OV25_User extends Doctrine_Record
 	
 	public function setUp()
 	{
-		$this->hasMany('Ticket_OV1_Role as Roles', array('local' => 'id_user', 'foreign' => 'id_role', 'refClass' => 'Ticket_OV1_UserRole', 'refOrderBy' => 'position ASC'));
+		$this->hasMany('Ticket_OV25_Role as Roles', array('local' => 'id_user', 'foreign' => 'id_role', 'refClass' => 'Ticket_OV25_UserRole', 'refOrderBy' => 'position ASC'));
 	}
 }
 
@@ -100,9 +100,9 @@ class Ticket_OV25_Role extends Doctrine_Record
 	
 	public function setUp()
 	{
-		$this->hasMany('Ticket_OV1_User as Users', array('local' => 'id_role', 'foreign' => 'id_user', 'refClass' => 'Ticket_OV1_UserRole', 'orderBy' => 'username DESC'));
-		$this->hasMany('Ticket_OV1_Role as Parents', array('local' => 'id_role_child', 'foreign' => 'id_role_parent', 'refClass' => 'Ticket_OV1_RoleReference'));
-		$this->hasMany('Ticket_OV1_Role as Children', array('local' => 'id_role_parent', 'foreign' => 'id_role_child', 'refClass' => 'Ticket_OV1_RoleReference'));
+		$this->hasMany('Ticket_OV25_User as Users', array('local' => 'id_role', 'foreign' => 'id_user', 'refClass' => 'Ticket_OV25_UserRole', 'orderBy' => 'username DESC'));
+		$this->hasMany('Ticket_OV25_Role as Parents', array('local' => 'id_role_child', 'foreign' => 'id_role_parent', 'refClass' => 'Ticket_OV25_RoleReference'));
+		$this->hasMany('Ticket_OV25_Role as Children', array('local' => 'id_role_parent', 'foreign' => 'id_role_child', 'refClass' => 'Ticket_OV25_RoleReference'));
 	}
 }
 
@@ -117,8 +117,8 @@ class Ticket_OV25_UserRole extends Doctrine_Record
 	
 	public function setUp()
 	{
-		$this->hasOne('Ticket_OV1_User as User', array('local' => 'id_user', 'foreign' => 'id', 'onDelete' => 'CASCADE'));
-		$this->hasOne('Ticket_OV1_Role as Role', array('local' => 'id_role', 'foreign' => 'id', 'onDelete' => 'CASCADE'));
+		$this->hasOne('Ticket_OV25_User as User', array('local' => 'id_user', 'foreign' => 'id', 'onDelete' => 'CASCADE'));
+		$this->hasOne('Ticket_OV25_Role as Role', array('local' => 'id_role', 'foreign' => 'id', 'onDelete' => 'CASCADE'));
 	}
 }
 
@@ -135,7 +135,7 @@ class Ticket_OV25_RoleReference extends Doctrine_Record
 	
 	public function setUp()
 	{
-		$this->hasOne('Ticket_OV1_Role as Parent', array('local' => 'id_role_parent', 'foreign' => 'id', 'onDelete' => 'CASCADE'));
-		$this->hasOne('Ticket_OV1_Role as Child', array('local' => 'id_role_child', 'foreign' => 'id', 'onDelete' => 'CASCADE'));
+		$this->hasOne('Ticket_OV25_Role as Parent', array('local' => 'id_role_parent', 'foreign' => 'id', 'onDelete' => 'CASCADE'));
+		$this->hasOne('Ticket_OV25_Role as Child', array('local' => 'id_role_child', 'foreign' => 'id', 'onDelete' => 'CASCADE'));
 	}
 }
