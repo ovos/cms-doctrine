@@ -7,8 +7,9 @@ on:
       - master
 
 jobs:
-  test:
-    name: "PHP ${{ matrix.php }}${{ matrix.allow-failure && ' (allowing failures - php version not supported yet)' || '' }}"
+  
+  ubuntu:
+    name: "Ubuntu PHP ${{ matrix.php }}${{ matrix.allow-failure && ' (allowing failures - php version not supported yet)' || '' }}"
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -17,13 +18,44 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup PHP ${{ matrix.php }}
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          ini-values: apc.enable_cli=1
+          ini-values: apc.enable_cli=1, opcache.enable=1, opcache.jit=tracing, opcache.jit_buffer_size=128M
+        env:
+            fail-fast: true
+
+      - name: "Run Tests"
+        run: |
+          php ./tests/run.php
+        continue-on-error: "${{ matrix.allow-failure == true }}"
+  
+  windows:
+    name: "Windows PHP ${{ matrix.php }}${{ matrix.allow-failure && ' (allowing failures - php version not supported yet)' || '' }}"
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.0', '8.1', '8.2', '8.3']
+
+    steps:
+      - name: Set git to use LF
+        run: |
+          git config --global core.autocrlf input
+          git config --global core.eol lf
+    
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: pdo_mysql, pdo_sqlite
+          ini-values: apc.enable_cli=1, opcache.enable=1, opcache.jit=tracing, opcache.jit_buffer_size=128M
         env:
             fail-fast: true
 
