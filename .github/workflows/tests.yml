@@ -28,6 +28,9 @@ jobs:
         env:
             fail-fast: true
 
+      - name: Install dependencies
+        run: composer install --no-dev --classmap-authoritative
+        
       - name: "Run Tests"
         run: |
           php ./tests/run.php
