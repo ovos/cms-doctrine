@@ -1,5 +1,6 @@
 <?php
 
+use Zf1s\Compat\Types;
 
 class Doctrine_Ticket_1830_TestCase extends Doctrine_UnitTestCase
 {
@@ -13,17 +14,19 @@ class Doctrine_Ticket_1830_TestCase extends Doctrine_UnitTestCase
         $this->prepareData();
     }
 
-    public function run(DoctrineTest_Reporter $reporter = null, $filter = null)
+    public function run($reporter = null, $filter = null)
     {
-      parent::run($reporter, $filter);
-      $this->manager->closeConnection($this->connection);
+        Types::isNullable('reporter', $reporter, 'DoctrineTest_Reporter');
+
+        parent::run($reporter, $filter);
+        $this->manager->closeConnection($this->connection);
     }
 
-    public function prepareData() 
+    public function prepareData()
     {
     }
-    
-    public function prepareTables() 
+
+    public function prepareTables()
     {
         try {
             $this->conn->exec('DROP TABLE ticket_1830__article_translation');

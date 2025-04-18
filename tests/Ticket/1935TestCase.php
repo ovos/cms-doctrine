@@ -1,5 +1,7 @@
 <?php
 
+use Zf1s\Compat\Types;
+
 class Doctrine_Ticket_1935_TestCase extends Doctrine_UnitTestCase
 {
     public function init()
@@ -12,8 +14,10 @@ class Doctrine_Ticket_1935_TestCase extends Doctrine_UnitTestCase
         $this->prepareData();
     }
 
-    public function run(DoctrineTest_Reporter $reporter = null, $filter = null)
+    public function run($reporter = null, $filter = null)
     {
+        Types::isNullable('reporter', $reporter, 'DoctrineTest_Reporter');
+
         parent::run($reporter, $filter);
         $this->manager->closeConnection($this->connection);
     }

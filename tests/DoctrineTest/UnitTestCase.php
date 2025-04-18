@@ -1,10 +1,13 @@
 <?php
+
+use Zf1s\Compat\Types;
+
 class UnitTestCase
 {
     protected $_passed = 0;
-    
+
     protected $_failed = 0;
-    
+
     protected $_messages = array();
 
     protected static $_passesAndFails = array('passes' => array(), 'fails' => array());
@@ -107,7 +110,7 @@ class UnitTestCase
         }
     }
 
-    public function pass() 
+    public function pass()
     {
         $class = get_class($this);
         if ( ! isset(self::$_passesAndFails['fails'][$class])) {
@@ -118,7 +121,7 @@ class UnitTestCase
 
     public function fail($message = "")
     {
-        $this->_fail($message);    
+        $this->_fail($message);
     }
 
     public function _fail($message = "")
@@ -149,20 +152,22 @@ class UnitTestCase
         self::$_passesAndFails['fails'][$class] = $class;
     }
 
-    public function run(DoctrineTest_Reporter $reporter = null, $filter = null) 
+    public function run($reporter = null, $filter = null)
     {
+        Types::isNullable('reporter', $reporter, 'DoctrineTest_Reporter');
+
         foreach (get_class_methods($this) as $method) {
             if (substr($method, 0, 4) === 'test') {
                 $this->setUp();
 
                 $this->$method();
-                
+
                 $this->tearDown();
             }
         }
     }
 
-    public function getMessages() 
+    public function getMessages()
     {
         return $this->_messages;
     }

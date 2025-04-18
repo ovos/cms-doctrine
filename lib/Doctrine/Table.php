@@ -1,4 +1,7 @@
 <?php
+
+use Zf1s\Compat\Types;
+
 /*
  *  $Id: Table.php 7681 2010-08-24 15:55:34Z jwage $
  *
@@ -1380,7 +1383,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
 
         $options['type'] = $type;
         $options['length'] = $length;
-        
+
         if (strtolower($fieldName) != $name) {
             $options['alias'] = $fieldName;
         }
@@ -2037,11 +2040,13 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
      *
      * @param string $fieldName
      * @param string $value
-     * @param Doctrine_Record $record   record to consider; if it does not exists, it is created
+     * @param Doctrine_Record|null $record   record to consider; if it does not exists, it is created
      * @return Doctrine_Validator_ErrorStack $errorStack
      */
-    public function validateField($fieldName, $value, Doctrine_Record $record = null)
+    public function validateField($fieldName, $value, $record = null)
     {
+        Types::isNullable('record', $record, 'Doctrine_Record');
+
         if ($record instanceof Doctrine_Record) {
             $errorStack = $record->getErrorStack();
         } else {
@@ -2191,8 +2196,10 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
      *
      * @return array numeric array
      */
-    public function getColumnNames(array $fieldNames = null)
+    public function getColumnNames($fieldNames = null)
     {
+        Types::isNullable('fieldNames', $fieldNames, 'array');
+
         if ($fieldNames === null) {
             return array_keys($this->_columns);
         } else {
@@ -2747,10 +2754,10 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
         $fieldsFound = $matches[1];
         $operatorFound = array_map('strtoupper', $matches[2]);
 
-        // Check if $fieldName has unidentified parts left 
+        // Check if $fieldName has unidentified parts left
         if (strlen(implode('', $fieldsFound) . implode('', $operatorFound)) !== strlen($fieldName)) {
             $expression = preg_replace('/(' . implode('|', $fields) . ')(Or|And)?/', '($1)$2', $fieldName);
-            throw new Doctrine_Table_Exception('Invalid expression found: ' . $expression);    
+            throw new Doctrine_Table_Exception('Invalid expression found: ' . $expression);
         }
 
         // Build result
@@ -2775,7 +2782,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
             }
 
             $where .= ' ' . strtoupper($operatorFound[$index]) . ' ';
-            
+
             $lastOperator = $operatorFound[$index];
         }
 

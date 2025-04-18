@@ -1,4 +1,7 @@
 <?php
+
+use Zf1s\Compat\Types;
+
 class GroupTest extends UnitTestCase
 {
     protected $_testCases = array();
@@ -51,8 +54,10 @@ class GroupTest extends UnitTestCase
         }
         return true;
     }
-    public function run(DoctrineTest_Reporter $reporter = null, $filter = null)
+    public function run($reporter = null, $filter = null)
     {
+    	Types::isNullable('reporter', $reporter, 'DoctrineTest_Reporter');
+
         set_time_limit(900);
         ini_set('memory_limit', '512M');
 

@@ -1,4 +1,7 @@
 <?php
+
+use Zf1s\Compat\Types;
+
 /*
  *  $Id: Query.php 7674 2010-06-08 22:59:01Z jwage $
  *
@@ -2636,10 +2639,12 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
     /**
      * Copies a Doctrine_Query object.
      *
-     * @return Doctrine_Query  Copy of the Doctrine_Query instance.
+     * @return Doctrine_Query|null  Copy of the Doctrine_Query instance.
      */
-    public function copy(Doctrine_Query $query = null)
+    public function copy($query = null)
     {
+        Types::isNullable('query', $query, 'Doctrine_Query');
+
         if ( ! $query) {
             $query = $this;
         }
