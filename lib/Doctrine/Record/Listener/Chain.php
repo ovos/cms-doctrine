@@ -37,12 +37,12 @@ class Doctrine_Record_Listener_Chain extends Doctrine_Access implements Doctrine
     /**
      * @var array $listeners        an array containing all listeners
      */
-    protected $_listeners = array();
+    protected $_listeners = [];
 
     /**
      * @var array $_options        an array containing chain options
      */
-    protected $_options = array('disabled' => false); 
+    protected $_options = ['disabled' => false]; 
 
     /** 
      * setOption 

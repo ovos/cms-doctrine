@@ -41,7 +41,7 @@ class Doctrine_Query_Groupby extends Doctrine_Query_Part
      */
     public function parse($clause, $append = false)
     {
-        $terms = $this->_tokenizer->clauseExplode($clause, array(' ', '+', '-', '*', '/', '<', '>', '=', '>=', '<='));
+        $terms = $this->_tokenizer->clauseExplode($clause, [' ', '+', '-', '*', '/', '<', '>', '=', '>=', '<=']);
         $str = '';
 
         foreach ($terms as $term) {

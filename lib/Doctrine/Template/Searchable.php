@@ -38,7 +38,7 @@ class Doctrine_Template_Searchable extends Doctrine_Template
      * @param array $options 
      * @return void
      */
-    public function __construct(array $options = array())
+    public function __construct(array $options = [])
     {
 	      parent::__construct($options);
         $this->_plugin = new Doctrine_Search($this->_options); 

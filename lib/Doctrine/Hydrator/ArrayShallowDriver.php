@@ -34,8 +34,8 @@ class Doctrine_Hydrator_ArrayShallowDriver extends Doctrine_Hydrator_ScalarDrive
 {
     public function hydrateResultSet($stmt)
     {
-        $cache = array();
-        $result = array();
+        $cache = [];
+        $result = [];
         while ($data = $stmt->fetch(Doctrine_Core::FETCH_ASSOC)) {
             $result[] = $this->_gatherRowData($data, $cache, false);
         }

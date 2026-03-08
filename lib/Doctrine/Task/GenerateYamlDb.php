@@ -33,8 +33,8 @@
 class Doctrine_Task_GenerateYamlDb extends Doctrine_Task
 {
     public $description          =   'Generates a Yaml schema file from an existing database',
-           $requiredArguments    =   array('yaml_schema_path'   =>  'Specify the path to your yaml schema files.'),
-           $optionalArguments    =   array();
+           $requiredArguments    =   ['yaml_schema_path'   =>  'Specify the path to your yaml schema files.'],
+           $optionalArguments    =   [];
     
     public function execute()
     {

@@ -95,7 +95,7 @@ class Doctrine_Validator_Email extends Doctrine_Validator_Driver
     {
         // We have different behavior here depending of OS and PHP version
         if (strtolower(substr(PHP_OS, 0, 3)) == 'win' && version_compare(PHP_VERSION, '5.3.0', '<')) {
-            $output = array();
+            $output = [];
             
             @exec('nslookup -type=MX '.escapeshellcmd($host) . ' 2>&1', $output);
             

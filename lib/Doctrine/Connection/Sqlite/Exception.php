@@ -37,7 +37,7 @@ class Doctrine_Connection_Sqlite_Exception extends Doctrine_Connection_Exception
      * @var array $errorRegexps         an array that is used for determining portable
      *                                  error code from a native database error message
      */
-    protected static $errorRegexps = array(
+    protected static $errorRegexps = [
                               '/^no such table:/'                    => Doctrine_Core::ERR_NOSUCHTABLE,
                               '/^no such index:/'                    => Doctrine_Core::ERR_NOT_FOUND,
                               '/^(table|index) .* already exists$/'  => Doctrine_Core::ERR_ALREADY_EXISTS,
@@ -50,7 +50,7 @@ class Doctrine_Connection_Sqlite_Exception extends Doctrine_Connection_Exception
                               '/column not present in both tables/i' => Doctrine_Core::ERR_NOSUCHFIELD,
                               '/^near ".*": syntax error$/'          => Doctrine_Core::ERR_SYNTAX,
                               '/[0-9]+ values for [0-9]+ columns/i'  => Doctrine_Core::ERR_VALUE_COUNT_ON_ROW,
-                              );
+                              ];
 
     /**
      * This method checks if native error code/message can be

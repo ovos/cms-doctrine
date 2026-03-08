@@ -35,7 +35,7 @@ class Doctrine_Record_Listener implements Doctrine_Record_Listener_Interface
     /**
      * @var array $_options        an array containing options
      */
-    protected $_options = array('disabled' => false); 
+    protected $_options = ['disabled' => false]; 
 
     /** 
      * setOption 

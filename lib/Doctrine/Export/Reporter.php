@@ -32,11 +32,11 @@
  */
 class Doctrine_Export_Reporter implements IteratorAggregate
 {
-    protected $messages = array();
+    protected $messages = [];
 
     public function add($code, $message)
     {
-        $this->messages[] = array($code, $message);
+        $this->messages[] = [$code, $message];
     }
 
     public function pop()

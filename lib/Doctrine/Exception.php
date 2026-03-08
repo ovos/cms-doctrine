@@ -35,7 +35,7 @@ class Doctrine_Exception extends Exception
     /**
      * @var array $_errorMessages       an array of error messages
      */
-    protected static $_errorMessages = array(
+    protected static $_errorMessages = [
                 Doctrine_Core::ERR                    => 'unknown error',
                 Doctrine_Core::ERR_ALREADY_EXISTS     => 'already exists',
                 Doctrine_Core::ERR_CANNOT_CREATE      => 'can not create',
@@ -68,7 +68,7 @@ class Doctrine_Exception extends Exception
                 Doctrine_Core::ERR_LOADMODULE         => 'error while including on demand module',
                 Doctrine_Core::ERR_TRUNCATED          => 'truncated',
                 Doctrine_Core::ERR_DEADLOCK           => 'deadlock detected',
-            );
+            ];
 
     /**
      * Return a textual error message for a Doctrine error code

@@ -46,7 +46,7 @@ class Doctrine_Connection_Sqlite extends Doctrine_Connection_Common
      */
     public function __construct(Doctrine_Manager $manager, $adapter)
     {
-        $this->supported = array('sequences'            => 'emulated',
+        $this->supported = ['sequences'            => 'emulated',
                           'indexes'              => true,
                           'affected_rows'        => true,
                           'summary_functions'    => true,
@@ -64,7 +64,7 @@ class Doctrine_Connection_Sqlite extends Doctrine_Connection_Common
                           'prepared_statements'  => 'emulated',
                           'identifier_quoting'   => true,
                           'pattern_escaping'     => false,
-                          );
+                          ];
          parent::__construct($manager, $adapter);
 
         if ($this->isConnected) {
@@ -123,16 +123,16 @@ class Doctrine_Connection_Sqlite extends Doctrine_Connection_Common
     public static function registerFunctions($dbh)
     {
         if ($dbh instanceof \Pdo\Sqlite) {
-            $dbh->createFunction('mod',    array('Doctrine_Expression_Sqlite', 'modImpl'), 2);
-            $dbh->createFunction('concat', array('Doctrine_Expression_Sqlite', 'concatImpl'));
+            $dbh->createFunction('mod',    ['Doctrine_Expression_Sqlite', 'modImpl'], 2);
+            $dbh->createFunction('concat', ['Doctrine_Expression_Sqlite', 'concatImpl']);
             $dbh->createFunction('md5', 'md5', 1);
-            $dbh->createFunction('now', array('Doctrine_Expression_Sqlite', 'nowImpl'), 0);
+            $dbh->createFunction('now', ['Doctrine_Expression_Sqlite', 'nowImpl'], 0);
         } else {
             // Fallback for plain PDO handles (legacy path), suppress deprecation on PHP 8.5+
-            @$dbh->sqliteCreateFunction('mod',    array('Doctrine_Expression_Sqlite', 'modImpl'), 2);
-            @$dbh->sqliteCreateFunction('concat', array('Doctrine_Expression_Sqlite', 'concatImpl'));
+            @$dbh->sqliteCreateFunction('mod',    ['Doctrine_Expression_Sqlite', 'modImpl'], 2);
+            @$dbh->sqliteCreateFunction('concat', ['Doctrine_Expression_Sqlite', 'concatImpl']);
             @$dbh->sqliteCreateFunction('md5', 'md5', 1);
-            @$dbh->sqliteCreateFunction('now', array('Doctrine_Expression_Sqlite', 'nowImpl'), 0);
+            @$dbh->sqliteCreateFunction('now', ['Doctrine_Expression_Sqlite', 'nowImpl'], 0);
         }
     }
 

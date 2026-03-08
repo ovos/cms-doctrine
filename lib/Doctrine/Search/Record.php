@@ -34,8 +34,8 @@ class Doctrine_Search_Record extends Doctrine_Template
 {
     public function setTableDefinition()
     {
-        $this->hasColumn('keyword', 'string', 250, array('notnull' => true));
-        $this->hasColumn('field', 'string', 50, array('notnull' => true));
+        $this->hasColumn('keyword', 'string', 250, ['notnull' => true]);
+        $this->hasColumn('field', 'string', 50, ['notnull' => true]);
         $this->hasColumn('position', 'integer', 8);
         // depending on the identifiers of the owner record this record 
         // has also one to many foreign key columns
@@ -43,6 +43,6 @@ class Doctrine_Search_Record extends Doctrine_Template
 
     public function setUp()
     {
-        $this->hasOne('[Component]', array('onDelete' => 'CASCADE'));
+        $this->hasOne('[Component]', ['onDelete' => 'CASCADE']);
     }
 }

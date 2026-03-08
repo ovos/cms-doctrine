@@ -233,7 +233,7 @@ class Doctrine_Lib
                 return func_get_arg(0);
              case 2:
                 $args = func_get_args();
-                $args[2] = array();
+                $args[2] = [];
                 
                 if (is_array($args[0]) && is_array($args[1]))
                 {
@@ -263,7 +263,7 @@ class Doctrine_Lib
                 $args[1] = self::arrayDeepMerge($args[0], $args[1]);
                 array_shift($args);
 
-                return call_user_func_array(array('Doctrine_Lib', 'arrayDeepMerge'), $args);
+                return call_user_func_array(['Doctrine_Lib', 'arrayDeepMerge'], $args);
             break;
         }
      }
@@ -290,7 +290,7 @@ class Doctrine_Lib
      */
     public static function arrayDiffSimple($array1, $array2)
     {
-        $diff = array();
+        $diff = [];
 
         foreach($array1 as $key => $val) {
             if(!isset($array2[$key])) {
@@ -432,7 +432,7 @@ class Doctrine_Lib
      */
     public static function getPlaceholderOffsets($sql, $maxIndex = null)
     {
-        $paramsPos = array();
+        $paramsPos = [];
         $index = 0;
         for($i = 0, $l = strlen($sql); $i < $l; $i++) {
             $char = $sql[$i];

@@ -44,7 +44,7 @@ class Doctrine_Import_Mssql extends Doctrine_Import
         $query = "SELECT name FROM sysobjects WHERE xtype = 'U'";
         $tableNames = $this->conn->fetchColumn($query);
 
-        return array_map(array($this->conn->formatter, 'fixSequenceName'), $tableNames);
+        return array_map([$this->conn->formatter, 'fixSequenceName'], $tableNames);
     }
 
     /**
@@ -68,15 +68,15 @@ class Doctrine_Import_Mssql extends Doctrine_Import
      */
     public function listTableRelations($tableName)
     {
-        $relations = array();
+        $relations = [];
         $sql = 'SELECT o1.name as table_name, c1.name as column_name, o2.name as referenced_table_name, c2.name as referenced_column_name, s.name as constraint_name FROM sysforeignkeys fk	inner join sysobjects o1 on fk.fkeyid = o1.id inner join sysobjects o2 on fk.rkeyid = o2.id inner join syscolumns c1 on c1.id = o1.id and c1.colid = fk.fkey inner join syscolumns c2 on c2.id = o2.id and c2.colid = fk.rkey inner join sysobjects s on fk.constid = s.id AND o1.name = \'' . $tableName . '\'';
         $results = $this->conn->fetchAssoc($sql);
         foreach ($results as $result)
         {
             $result = array_change_key_case($result, CASE_LOWER);
-            $relations[] = array('table'   => $result['referenced_table_name'],
+            $relations[] = ['table'   => $result['referenced_table_name'],
                                  'local'   => $result['column_name'],
-                                 'foreign' => $result['referenced_column_name']);
+                                 'foreign' => $result['referenced_column_name']];
         }
         return $relations;
     }
@@ -91,14 +91,14 @@ class Doctrine_Import_Mssql extends Doctrine_Import
     {
         $sql = 'EXEC sp_primary_keys_rowset @table_name = ' . $this->conn->quoteIdentifier($table, true);
         $result = $this->conn->fetchAssoc($sql);
-        $primary = array();
+        $primary = [];
         foreach ($result as $key => $val) {
             $primary[] = $val['COLUMN_NAME'];
         }
 
         $sql     = 'EXEC sp_columns @table_name = ' . $this->conn->quoteIdentifier($table, true);
         $result  = $this->conn->fetchAssoc($sql);
-        $columns = array();
+        $columns = [];
 
         foreach ($result as $key => $val) {
             $val = array_change_key_case($val, CASE_LOWER);
@@ -122,7 +122,7 @@ class Doctrine_Import_Mssql extends Doctrine_Import
             $isNullable = (bool) (strtoupper(trim($val['is_nullable'])) == 'NO');
             $isPrimary = in_array($val['column_name'], $primary);
 
-            $description  = array(
+            $description  = [
                 'name'          => $val['column_name'],
                 'ntype'         => $type,
                 'type'          => $decl['type'][0],
@@ -134,7 +134,7 @@ class Doctrine_Import_Mssql extends Doctrine_Import
                 'default'       => $val['column_def'],
                 'primary'       => $isPrimary,
                 'autoincrement' => $isIdentity,
-            );
+            ];
 
             $columns[$val['column_name']] = $description;
         }
@@ -222,7 +222,7 @@ class Doctrine_Import_Mssql extends Doctrine_Import
         $query = 'EXEC sp_pkeys @table_name = ' . $this->conn->quoteIdentifier($table, true);
         $pkAll = $this->conn->fetchColumn($query, $pkName);
 
-        $result = array();
+        $result = [];
 
         foreach ($indexes as $index) {
             if ( ! in_array($index, $pkAll) && $index != null) {

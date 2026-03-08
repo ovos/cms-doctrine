@@ -38,7 +38,7 @@ class Doctrine_Connection_Pgsql_Exception extends Doctrine_Connection_Exception
      * @var array $errorRegexps         an array that is used for determining portable
      *                                  error code from a native database error message
      */
-    protected static $errorRegexps = array(
+    protected static $errorRegexps = [
                                     '/parser: parse error at or near/i'
                                         => Doctrine_Core::ERR_SYNTAX,
                                     '/syntax error at/'
@@ -79,7 +79,7 @@ class Doctrine_Connection_Pgsql_Exception extends Doctrine_Connection_Exception
                                         => Doctrine_Core::ERR_CONSTRAINT_NOT_NULL,
                                     '/more expressions than target columns/i'
                                         => Doctrine_Core::ERR_VALUE_COUNT_ON_ROW,
-                                );
+                                ];
 
     /**
      * This method checks if native error code/message can be

@@ -34,7 +34,7 @@ class Doctrine_Hydrator_ArrayDriver extends Doctrine_Hydrator_Graph
 {
     public function getElementCollection($component)
     {
-        return array();
+        return [];
     }
 
     public function getElement(array $data, $component)
@@ -50,7 +50,7 @@ class Doctrine_Hydrator_ArrayDriver extends Doctrine_Hydrator_Graph
     public function initRelated(&$record, $name, $keyColumn = null)
     {
         if ( ! isset($record[$name])) {
-            $record[$name] = array();
+            $record[$name] = [];
         }
         return true;
     }

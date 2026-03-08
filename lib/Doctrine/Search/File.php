@@ -37,7 +37,7 @@ class Doctrine_Search_File extends Doctrine_Search
      *
      * @param array $options    an array of plugin options
      */
-    public function __construct(array $options = array())
+    public function __construct(array $options = [])
     {
         parent::__construct($options);
 
@@ -46,11 +46,11 @@ class Doctrine_Search_File extends Doctrine_Search
             $tableClass = $conn->getAttribute(Doctrine_Core::ATTR_TABLE_CLASS);
             $table = new $tableClass('File', $conn);
 
-            $table->setColumn('url', 'string', 255, array('primary' => true));
+            $table->setColumn('url', 'string', 255, ['primary' => true]);
         }
 
         if (empty($this->_options['fields'])) {
-            $this->_options['fields'] = array('url', 'content');
+            $this->_options['fields'] = ['url', 'content'];
         }
 
         $this->initialize($table);
@@ -77,8 +77,8 @@ class Doctrine_Search_File extends Doctrine_Search
                 continue;
             }
 
-            $this->updateIndex(array('url' => $file->getPathName(),
-                                     'content' => file_get_contents($file)));
+            $this->updateIndex(['url' => $file->getPathName(),
+                                     'content' => file_get_contents($file)]);
         }
     }
 }

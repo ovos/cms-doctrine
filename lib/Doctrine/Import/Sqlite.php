@@ -73,7 +73,7 @@ class Doctrine_Import_Sqlite extends Doctrine_Import
         $query      = "SELECT name FROM sqlite_master WHERE type='table' AND sql NOT NULL ORDER BY name";
         $tableNames = $this->conn->fetchColumn($query);
 
-        $result = array();
+        $result = [];
         foreach ($tableNames as $tableName) {
             if ($sqn = $this->conn->fixSequenceName($tableName, true)) {
                 $result[] = $sqn;
@@ -105,7 +105,7 @@ class Doctrine_Import_Sqlite extends Doctrine_Import
         $query  .= ' AND sql NOT NULL ORDER BY name';
         $indexes = $this->conn->fetchColumn($query);
 
-        $result = array();
+        $result = [];
         foreach ($indexes as $sql) {
             if (preg_match("/^create unique index ([^ ]+) on /i", $sql, $tmp)) {
                 $index = $this->conn->formatter->fixIndexName($tmp[1]);
@@ -132,13 +132,13 @@ class Doctrine_Import_Sqlite extends Doctrine_Import
         $sql    = 'PRAGMA table_info(' . $table . ')';
         $result = $this->conn->fetchAll($sql);
 
-        $description = array();
-        $columns     = array();
+        $description = [];
+        $columns     = [];
         foreach ($result as $key => $val) {
             $val = array_change_key_case($val, CASE_LOWER);
             $decl = $this->conn->dataDict->getPortableDeclaration($val);
 
-            $description = array(
+            $description = [
                     'name'          => $val['name'],
                     'ntype'         => $val['type'],
                     'type'          => $decl['type'][0],
@@ -151,7 +151,7 @@ class Doctrine_Import_Sqlite extends Doctrine_Import
                     'precision'     => null,
                     'unsigned'      => null,
                     'autoincrement' => (bool) ($val['pk'] == 1 && $decl['type'][0] == 'integer'),
-                    );
+                    ];
             $columns[$val['name']] = $description;
         }
         return $columns;
@@ -205,7 +205,7 @@ class Doctrine_Import_Sqlite extends Doctrine_Import
         $query = "SELECT name, sql FROM sqlite_master WHERE type='view' AND sql NOT NULL";
         $views = $db->fetchAll($query);
 
-        $result = array();
+        $result = [];
         foreach ($views as $row) {
             if (preg_match("/^create view .* \bfrom\b\s+\b{$table}\b /i", $row['sql'])) {
                 if ( ! empty($row['name'])) {

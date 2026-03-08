@@ -33,8 +33,8 @@
 class Doctrine_Task_CreateTables extends Doctrine_Task
 {
     public $description          =   'Create tables for all existing database connections. If table exists nothing happens.',
-           $requiredArguments    =   array('models_path' => 'Specify path to your models directory.'),
-           $optionalArguments    =   array();
+           $requiredArguments    =   ['models_path' => 'Specify path to your models directory.'],
+           $optionalArguments    =   [];
     
     public function execute()
     {

@@ -38,7 +38,7 @@ class Doctrine_Template_Listener_Timestampable extends Doctrine_Record_Listener
      *
      * @var string
      */
-    protected $_options = array();
+    protected $_options = [];
 
     /**
      * __construct

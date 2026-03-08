@@ -46,7 +46,7 @@ abstract class Doctrine_Template extends Doctrine_Record_Abstract
     /**
      * @var array $_options Template options
      */
-    protected $_options = array();
+    protected $_options = [];
 
     /**
      * __construct
@@ -54,7 +54,7 @@ abstract class Doctrine_Template extends Doctrine_Record_Abstract
      * @param string $array 
      * @return void
      */
-    public function __construct(array $options = array())
+    public function __construct(array $options = [])
     {
         $this->_options = Doctrine_Lib::arrayDeepMerge($this->_options, $options);
     }

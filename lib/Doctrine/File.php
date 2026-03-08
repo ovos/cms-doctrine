@@ -39,10 +39,10 @@ class Doctrine_File extends Doctrine_Record
 
     public function setUp()
     {
-        $this->actAs('Searchable', array('className' => 'Doctrine_File_Index',
-                                         'fields' => array('url', 'content')));
+        $this->actAs('Searchable', ['className' => 'Doctrine_File_Index',
+                                         'fields' => ['url', 'content']]);
         
-        $this->index('url', array('fields' => array('url')));
+        $this->index('url', ['fields' => ['url']]);
     }
 
     public function get($name, $load = true)

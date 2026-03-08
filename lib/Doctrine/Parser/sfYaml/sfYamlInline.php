@@ -75,13 +75,13 @@ class sfYamlInline
   {
     if ('1.1' === sfYaml::getSpecVersion())
     {
-      $trueValues = array('true', 'on', '+', 'yes', 'y');
-      $falseValues = array('false', 'off', '-', 'no', 'n');
+      $trueValues = ['true', 'on', '+', 'yes', 'y'];
+      $falseValues = ['false', 'off', '-', 'no', 'n'];
     }
     else
     {
-      $trueValues = array('true');
-      $falseValues = array('false');
+      $trueValues = ['true'];
+      $falseValues = ['false'];
     }
 
     switch (true)
@@ -103,7 +103,7 @@ class sfYamlInline
       case is_numeric($value):
         return is_infinite($value) ? str_ireplace('INF', '.Inf', strval($value)) : (is_string($value) ? "'$value'" : $value);
       case false !== strpos($value, "\n") || false !== strpos($value, "\r"):
-        return sprintf('"%s"', str_replace(array('"', "\n", "\r"), array('\\"', '\n', '\r'), $value));
+        return sprintf('"%s"', str_replace(['"', "\n", "\r"], ['\\"', '\n', '\r'], $value));
       case preg_match('/[ \s \' " \: \{ \} \[ \] , & \* \# \?] | \A[ - ? | < > = ! % @ ` ]/x', $value):
         return sprintf("'%s'", str_replace('\'', '\'\'', $value));
       case '' == $value:
@@ -114,7 +114,7 @@ class sfYamlInline
         return "'$value'";
       case in_array(strtolower($value), $falseValues):
         return "'$value'";
-      case in_array(strtolower($value), array('null', '~')):
+      case in_array(strtolower($value), ['null', '~']):
         return "'$value'";
       default:
         return $value;
@@ -138,7 +138,7 @@ class sfYamlInline
       // [OV22] Replace deprecated create_function with an anonymous function
       (count($keys) > 1 && array_reduce($keys, function($v,$w) { return (int) $v + $w; }, 0) == count($keys) * (count($keys) - 1) / 2))
     {
-      $output = array();
+      $output = [];
       foreach ($value as $val)
       {
         $output[] = self::dump($val);
@@ -148,7 +148,7 @@ class sfYamlInline
     }
 
     // mapping
-    $output = array();
+    $output = [];
     foreach ($value as $key => $val)
     {
       $output[] = sprintf('%s: %s', self::dump($key), self::dump($val));
@@ -168,7 +168,7 @@ class sfYamlInline
    *
    * @return string A YAML string
    */
-  static public function parseScalar($scalar, $delimiters = null, $stringDelimiters = array('"', "'"), &$i = 0, $evaluate = true)
+  static public function parseScalar($scalar, $delimiters = null, $stringDelimiters = ['"', "'"], &$i = 0, $evaluate = true)
   {
     if (in_array($scalar[$i], $stringDelimiters))
     {
@@ -225,7 +225,7 @@ class sfYamlInline
     if ('"' == $scalar[$i])
     {
       // evaluate the string
-      $output = str_replace(array('\\"', '\\n', '\\r'), array('"', "\n", "\r"), $output);
+      $output = str_replace(['\\"', '\\n', '\\r'], ['"', "\n", "\r"], $output);
     }
     else
     {
@@ -248,7 +248,7 @@ class sfYamlInline
    */
   static protected function parseSequence($sequence, &$i = 0)
   {
-    $output = array();
+    $output = [];
     $len = strlen($sequence);
     $i += 1;
 
@@ -271,8 +271,8 @@ class sfYamlInline
         case ' ':
           break;
         default:
-          $isQuoted = in_array($sequence[$i], array('"', "'"));
-          $value = self::parseScalar($sequence, array(',', ']'), array('"', "'"), $i);
+          $isQuoted = in_array($sequence[$i], ['"', "'"]);
+          $value = self::parseScalar($sequence, [',', ']'], ['"', "'"], $i);
 
           if (!$isQuoted && false !== strpos($value, ': '))
           {
@@ -308,7 +308,7 @@ class sfYamlInline
    */
   static protected function parseMapping($mapping, &$i = 0)
   {
-    $output = array();
+    $output = [];
     $len = strlen($mapping);
     $i += 1;
 
@@ -326,7 +326,7 @@ class sfYamlInline
       }
 
       // key
-      $key = self::parseScalar($mapping, array(':', ' '), array('"', "'"), $i, false);
+      $key = self::parseScalar($mapping, [':', ' '], ['"', "'"], $i, false);
 
       // value
       $done = false;
@@ -348,7 +348,7 @@ class sfYamlInline
           case ' ':
             break;
           default:
-            $output[$key] = self::parseScalar($mapping, array(',', '}'), array('"', "'"), $i);
+            $output[$key] = self::parseScalar($mapping, [',', '}'], ['"', "'"], $i);
             $done = true;
             --$i;
         }
@@ -378,13 +378,13 @@ class sfYamlInline
 
     if ('1.1' === sfYaml::getSpecVersion())
     {
-      $trueValues = array('true', 'on', '+', 'yes', 'y');
-      $falseValues = array('false', 'off', '-', 'no', 'n');
+      $trueValues = ['true', 'on', '+', 'yes', 'y'];
+      $falseValues = ['false', 'off', '-', 'no', 'n'];
     }
     else
     {
-      $trueValues = array('true');
-      $falseValues = array('false');
+      $trueValues = ['true'];
+      $falseValues = ['false'];
     }
 
     switch (true)

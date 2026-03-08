@@ -112,7 +112,7 @@ class Doctrine_Node implements IteratorAggregate
      * @return Doctrine_Node
      * @throws Doctrine_Node_Exception          if $implName is not a valid class
      */
-    public static function factory(Doctrine_Record $record, $implName, $options = array())
+    public static function factory(Doctrine_Record $record, $implName, $options = [])
     {
         $class = 'Doctrine_Node_' . $implName;
 
@@ -149,7 +149,7 @@ class Doctrine_Node implements IteratorAggregate
      * @param string $type                      type of iterator (Pre | Post | Level)
      * @param array $options                    options
      */
-    public function traverse($type = 'Pre', $options = array())
+    public function traverse($type = 'Pre', $options = [])
     {
         return $this->getIterator($type, $options);
     }
@@ -168,7 +168,7 @@ class Doctrine_Node implements IteratorAggregate
         }
 
         if ($options === null) {
-            $options = (isset($this->iteratorOptions) ? $this->iteratorOptions : array());
+            $options = (isset($this->iteratorOptions) ? $this->iteratorOptions : []);
         }
 
         $implName = $this->record->getTable()->getOption('treeImpl');

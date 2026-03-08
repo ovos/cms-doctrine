@@ -37,7 +37,7 @@ class Doctrine_Connection_Oracle_Exception extends Doctrine_Connection_Exception
      * @var array $errorCodeMap         an array that is used for determining portable
      *                                  error code from a native database error code
      */
-    protected static $errorCodeMap = array(
+    protected static $errorCodeMap = [
                                       1    => Doctrine_Core::ERR_CONSTRAINT,
                                       900  => Doctrine_Core::ERR_SYNTAX,
                                       904  => Doctrine_Core::ERR_NOSUCHFIELD,
@@ -56,7 +56,7 @@ class Doctrine_Connection_Oracle_Exception extends Doctrine_Connection_Exception
                                       2291 => Doctrine_Core::ERR_CONSTRAINT,
                                       2292 => Doctrine_Core::ERR_CONSTRAINT,
                                       2449 => Doctrine_Core::ERR_CONSTRAINT,
-                                      );
+                                      ];
 
     /**
      * This method checks if native error code/message can be

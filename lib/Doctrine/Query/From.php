@@ -45,7 +45,7 @@ class Doctrine_Query_From extends Doctrine_Query_Part
         $str = trim($str);
         $parts = $this->_tokenizer->bracketExplode($str, 'JOIN ');
 
-        $from = $return ? array() : null;
+        $from = $return ? [] : null;
 
         $operator = false;
 

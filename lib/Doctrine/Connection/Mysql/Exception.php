@@ -37,7 +37,7 @@ class Doctrine_Connection_Mysql_Exception extends Doctrine_Connection_Exception
      * @var array $errorCodeMap         an array that is used for determining portable
      *                                  error code from a native database error code
      */
-    protected static $errorCodeMap = array(
+    protected static $errorCodeMap = [
                                       1004 => Doctrine_Core::ERR_CANNOT_CREATE,
                                       1005 => Doctrine_Core::ERR_CANNOT_CREATE,
                                       1006 => Doctrine_Core::ERR_CANNOT_CREATE,
@@ -62,7 +62,7 @@ class Doctrine_Connection_Mysql_Exception extends Doctrine_Connection_Exception
                                       1216 => Doctrine_Core::ERR_CONSTRAINT,
                                       1217 => Doctrine_Core::ERR_CONSTRAINT,
                                       1451 => Doctrine_Core::ERR_CONSTRAINT,
-                                      );
+                                      ];
 
     /**
      * This method checks if native error code/message can be

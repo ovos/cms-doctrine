@@ -32,9 +32,9 @@
  */
 class Doctrine_Search_Analyzer implements Doctrine_Search_Analyzer_Interface
 {
-    protected $_options = array();
+    protected $_options = [];
 
-    public function __construct($options = array())
+    public function __construct($options = [])
     {
         $this->_options = $options;
     }

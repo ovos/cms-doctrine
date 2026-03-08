@@ -66,7 +66,7 @@ class Doctrine_Hook_Integer extends Doctrine_Hook_Parser_Complex
 
                 $a[] = '(' . $name . ' > ? AND ' . $name . ' < ?)';
 
-                $this->params += array($e2[0], $e2[1]);
+                $this->params += [$e2[0], $e2[1]];
             }
 
         }

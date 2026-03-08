@@ -72,7 +72,7 @@ abstract class Doctrine_Hook_Parser_Complex extends Doctrine_Hook_Parser
         $parts = $this->_tokenizer->quoteExplode($value, ' AND ');
 
         if (count($parts) > 1) {
-            $ret = array();
+            $ret = [];
             foreach ($parts as $part) {
                 $ret[] = $this->parseSingle($alias, $field, $part);
             }
@@ -81,7 +81,7 @@ abstract class Doctrine_Hook_Parser_Complex extends Doctrine_Hook_Parser
         } else {
             $parts = $this->_tokenizer->quoteExplode($value, ' OR ');
             if (count($parts) > 1) {
-                $ret = array();
+                $ret = [];
                 foreach ($parts as $part) {
                     $ret[] = $this->parseClause($alias, $field, $part);
                 }

@@ -41,7 +41,7 @@ class Doctrine_Hydrator
         $_hydrators,
         $_rootAlias = null,
         $_hydrationMode = Doctrine_Core::HYDRATE_RECORD,
-        $_queryComponents = array();
+        $_queryComponents = [];
 
     public function __construct()
     {

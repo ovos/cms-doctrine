@@ -85,7 +85,7 @@ interface Doctrine_Adapter_Statement_Interface
      * @param mixed $driverOptions
      * @return boolean              Returns TRUE on success or FALSE on failure.
      */
-    public function bindParam($column, &$variable, $type = null, $length = null, $driverOptions = array());
+    public function bindParam($column, &$variable, $type = null, $length = null, $driverOptions = []);
 
     /**
      * Closes the cursor, enabling the statement to be executed again.
@@ -204,7 +204,7 @@ interface Doctrine_Adapter_Statement_Interface
      * @return mixed                        an instance of the required class with property names that correspond 
      *                                      to the column names or FALSE in case of an error.
      */
-    public function fetchObject($className = 'stdClass', $args = array());
+    public function fetchObject($className = 'stdClass', $args = []);
 
     /**
      * Retrieve a statement attribute 

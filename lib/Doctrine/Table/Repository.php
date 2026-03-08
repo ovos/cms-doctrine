@@ -44,7 +44,7 @@ class Doctrine_Table_Repository implements Countable, IteratorAggregate
      * an array of all records
      * keys representing record object identifiers
      */
-    private $registry = array();
+    private $registry = [];
 
     /**
      * constructor

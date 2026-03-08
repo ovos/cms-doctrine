@@ -152,7 +152,7 @@ class Doctrine_Connection_Statement implements Doctrine_Adapter_Statement_Interf
      * @param mixed $driverOptions
      * @return boolean              Returns TRUE on success or FALSE on failure.
      */
-    public function bindParam($column, &$variable, $type = null, $length = null, $driverOptions = array())
+    public function bindParam($column, &$variable, $type = null, $length = null, $driverOptions = [])
     {
         if ($type === null) {
             return $this->_stmt->bindParam($column, $variable);
@@ -385,7 +385,7 @@ class Doctrine_Connection_Statement implements Doctrine_Adapter_Statement_Interf
      * @return mixed                        an instance of the required class with property names that correspond
      *                                      to the column names or FALSE in case of an error.
      */
-    public function fetchObject($className = 'stdClass', $args = array())
+    public function fetchObject($className = 'stdClass', $args = [])
     {
         return $this->_stmt->fetchObject($className, $args);
     }

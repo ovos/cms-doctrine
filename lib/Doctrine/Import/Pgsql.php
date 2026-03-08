@@ -33,7 +33,7 @@
 class Doctrine_Import_Pgsql extends Doctrine_Import
 {
 
-    protected $sql = array(
+    protected $sql = [
                         'listDatabases' => 'SELECT datname FROM pg_database',
                         'listFunctions' => "SELECT
                                                 proname
@@ -122,7 +122,7 @@ class Doctrine_Import_Pgsql extends Doctrine_Import
                                                               WHERE c.relname ~ ? AND pg_catalog.pg_table_is_visible(c.oid)
                                                           )
                                                           AND r.contype = 'f'"
-                        );
+                        ];
 
     /**
      * lists all database triggers
@@ -161,7 +161,7 @@ class Doctrine_Import_Pgsql extends Doctrine_Import
         $query = sprintf($this->sql['listTableColumns'], $table);
         $result = $this->conn->fetchAssoc($query);
 
-        $columns     = array();
+        $columns     = [];
         foreach ($result as $key => $val) {
             $val = array_change_key_case($val, CASE_LOWER);
 
@@ -177,7 +177,7 @@ class Doctrine_Import_Pgsql extends Doctrine_Import
             
             $decl = $this->conn->dataDict->getPortableDeclaration($val);
 
-            $description = array(
+            $description = [
                 'name'      => $val['field'],
                 'ntype'     => $val['type'],
                 'type'      => $decl['type'][0],
@@ -188,7 +188,7 @@ class Doctrine_Import_Pgsql extends Doctrine_Import
                 'notnull'   => ($val['isnotnull'] == 'NO'),
                 'default'   => $val['default'],
                 'primary'   => ($val['pri'] == 't'),
-            );
+            ];
 
             // If postgres enum type            
             if ($val['type'] == 'e'){
@@ -203,7 +203,7 @@ class Doctrine_Import_Pgsql extends Doctrine_Import
                 }
             }
 
-            $matches = array(); 
+            $matches = []; 
 
             if (preg_match("/^nextval\('(.*)'(::.*)?\)$/", $description['default'], $matches)) { 
                 $description['sequence'] = $this->conn->formatter->fixSequenceName($matches[1]); 
@@ -284,18 +284,18 @@ class Doctrine_Import_Pgsql extends Doctrine_Import
     public function listTableRelations($table)
     {
         $sql = $this->sql['listTableRelations'];
-        $param = array('^(' . $table . ')$');
+        $param = ['^(' . $table . ')$'];
 
-        $relations = array();
+        $relations = [];
 
         $results = $this->conn->fetchAssoc($sql, $param);
         foreach ($results as $result) {
             preg_match('/FOREIGN KEY \((.+)\) REFERENCES (.+)\((.+)\)/', $result['condef'], $values);
             if ((strpos($values[1], ',') === false) && (strpos($values[3], ',') === false)) {
                 $tableName = trim($values[2], '"');
-                $relations[] = array('table'   => $tableName,
+                $relations[] = ['table'   => $tableName,
                                      'local'   => $values[1],
-                                     'foreign' => $values[3]);
+                                     'foreign' => $values[3]];
             }
         }
 

@@ -33,7 +33,7 @@
 abstract class Doctrine_Hook_Parser
 {
     protected $condition;
-    protected $params = array();
+    protected $params = [];
 
     public function getCondition()
     {

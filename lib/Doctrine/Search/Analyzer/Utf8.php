@@ -51,7 +51,7 @@ class Doctrine_Search_Analyzer_Utf8 extends Doctrine_Search_Analyzer_Standard
 
         $terms = explode(' ', $text);
         
-        $ret = array();
+        $ret = [];
         if ( ! empty($terms)) {
             foreach ($terms as $i => $term) {
                 if (empty($term)) {

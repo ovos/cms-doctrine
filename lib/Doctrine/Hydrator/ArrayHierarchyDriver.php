@@ -43,17 +43,17 @@ class Doctrine_Hydrator_ArrayHierarchyDriver extends Doctrine_Hydrator_ArrayDriv
         }
 
         // Trees mapped
-        $trees = array();
+        $trees = [];
         $l = 0;
 
         if (count($collection) > 0) {
             // Node Stack. Used to help building the hierarchy
-            $stack = array();
+            $stack = [];
 
             foreach ($collection as $child) {
                 $item = $child;
 
-                $item['__children'] = array();
+                $item['__children'] = [];
 
                 // Number of stack items
                 $l = count($stack);

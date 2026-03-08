@@ -45,14 +45,14 @@ class Doctrine_Validator_Creditcard extends Doctrine_Validator_Driver
             return true;
         }
         $cardType = "";
-        $card_regexes = array(
+        $card_regexes = [
             "/^4\d{12}(\d\d\d){0,1}$/"      => 'visa',
             "/^5[12345]\d{14}$/"            => 'mastercard',
             "/^3[47]\d{13}$/"               => 'amex',
             "/^6011\d{12}$/"                => 'discover',
             "/^30[012345]\d{11}$/"          => 'diners',
             "/^3[68]\d{12}$/"               => 'diners',
-        );
+        ];
         foreach ($card_regexes as $regex => $type) {
             if (preg_match($regex, $value)) {
                  $cardType = $type;

@@ -111,6 +111,6 @@ class Doctrine_Relation_Association_Self extends Doctrine_Relation_Association
         $q->addComponent($assocTable, $record->getTable()->getComponentName(). '.' . $this->getAssociationFactory()->getComponentName());
         $q->orderBy($this->getOrderByStatement($tableName, true));
 
-        return $q->execute(array($id, $id));
+        return $q->execute([$id, $id]);
     }
 }

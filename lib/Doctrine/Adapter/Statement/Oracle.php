@@ -57,17 +57,17 @@ class Doctrine_Adapter_Statement_Oracle implements Doctrine_Adapter_Statement_In
     /**
      * @var array $bindParams          Array of parameters bounded to a statement
      */
-    protected $bindParams = array();
+    protected $bindParams = [];
 
     /**
      * @var array $attributes           Array of attributes
      */
-    protected $attributes = array();
+    protected $attributes = [];
 
     /**
      * @var array $ociErrors            Array of errors
      */
-    protected $ociErrors = array();
+    protected $ociErrors = [];
     
     /**
      * the constructor
@@ -149,7 +149,7 @@ class Doctrine_Adapter_Statement_Oracle implements Doctrine_Adapter_Statement_In
      * @param mixed $driverOptions
      * @return boolean              Returns TRUE on success or FALSE on failure.
      */
-    public function bindParam($column, &$variable, $type = null, $length = null, $driverOptions = array())
+    public function bindParam($column, &$variable, $type = null, $length = null, $driverOptions = [])
     {
         if ($driverOptions || $length ) {
             throw new Doctrine_Adapter_Exception('Unsupported parameters:$length, $driverOptions');
@@ -186,7 +186,7 @@ class Doctrine_Adapter_Statement_Oracle implements Doctrine_Adapter_Statement_In
      */
     public function closeCursor()
     {
-        $this->bindParams = array();
+        $this->bindParams = [];
         return oci_free_statement($this->statement);
     }
 
@@ -357,7 +357,7 @@ class Doctrine_Adapter_Statement_Oracle implements Doctrine_Adapter_Statement_In
         $fetchColumn = false;
         $skip = 0;
         $maxrows = -1;
-        $data = array();
+        $data = [];
         $flags = OCI_FETCHSTATEMENT_BY_ROW + OCI_ASSOC;
 
         $int = $fetchStyle & Doctrine_Core::FETCH_COLUMN;
@@ -393,7 +393,7 @@ class Doctrine_Adapter_Statement_Oracle implements Doctrine_Adapter_Statement_In
     public function fetchColumn($columnIndex = 0)
     {
         if ( ! is_integer($columnIndex)) {
-            $this->handleError(array('message'=>"columnIndex parameter should be numeric"));
+            $this->handleError(['message'=>"columnIndex parameter should be numeric"]);
 
             return false;
         }
@@ -413,7 +413,7 @@ class Doctrine_Adapter_Statement_Oracle implements Doctrine_Adapter_Statement_In
      * @return mixed                        an instance of the required class with property names that correspond 
      *                                      to the column names or FALSE in case of an error.
      */
-    public function fetchObject($className = 'stdClass', $args = array())
+    public function fetchObject($className = 'stdClass', $args = [])
     {
         $row = $this->fetch(Doctrine_Core::FETCH_ASSOC);
         if ($row === false) {
@@ -470,7 +470,7 @@ class Doctrine_Adapter_Statement_Oracle implements Doctrine_Adapter_Statement_In
             $internal_column = $column;
         }
 
-        $data = array();
+        $data = [];
         $data['native_type'] = oci_field_type($this->statement, $internal_column);
         $data['flags'] = "";
         $data['len'] = oci_field_size($this->statement, $internal_column);
@@ -552,7 +552,7 @@ class Doctrine_Adapter_Statement_Oracle implements Doctrine_Adapter_Statement_In
         throw new Doctrine_Adapter_Exception("Unsupported");
     }
 
-    private function handleError($params=array())
+    private function handleError($params=[])
     {
 
         switch ($this->attributes[Doctrine_Core::ATTR_ERRMODE]) {

@@ -45,25 +45,25 @@ class Doctrine_Hook
     /**
      * @var array $hooks                    hooks array
      */
-    protected $hooks        = array(
+    protected $hooks        = [
                              'where',
                              'orderby',
                              'limit',
                              'offset'
-                              );
+                              ];
 
     /**
      * @var array $fieldParsers             custom field parsers array
      *                                      keys as field names in the format componentAlias.FieldName
      *                                      values as parser names / objects
      */
-    protected $fieldParsers = array();
+    protected $fieldParsers = [];
 
     /**
      * @var array $typeParsers              type parsers array
      *                                      keys as type names and values as parser names / objects
      */
-    protected $typeParsers  = array(
+    protected $typeParsers  = [
                               'char'      => 'Doctrine_Hook_WordLike',
                               'string'    => 'Doctrine_Hook_WordLike',
                               'varchar'   => 'Doctrine_Hook_WordLike',
@@ -71,7 +71,7 @@ class Doctrine_Hook
                               'enum'      => 'Doctrine_Hook_Integer',
                               'time'      => 'Doctrine_Hook_Time',
                               'date'      => 'Doctrine_Hook_Date',
-                              );
+                              ];
 
     /**
      * @param Doctrine_Query $query         the base query

@@ -59,7 +59,7 @@ class Doctrine_Query_Tokenizer
     public function tokenizeQuery($query)
     {
         $tokens = $this->sqlExplode($query, ' ');
-        $parts = array();
+        $parts = [];
 
         foreach ($tokens as $index => $token) {
             $token = trim($token);
@@ -152,14 +152,14 @@ class Doctrine_Query_Tokenizer
     public function bracketExplode($str, $d = ' ', $e1 = '(', $e2 = ')')
     {
         if (is_string($d)) {
-            $d = array($d);
+            $d = [$d];
         }
 
         // Bracket explode has to be case insensitive
         $regexp = $this->getSplitRegExpFromArray($d) . 'i';
         $terms = $this->clauseExplodeRegExp($str, $regexp, $e1, $e2);
 
-        $res = array();
+        $res = [];
 
         // Trim is here for historical reasons
         foreach ($terms as $value) {
@@ -191,14 +191,14 @@ class Doctrine_Query_Tokenizer
     public function quoteExplode($str, $d = ' ')
     {
         if (is_string($d)) {
-            $d = array($d);
+            $d = [$d];
         }
 
         // According to the testcases quoteExplode is case insensitive
         $regexp = $this->getSplitRegExpFromArray($d) . 'i';
         $terms = $this->clauseExplodeCountBrackets($str, $regexp);
 
-        $res = array();
+        $res = [];
 
         foreach ($terms as $val) {
             $res[] = trim($val[0]);
@@ -239,11 +239,11 @@ class Doctrine_Query_Tokenizer
     public function sqlExplode($str, $d = ' ', $e1 = '(', $e2 = ')')
     {
         if (is_string($d)) {
-            $d = array($d);
+            $d = [$d];
         }
 
         $terms = $this->clauseExplode($str, $d, $e1, $e2);
-        $res = array();
+        $res = [];
 
         foreach ($terms as $value) {
             $res[] = trim($value[0]);
@@ -356,7 +356,7 @@ class Doctrine_Query_Tokenizer
     private function clauseExplodeCountBrackets($str, $regexp, $e1 = '(', $e2 = ')')
     {
         $quoteTerms = $this->quotedStringExplode($str);
-        $terms = array();
+        $terms = [];
         $i = 0;
 
         foreach ($quoteTerms as $key => $val) {
@@ -366,7 +366,7 @@ class Doctrine_Query_Tokenizer
                if ($terms[$i - 1][1] == '') {
                    $terms[$i - 1][0] .= $val;
                } else {
-                   $terms[$i++] = array($val, '', 0);
+                   $terms[$i++] = [$val, '', 0];
                }
             } else { // Not a quoted string
                 // Do the clause explode
@@ -431,13 +431,13 @@ class Doctrine_Query_Tokenizer
     private function clauseExplodeNonQuoted($str, $regexp)
     {
         $str = preg_split($regexp, $str, -1, PREG_SPLIT_DELIM_CAPTURE);
-        $term = array();
+        $term = [];
         $i = 0;
 
         foreach ($str as $key => $val) {
             // Every odd entry is a delimiter, so add it to the previous term entry
             if ( ! ($key & 1)) {
-                $term[$i] = array($val, '');
+                $term[$i] = [$val, ''];
             } else {
                 $term[$i++][1] = $val;
             }
@@ -477,12 +477,12 @@ class Doctrine_Query_Tokenizer
      */
     private function mergeBracketTerms(array $terms)
     {
-        $res = array();
+        $res = [];
         $i = 0;
 
         foreach ($terms as $val) {
             if ( ! isset($res[$i])) {
-                $res[$i] = array($val[0], $val[1], $val[2]);
+                $res[$i] = [$val[0], $val[1], $val[2]];
             } else {
                 $res[$i][0] .= $res[$i][1] . $val[0]; 
                 $res[$i][1] = $val[1];
@@ -519,11 +519,11 @@ class Doctrine_Query_Tokenizer
     public function quotedStringExplode($str)
     {
         // Split by all possible incarnations of a quote
-        $split = array_map('preg_quote', array("\\'","''","'", "\\\"", "\"\"", "\""));
+        $split = array_map('preg_quote', ["\\'","''","'", "\\\"", "\"\"", "\""]);
         $split = '#(' . implode('|', $split) . ')#';
         $str = preg_split($split, $str, -1, PREG_SPLIT_DELIM_CAPTURE);
 
-        $parts = array();
+        $parts = [];
         $mode = false; // Mode is either ' or " if the loop is inside a string quoted with ' or "
         $i = 0;
 

@@ -32,7 +32,7 @@
  */
 class Doctrine_Search_Analyzer_Standard extends Doctrine_Search_Analyzer implements Doctrine_Search_Analyzer_Interface
 {
-    protected static $_stopwords = array(
+    protected static $_stopwords = [
                             // Ticket #1787. Fixed searchable behavior numeric evaluation
                             // Removed the numeric 0-9 from here
                             'a',
@@ -259,7 +259,7 @@ class Doctrine_Search_Analyzer_Standard extends Doctrine_Search_Analyzer impleme
                             'you',
                             'your',
                             'yours'
-                            );
+                            ];
 
     public function analyze($text, $encoding = null)
     {
@@ -270,7 +270,7 @@ class Doctrine_Search_Analyzer_Standard extends Doctrine_Search_Analyzer impleme
 
         $terms = explode(' ', $text);
         
-        $ret = array();
+        $ret = [];
         if ( ! empty($terms)) {
             foreach ($terms as $i => $term) {
                 if (empty($term)) {

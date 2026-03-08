@@ -44,14 +44,14 @@ class Doctrine_Adapter_Mock implements Doctrine_Adapter_Interface, Countable
      *
      * @var array $queries
      */
-    private $_queries = array();
+    private $_queries = [];
 
     /**
      * Array of exceptions thrown
      *
      * @var array $exceptions
      */
-    private $_exception = array();
+    private $_exception = [];
 
     /**
      * Bool true/false variable for whether or not the last insert failed
@@ -110,7 +110,7 @@ class Doctrine_Adapter_Mock implements Doctrine_Adapter_Interface, Countable
      */
     public function forceException($name, $message = '', $code = 0)
     {
-        $this->_exception = array($name, $message, $code);
+        $this->_exception = [$name, $message, $code];
     }
 
     /**
@@ -153,7 +153,7 @@ class Doctrine_Adapter_Mock implements Doctrine_Adapter_Interface, Countable
         if ( ! empty($e)) {
             $name = $e[0];
 
-            $this->_exception = array();
+            $this->_exception = [];
 
             throw new $name($e[1], $e[2]);
         }
@@ -200,7 +200,7 @@ class Doctrine_Adapter_Mock implements Doctrine_Adapter_Interface, Countable
         if ( ! empty($e)) {
             $name = $e[0];
 
-            $this->_exception = array();
+            $this->_exception = [];
 
             throw new $name($e[1], $e[2]);
         }

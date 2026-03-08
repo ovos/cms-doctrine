@@ -40,7 +40,7 @@ class Doctrine_Search_Indexer
 
         $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir), RecursiveIteratorIterator::LEAVES_ONLY);
 
-        $files = array();
+        $files = [];
         foreach ($it as $file) {
             $name = $file->getPathName();
             if (strpos($name, '.svn') === false) {
@@ -51,7 +51,7 @@ class Doctrine_Search_Indexer
         $q = Doctrine_Core::getTable('Doctrine_File')
             ->createQuery('f')
             ->delete()
-            ->where('f.url LIKE ?', array($dir . '%'))
+            ->where('f.url LIKE ?', [$dir . '%'])
             ->execute();
 
         // clear the index

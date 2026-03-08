@@ -32,7 +32,7 @@
  */
 class Doctrine_Validator_Usstate extends Doctrine_Validator_Driver
 {
-    private static $states = array(
+    private static $states = [
                 'AK' => true,
                 'AL' => true,
                 'AR' => true,
@@ -86,7 +86,7 @@ class Doctrine_Validator_Usstate extends Doctrine_Validator_Driver
                 'WI' => true,
                 'WV' => true,
                 'WY' => true
-            );
+            ];
     public function getStates()
     {
         return self::$states;

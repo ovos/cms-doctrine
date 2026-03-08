@@ -36,7 +36,7 @@ abstract class Doctrine_Configurable extends Doctrine_Locator_Injectable
     /**
      * @var array $attributes               an array of containing all attributes
      */
-    protected $attributes = array();
+    protected $attributes = [];
 
     /**
      * @var Doctrine_Configurable $parent   the parent of this component
@@ -48,12 +48,12 @@ abstract class Doctrine_Configurable extends Doctrine_Locator_Injectable
      *                                      keys as template names and values as names of the concrete
      *                                      implementation classes
      */
-    protected $_impl = array();
+    protected $_impl = [];
     
     /**
      * @var array $_params                  an array of user defined parameters
      */
-    protected $_params = array();
+    protected $_params = [];
 
     /**
      * setAttribute

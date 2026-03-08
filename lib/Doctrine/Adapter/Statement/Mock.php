@@ -117,7 +117,7 @@ class Doctrine_Adapter_Statement_Mock implements Doctrine_Adapter_Statement_Inte
      * @param mixed $driverOptions
      * @return boolean              Returns TRUE on success or FALSE on failure.
      */
-    public function bindParam($column, &$variable, $type = null, $length = null, $driverOptions = array())
+    public function bindParam($column, &$variable, $type = null, $length = null, $driverOptions = [])
     {
 
     }
@@ -158,7 +158,7 @@ class Doctrine_Adapter_Statement_Mock implements Doctrine_Adapter_Statement_Inte
      */
     public function errorCode()
     {
-        return array();
+        return [];
     }
 
     /**
@@ -171,7 +171,7 @@ class Doctrine_Adapter_Statement_Mock implements Doctrine_Adapter_Statement_Inte
      */
     public function errorInfo()
     {
-        return array();
+        return [];
     }
 
     /**
@@ -205,7 +205,7 @@ class Doctrine_Adapter_Statement_Mock implements Doctrine_Adapter_Statement_Inte
                           $cursorOrientation = Doctrine_Core::FETCH_ORI_NEXT,
                           $cursorOffset = null)
     {
-        return array();
+        return [];
     }
 
     /**
@@ -224,7 +224,7 @@ class Doctrine_Adapter_Statement_Mock implements Doctrine_Adapter_Statement_Inte
      */
     public function fetchAll($fetchMode = Doctrine_Core::FETCH_BOTH)
     {
-        return array();
+        return [];
     }
 
     /**
@@ -282,7 +282,7 @@ class Doctrine_Adapter_Statement_Mock implements Doctrine_Adapter_Statement_Inte
      * @return mixed                        an instance of the required class with property names that correspond
      *                                      to the column names or FALSE in case of an error.
      */
-    public function fetchObject($className = 'stdClass', $args = array())
+    public function fetchObject($className = 'stdClass', $args = [])
     {
         return new $className();
     }

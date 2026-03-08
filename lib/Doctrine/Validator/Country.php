@@ -32,7 +32,7 @@
  */
 class Doctrine_Validator_Country extends Doctrine_Validator_Driver
 {
-    private static $countries = array(
+    private static $countries = [
         'ad' =>    'Andorra',
         'ae' =>    'United Arab Emirates',
         'af' =>    'Afghanistan',
@@ -275,7 +275,7 @@ class Doctrine_Validator_Country extends Doctrine_Validator_Driver
         'za' =>    'South Africa',
         'zm' =>    'Zambia',
         'zr' =>    'Zaire',
-        'zw' =>    'Zimbabwe');
+        'zw' =>    'Zimbabwe'];
 
     /**
      * returns all available country codes

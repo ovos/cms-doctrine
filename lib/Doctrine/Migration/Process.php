@@ -75,7 +75,7 @@ class Doctrine_Migration_Process
      */
     public function processRenamedTable(array $table)
     {
-        $this->getConnection()->export->alterTable($table['oldTableName'], array('name' => $table['newTableName']));
+        $this->getConnection()->export->alterTable($table['oldTableName'], ['name' => $table['newTableName']]);
     }
 
     /**
@@ -86,7 +86,7 @@ class Doctrine_Migration_Process
      */
     public function processCreatedColumn(array $column)
     {
-        $this->getConnection()->export->alterTable($column['tableName'], array('add' => array($column['columnName'] => $column)));
+        $this->getConnection()->export->alterTable($column['tableName'], ['add' => [$column['columnName'] => $column]]);
     }
 
     /**
@@ -97,7 +97,7 @@ class Doctrine_Migration_Process
      */
     public function processDroppedColumn(array $column)
     {
-        $this->getConnection()->export->alterTable($column['tableName'], array('remove' => array($column['columnName'] => array())));
+        $this->getConnection()->export->alterTable($column['tableName'], ['remove' => [$column['columnName'] => []]]);
     }
 
     /**
@@ -110,7 +110,7 @@ class Doctrine_Migration_Process
     {
         $columnList = $this->getConnection()->import->listTableColumns($column['tableName']);
         if (isset($columnList[$column['oldColumnName']])) {
-            $this->getConnection()->export->alterTable($column['tableName'], array('rename' => array($column['oldColumnName'] => array('name' => $column['newColumnName'], 'definition' => $columnList[$column['oldColumnName']]))));
+            $this->getConnection()->export->alterTable($column['tableName'], ['rename' => [$column['oldColumnName'] => ['name' => $column['newColumnName'], 'definition' => $columnList[$column['oldColumnName']]]]]);
         }
     }
 
@@ -122,11 +122,11 @@ class Doctrine_Migration_Process
      */
     public function processChangedColumn(array $column)
     {
-        $options = array();
+        $options = [];
         $options = $column['options'];
         $options['type'] = $column['type'];
     
-        $this->getConnection()->export->alterTable($column['tableName'], array('change' => array($column['columnName'] => array('definition' => $options))));
+        $this->getConnection()->export->alterTable($column['tableName'], ['change' => [$column['columnName'] => ['definition' => $options]]]);
     }
 
     /**

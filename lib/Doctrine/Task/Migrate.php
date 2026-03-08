@@ -33,8 +33,8 @@
 class Doctrine_Task_Migrate extends Doctrine_Task
 {
     public $description          =   'Migrate database to latest version or the specified version',
-           $requiredArguments    =   array('migrations_path' => 'Specify path to your migrations directory.'),
-           $optionalArguments    =   array('version' => 'Version to migrate to. If you do not specify, the db will be migrated from the current version to the latest.');
+           $requiredArguments    =   ['migrations_path' => 'Specify path to your migrations directory.'],
+           $optionalArguments    =   ['version' => 'Version to migrate to. If you do not specify, the db will be migrated from the current version to the latest.'];
     
     public function execute()
     {

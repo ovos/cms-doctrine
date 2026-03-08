@@ -35,7 +35,7 @@ class Doctrine_Query_Filter_Chain
     /**
      * @var array $_filters         an array of Doctrine_Query_Filter objects
      */
-    protected $_filters = array();
+    protected $_filters = [];
 
     /**
      * add

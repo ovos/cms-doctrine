@@ -41,22 +41,22 @@ class Doctrine_Compiler
      * @throws Doctrine_Compiler_Exception      if something went wrong during the compile operation
      * @return $target Path the compiled file was written to
      */
-    public static function compile($target = null, $includedDrivers = array())
+    public static function compile($target = null, $includedDrivers = [])
     {
         if ( ! is_array($includedDrivers)) {
-            $includedDrivers = array($includedDrivers);
+            $includedDrivers = [$includedDrivers];
         }
         
-        $excludedDrivers = array();
+        $excludedDrivers = [];
         
         // If we have an array of specified drivers then lets determine which drivers we should exclude
         if ( ! empty($includedDrivers)) {
-            $drivers = array('db2',
+            $drivers = ['db2',
                              'mssql',
                              'mysql',
                              'oracle',
                              'pgsql',
-                             'sqlite');
+                             'sqlite'];
             
             $excludedDrivers = array_diff($drivers, $includedDrivers);
         }
@@ -78,7 +78,7 @@ class Doctrine_Compiler
 
         $classes = array_merge(get_declared_classes(), get_declared_interfaces());
 
-        $ret     = array();
+        $ret     = [];
 
         foreach ($classes as $class) {
             $e = explode('_', $class);

@@ -130,7 +130,7 @@ class Doctrine_DataDict_Oracle extends Doctrine_DataDict
         }
         
         $dbType = strtolower($field['data_type']);
-        $type = array();
+        $type = [];
         $length = $unsigned = $fixed = null;
         if ( ! empty($field['data_length'])) {
             $length = (int)$field['data_length'];
@@ -222,9 +222,9 @@ class Doctrine_DataDict_Oracle extends Doctrine_DataDict
                 $length = isset($field['length']) ? $field['length']:null;
         }
 
-        return array('type'     => $type,
+        return ['type'     => $type,
                      'length'   => $length,
                      'unsigned' => $unsigned,
-                     'fixed'    => $fixed);
+                     'fixed'    => $fixed];
     }
 }

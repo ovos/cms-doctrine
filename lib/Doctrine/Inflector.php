@@ -56,11 +56,11 @@ class Doctrine_Inflector
      */
     public static function classify($word)
     {
-        static $cache = array();
+        static $cache = [];
 
         if (!isset($cache[$word])) {
             $word = preg_replace('/[$]/', '', $word);
-            $classify = preg_replace_callback('~(_?)([-_])([\w])~', array("Doctrine_Inflector", "classifyCallback"), ucfirst(strtolower($word)));
+            $classify = preg_replace_callback('~(_?)([-_])([\w])~', ["Doctrine_Inflector", "classifyCallback"], ucfirst(strtolower($word)));
             $cache[$word] = $classify;
         }
         return $cache[$word];
@@ -116,7 +116,7 @@ class Doctrine_Inflector
       }
 
         if (self::seemsUtf8($string)) {
-          $chars = array(
+          $chars = [
           // Decompositions for Latin-1 Supplement
           chr(195).chr(128) => 'A', chr(195).chr(129) => 'A',
           chr(195).chr(130) => 'A', chr(195).chr(131) => 'A',
@@ -219,7 +219,7 @@ class Doctrine_Inflector
           'Ö' => 'Oe', 'ö' => 'oe', 'ß' => 'ss',
           // Norwegian characters
           'Å'=>'Aa','Æ'=>'Ae','Ø'=>'O','æ'=>'a','ø'=>'o','å'=>'aa'
-          );
+          ];
 
           $string = strtr($string, $chars);
         } else {
@@ -238,8 +238,8 @@ class Doctrine_Inflector
           $chars['out'] = "EfSZszYcYuAAAAAACEEEEIIIINOOOOOOUUUUYaaaaaaceeeeiiiinoooooouuuuyy";
 
           $string = strtr($string, $chars['in'], $chars['out']);
-          $doubleChars['in'] = array(chr(140), chr(156), chr(198), chr(208), chr(222), chr(223), chr(230), chr(240), chr(254));
-          $doubleChars['out'] = array('OE', 'oe', 'AE', 'DH', 'TH', 'ss', 'ae', 'dh', 'th');
+          $doubleChars['in'] = [chr(140), chr(156), chr(198), chr(208), chr(222), chr(223), chr(230), chr(240), chr(254)];
+          $doubleChars['out'] = ['OE', 'oe', 'AE', 'DH', 'TH', 'ss', 'ae', 'dh', 'th'];
           $string = str_replace($doubleChars['in'], $doubleChars['out'], $string);
         }
 

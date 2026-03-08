@@ -61,7 +61,7 @@ class Doctrine_IntegrityMapper
             
             foreach($record->get($relation->getAlias()) as $coll) {
                 if ( ! ($coll instanceof Doctrine_Collection)) {
-                    $coll = array($coll);
+                    $coll = [$coll];
                 }
                 foreach ($coll as $record) {
                     $this->invokeIntegrityActions($record);
@@ -89,8 +89,8 @@ class Doctrine_IntegrityMapper
     {
         $q = $record->getTable()->createQuery();
         
-        $aliases = array();
-        $indexes = array();
+        $aliases = [];
+        $indexes = [];
 
         $root = $record->getTable()->getComponentName();
         $rootAlias = strtolower(substr($root, 0, 1));
@@ -113,7 +113,7 @@ class Doctrine_IntegrityMapper
         }
         $q->where(implode(' AND ', $cond));
 
-        return $q->execute(array($params));
+        return $q->execute([$params]);
     }
 
     /**

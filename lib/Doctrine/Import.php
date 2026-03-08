@@ -36,7 +36,7 @@
  */
 class Doctrine_Import extends Doctrine_Connection_Module
 {
-    protected $sql = array();
+    protected $sql = [];
 
     /**
      * lists all databases
@@ -361,9 +361,9 @@ class Doctrine_Import extends Doctrine_Connection_Module
      * @param array $connections Array of connection names to generate models for
      * @return array                the names of the imported classes
      */
-    public function importSchema($directory, array $connections = array(), array $options = array())
+    public function importSchema($directory, array $connections = [], array $options = [])
     {
-        $classes = array();
+        $classes = [];
 
         $manager = Doctrine_Manager::getInstance();
         foreach ($manager as $name => $connection) {
@@ -377,10 +377,10 @@ class Doctrine_Import extends Doctrine_Connection_Module
           $builder->setTargetPath($directory);
           $builder->setOptions($options);
 
-          $definitions = array();
+          $definitions = [];
 
           foreach ($connection->import->listTables() as $table) {
-              $definition = array();
+              $definition = [];
               $definition['tableName'] = $table;
               $definition['className'] = Doctrine_Inflector::classify(Doctrine_Inflector::tableize($table));
               $definition['columns'] = $connection->import->listTableColumns($table);
@@ -388,9 +388,9 @@ class Doctrine_Import extends Doctrine_Connection_Module
               $definition['connectionClassName'] = $definition['className'];
 
               try {
-                  $definition['relations'] = array();
+                  $definition['relations'] = [];
                   $relations = $connection->import->listTableRelations($table);
-                  $relClasses = array();
+                  $relClasses = [];
                   foreach ($relations as $relation) {
                       $table = $relation['table'];
                       $class = Doctrine_Inflector::classify(Doctrine_Inflector::tableize($table));
@@ -400,12 +400,12 @@ class Doctrine_Import extends Doctrine_Connection_Module
                           $alias = $class;
                       }
                       $relClasses[] = $class;
-                      $definition['relations'][$alias] = array(
+                      $definition['relations'][$alias] = [
                           'alias'   => $alias,
                           'class'   => $class,
                           'local'   => $relation['local'],
                           'foreign' => $relation['foreign']
-                      );
+                      ];
                   }
               } catch (Exception $e) {}
 
@@ -416,7 +416,7 @@ class Doctrine_Import extends Doctrine_Connection_Module
           // Build opposite end of relationships
           foreach ($definitions as $definition) {
               $className = $definition['className'];
-              $relClasses = array();
+              $relClasses = [];
               foreach ($definition['relations'] as $alias => $relation) {
                   if (in_array($relation['class'], $relClasses) || isset($definitions[$relation['class']]['relations'][$className])) {
                       $alias = $className . '_' . (count($relClasses) + 1);
@@ -424,13 +424,13 @@ class Doctrine_Import extends Doctrine_Connection_Module
                       $alias = $className;
                   }
                   $relClasses[] = $relation['class'];
-                  $definitions[strtolower($relation['class'])]['relations'][$alias] = array(
+                  $definitions[strtolower($relation['class'])]['relations'][$alias] = [
                     'type' => Doctrine_Relation::MANY,
                     'alias' => $alias,
                     'class' => $className,
                     'local' => $relation['foreign'],
                     'foreign' => $relation['local']
-                  );
+                  ];
               }
           }
 

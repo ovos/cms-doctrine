@@ -76,8 +76,8 @@ class Doctrine_Query_JoinCondition extends Doctrine_Query_Condition
             } else {
                 // Possible expression found (field1 AND field2)
                 // In relation to ticket #1488
-                $e     = $this->_tokenizer->bracketExplode($value, array(' AND ', ' \&\& '), '(', ')');
-                $value = array();
+                $e     = $this->_tokenizer->bracketExplode($value, [' AND ', ' \&\& '], '(', ')');
+                $value = [];
 
                 foreach ($e as $part) {
                     $value[] = $this->parseLiteralValue($part);

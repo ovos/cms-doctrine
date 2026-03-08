@@ -37,7 +37,7 @@ class Doctrine_Connection_Mssql_Exception extends Doctrine_Connection_Exception
      * @var array $errorCodeMap         an array that is used for determining portable
      *                                  error code from a native database error code
      */
-    protected static $errorCodeMap = array(
+    protected static $errorCodeMap = [
                                       110   => Doctrine_Core::ERR_VALUE_COUNT_ON_ROW,
                                       155   => Doctrine_Core::ERR_NOSUCHFIELD,
                                       170   => Doctrine_Core::ERR_SYNTAX,
@@ -51,7 +51,7 @@ class Doctrine_Connection_Mssql_Exception extends Doctrine_Connection_Exception
                                       2714  => Doctrine_Core::ERR_ALREADY_EXISTS,
                                       3701  => Doctrine_Core::ERR_NOSUCHTABLE,
                                       8134  => Doctrine_Core::ERR_DIVZERO,
-                                      );
+                                      ];
 
     /**
      * This method checks if native error code/message can be

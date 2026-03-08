@@ -38,14 +38,14 @@ class Doctrine_Validator_ErrorStack extends Doctrine_Access implements Countable
      *
      * @var array
      */
-    protected $_errors = array();
+    protected $_errors = [];
 
     /**
      * Array of validators that failed
      *
      * @var array
      */
-    protected $_validators = array();
+    protected $_validators = [];
 
     /**
      * Get model class name for the error stack
@@ -139,8 +139,8 @@ class Doctrine_Validator_ErrorStack extends Doctrine_Access implements Countable
      */
     public function clear()
     {
-        $this->_errors = array();
-        $this->_validators = array();
+        $this->_errors = [];
+        $this->_validators = [];
     }
 
     /**

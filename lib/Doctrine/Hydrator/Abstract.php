@@ -33,8 +33,8 @@
 abstract class Doctrine_Hydrator_Abstract extends Doctrine_Locator_Injectable
 {
     protected
-        $_queryComponents = array(),
-        $_tableAliases = array(),
+        $_queryComponents = [],
+        $_tableAliases = [],
         $_priorRow,
         $_hydrationMode;
 

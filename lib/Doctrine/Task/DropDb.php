@@ -33,8 +33,8 @@
 class Doctrine_Task_DropDb extends Doctrine_Task
 {
     public $description          =   'Drop database for all existing connections',
-           $requiredArguments    =   array(),
-           $optionalArguments    =   array('force'  =>  'Whether or not to force the drop database task');
+           $requiredArguments    =   [],
+           $optionalArguments    =   ['force'  =>  'Whether or not to force the drop database task'];
 
     public function execute()
     {

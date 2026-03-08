@@ -67,7 +67,7 @@ class Doctrine_Validator_Unique extends Doctrine_Validator_Driver
             $values = $value;
         } else {
             $sql .= $conn->quoteIdentifier($table->getColumnName($this->field)) . ' = ?';
-            $values = array();
+            $values = [];
             $values[] = $value;
         }
         

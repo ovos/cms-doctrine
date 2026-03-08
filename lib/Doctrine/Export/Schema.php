@@ -44,7 +44,7 @@ class Doctrine_Export_Schema
      * @param integer $modelLoading The model loading strategy to use to load the models from the passed directory
      * @return void
      */
-    public function buildSchema($directory = null, $models = array(), $modelLoading = null)
+    public function buildSchema($directory = null, $models = [], $modelLoading = null)
     {
         if ($directory !== null) {
             $loadedModels = Doctrine_Core::filterInvalidModels(Doctrine_Core::loadModels($directory, $modelLoading));
@@ -52,12 +52,12 @@ class Doctrine_Export_Schema
             $loadedModels = Doctrine_Core::getLoadedModels();
         }
         
-        $array = array();
+        $array = [];
         
         $parent = new ReflectionClass('Doctrine_Record');
 
-        $sql = array();
-        $fks = array();
+        $sql = [];
+        $fks = [];
 
         // we iterate through the diff of previously declared classes
         // and currently declared classes
@@ -70,9 +70,9 @@ class Doctrine_Export_Schema
             
             $data = $recordTable->getExportableFormat();
             
-            $table = array();
+            $table = [];
             $table['connection'] = $recordTable->getConnection()->getName();
-            $remove = array('ptype', 'ntype', 'alltypes');
+            $remove = ['ptype', 'ntype', 'alltypes'];
             // Fix explicit length in schema, concat it to type in this format: type(length)
             foreach ($data['columns'] AS $name => $column) {
                 if (isset($column['length']) && $column['length'] && isset($column['scale']) && $column['scale']) {
@@ -141,7 +141,7 @@ class Doctrine_Export_Schema
      * @param integer $modelLoading The model loading strategy to use to load the models from the passed directory
      * @return void
      */
-    public function exportSchema($schema, $format = 'yml', $directory = null, $models = array(), $modelLoading = null)
+    public function exportSchema($schema, $format = 'yml', $directory = null, $models = [], $modelLoading = null)
     {
         $array = $this->buildSchema($directory, $models, $modelLoading);
         

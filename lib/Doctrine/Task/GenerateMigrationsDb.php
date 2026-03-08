@@ -33,8 +33,8 @@
 class Doctrine_Task_GenerateMigrationsDb extends Doctrine_Task
 {
     public $description          =   'Generate migration classes for an existing database',
-           $requiredArguments    =   array('migrations_path' => 'Specify the complete path to your migration classes folder.'),
-           $optionalArguments    =   array();
+           $requiredArguments    =   ['migrations_path' => 'Specify the complete path to your migration classes folder.'],
+           $optionalArguments    =   [];
     
     public function execute()
     {
@@ -46,7 +46,7 @@ class Doctrine_Task_GenerateMigrationsDb extends Doctrine_Task
             if ( ! count($migration->getMigrationClasses())) {
                 $result1 = Doctrine_Core::generateMigrationsFromDb($migrationsPath);
             }
-            $connections = array();
+            $connections = [];
             foreach (Doctrine_Manager::getInstance() as $connection) {
                 $connections[] = $connection->getName();
             }

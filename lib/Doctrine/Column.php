@@ -36,15 +36,15 @@ class Doctrine_Column extends Doctrine_Access implements IteratorAggregate, Coun
     /**
      * @var array $_definition  @see getDefinition()
      */
-    protected $_definition = array(
+    protected $_definition = [
                                 'type'    => null,
                                 'length'  => 0,
-                                );
+                                ];
 
     /**
      * @var array $definition  @see getDefinition()
      */
-    public function __construct(array $definition = array())
+    public function __construct(array $definition = [])
     {
         $this->_definition = $definition;
     }
@@ -108,7 +108,7 @@ class Doctrine_Column extends Doctrine_Access implements IteratorAggregate, Coun
         if (isset($this->_definition['values'])) {
             return $this->_definition['values'];
         } else {
-            return array();
+            return [];
         }
     }
 

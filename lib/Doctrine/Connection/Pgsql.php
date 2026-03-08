@@ -47,7 +47,7 @@ class Doctrine_Connection_Pgsql extends Doctrine_Connection_Common
     public function __construct(Doctrine_Manager $manager, $adapter)
     {
         // initialize all driver options
-        $this->supported = array(
+        $this->supported = [
                           'sequences'               => true,
                           'indexes'                 => true,
                           'affected_rows'           => true,
@@ -66,16 +66,16 @@ class Doctrine_Connection_Pgsql extends Doctrine_Connection_Common
                           'prepared_statements'     => true,
                           'identifier_quoting'      => true,
                           'pattern_escaping'        => true,
-                          );
+                          ];
 
-        $this->properties['string_quoting'] = array('start' => "'",
+        $this->properties['string_quoting'] = ['start' => "'",
                                                     'end' => "'",
                                                     'escape' => "'",
-                                                    'escape_pattern' => '\\');
+                                                    'escape_pattern' => '\\'];
 
-        $this->properties['identifier_quoting'] = array('start' => '"',
+        $this->properties['identifier_quoting'] = ['start' => '"',
                                                         'end' => '"',
-                                                        'escape' => '"');
+                                                        'escape' => '"'];
         parent::__construct($manager, $adapter);
     }
 
@@ -174,21 +174,21 @@ class Doctrine_Connection_Pgsql extends Doctrine_Connection_Common
             if (empty($tmp[2]) && isset($tmp[1])
                 && preg_match('/(\d+)(.*)/', $tmp[1], $tmp2)
             ) {
-                $serverInfo = array(
+                $serverInfo = [
                     'major' => $tmp[0],
                     'minor' => $tmp2[1],
                     'patch' => null,
                     'extra' => $tmp2[2],
                     'native' => $serverInfo,
-                );
+                ];
             } else {
-                $serverInfo = array(
+                $serverInfo = [
                     'major' => isset($tmp[0]) ? $tmp[0] : null,
                     'minor' => isset($tmp[1]) ? $tmp[1] : null,
                     'patch' => isset($tmp[2]) ? $tmp[2] : null,
                     'extra' => null,
                     'native' => $serverInfo,
-                );
+                ];
             }
         }
         return $serverInfo;
@@ -207,9 +207,9 @@ class Doctrine_Connection_Pgsql extends Doctrine_Connection_Common
         $tableName = $table->getTableName();
 
         // column names are specified as array keys
-        $cols = array();
+        $cols = [];
         // the query VALUES will contain either expresions (eg 'NOW()') or ?
-        $a = array();
+        $a = [];
         
         foreach ($fields as $fieldName => $value) {
         	if ($table->isIdentifier($fieldName) 

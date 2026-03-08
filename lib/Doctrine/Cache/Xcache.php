@@ -39,7 +39,7 @@ class Doctrine_Cache_Xcache extends Doctrine_Cache_Driver
      *
      * @param array $options        associative array of cache driver options
      */
-    public function __construct($options = array())
+    public function __construct($options = [])
     {
         if ( ! extension_loaded('xcache') ) {
             throw new Doctrine_Cache_Exception('In order to use Xcache driver, the xcache extension must be loaded.');
@@ -104,7 +104,7 @@ class Doctrine_Cache_Xcache extends Doctrine_Cache_Driver
     protected function _getCacheKeys()
     {
         $this->checkAuth();
-        $keys = array();
+        $keys = [];
         for ($i = 0, $count = xcache_count(XC_TYPE_VAR); $i < $count; $i++) {
             $entries = xcache_list(XC_TYPE_VAR, $i);
             if (is_array($entries['cache_list'])) {

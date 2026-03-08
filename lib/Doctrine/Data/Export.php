@@ -62,7 +62,7 @@ class Doctrine_Data_Export extends Doctrine_Data
         $models = Doctrine_Core::getLoadedModels();
         $specifiedModels = $this->getModels();
 
-        $data = array();
+        $data = [];
 
 		    // for situation when the $models array is empty, but the $specifiedModels array isn't
         if (empty($models)) {
@@ -72,7 +72,7 @@ class Doctrine_Data_Export extends Doctrine_Data
         $models = Doctrine_Core::initializeModels($models);
 
         // temporarily disable indexBy query parts of selected and related tables
-        $originalIndexBy = array();
+        $originalIndexBy = [];
         foreach ($models AS $name) {
           $table = Doctrine_Core::getTable($name);
           if ( !is_null($indexBy = $table->getBoundQueryPart('indexBy'))) {
@@ -125,7 +125,7 @@ class Doctrine_Data_Export extends Doctrine_Data
 
             foreach ($data as $className => $classData) {
                 if ( ! empty($classData)) {
-                    Doctrine_Parser::dump(array($className => $classData), $format, $directory.DIRECTORY_SEPARATOR.$className.'.'.$format);
+                    Doctrine_Parser::dump([$className => $classData], $format, $directory.DIRECTORY_SEPARATOR.$className.'.'.$format);
                 }
             }
         } else {
@@ -149,15 +149,15 @@ class Doctrine_Data_Export extends Doctrine_Data
      */
     public function prepareData($data)
     {
-        $preparedData = array();
+        $preparedData = [];
 
         foreach ($data AS $className => $classData) {
-            $preparedData[$className] = array();
+            $preparedData[$className] = [];
             $keyType = $classData->getTable()->getIdentifierType();
             foreach ($classData as $record) {
                 $className = get_class($record);
                 $recordKey = $className . '_' . implode('_', $record->identifier());
-                $preparedData[$className][$recordKey] = array();
+                $preparedData[$className][$recordKey] = [];
 
                 // skip single primary keys, we need to maintain composite primary keys
                 $keys = $record->getTable()->getIdentifier();
@@ -166,7 +166,7 @@ class Doctrine_Data_Export extends Doctrine_Data
 
                 foreach ($recordData as $key => $value) {
                     if ( ! is_array($keys)) {
-                      $keys = array($keys);
+                      $keys = [$keys];
                     }
 
                     if ($keyType !== Doctrine_Core::IDENTIFIER_NATURAL && count($keys) <= 1 && in_array($key, $keys)) {

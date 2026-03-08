@@ -34,7 +34,7 @@ class Doctrine_Hydrator_SingleScalarDriver extends Doctrine_Hydrator_Abstract
 {
     public function hydrateResultSet($stmt)
     {
-        $result = array();
+        $result = [];
         while (($val = $stmt->fetchColumn()) !== false) {
             $result[] = $val;
         }

@@ -31,7 +31,7 @@
  */
 class Doctrine_DataDict_Mysql extends Doctrine_DataDict
 {
-    protected $keywords = array(
+    protected $keywords = [
                           'ADD', 'ALL', 'ALTER',
                           'ANALYZE', 'AND', 'AS',
                           'ASC', 'ASENSITIVE', 'BEFORE',
@@ -106,7 +106,7 @@ class Doctrine_DataDict_Mysql extends Doctrine_DataDict
                           'WHEN', 'WHERE', 'WHILE',
                           'WITH', 'WRITE', 'X509',
                           'XOR', 'YEAR_MONTH', 'ZEROFILL'
-                          );
+                          ];
 
     /**
      * Obtain DBMS specific SQL code portion needed to declare an text type
@@ -144,7 +144,7 @@ class Doctrine_DataDict_Mysql extends Doctrine_DataDict
                 return $length ? 'CHAR('.$length.')' : 'CHAR(255)';
             case 'enum':
                 if ($this->conn->getAttribute(Doctrine_Core::ATTR_USE_NATIVE_ENUM)) {
-                    $values = array();
+                    $values = [];
                     foreach ($field['values'] as $value) {
                       $values[] = $this->conn->quote($value, 'varchar');
                     }
@@ -154,7 +154,7 @@ class Doctrine_DataDict_Mysql extends Doctrine_DataDict
                 }
             case 'set':
                 if ($this->conn->getAttribute(Doctrine_Core::ATTR_USE_NATIVE_SET)) {
-                    $values = array();
+                    $values = [];
                     foreach ($field['values'] as $value) {
                         $values[] = $this->conn->quote($value, 'varchar');
                     }
@@ -270,7 +270,7 @@ class Doctrine_DataDict_Mysql extends Doctrine_DataDict
                 $decimal = null;
             }
         }
-        $type = array();
+        $type = [];
         $unsigned = $fixed = null;
 
         if ( ! isset($field['name'])) {
@@ -424,7 +424,7 @@ class Doctrine_DataDict_Mysql extends Doctrine_DataDict
         }
 
         $length = ((int) $length == 0) ? null : (int) $length;
-        $def =  array('type' => $type, 'length' => $length, 'unsigned' => $unsigned, 'fixed' => $fixed);
+        $def =  ['type' => $type, 'length' => $length, 'unsigned' => $unsigned, 'fixed' => $fixed];
         if ($values !== null) {
             $def['values'] = $values;
         }

@@ -36,20 +36,20 @@ class Doctrine_Search extends Doctrine_Record_Generator
 
     const INDEX_TABLES = 1;
 
-    protected $_options = array('generateFiles'    => false,
+    protected $_options = ['generateFiles'    => false,
                                 'analyzer'         => 'Doctrine_Search_Analyzer_Standard',
-                                'analyzer_options' => array(),
+                                'analyzer_options' => [],
                                 'type'             => self::INDEX_TABLES,
                                 'className'        => '%CLASS%Index',
                                 'generatePath'     => false,
                                 'table'            => null,
                                 'batchUpdates'     => false,
                                 'pluginTable'      => false,
-                                'fields'           => array(),
+                                'fields'           => [],
                                 'connection'       => null,
-                                'children'         => array(),
+                                'children'         => [],
                                 'cascadeDelete'    => true,
-                                'appLevelDelete'   => false);
+                                'appLevelDelete'   => false];
     /**
      * __construct 
      * 
@@ -65,7 +65,7 @@ class Doctrine_Search extends Doctrine_Record_Generator
         }
 
         if ( ! isset($this->_options['analyzer_options'])) {
-            $this->_options['analyzer_options'] = array();
+            $this->_options['analyzer_options'] = [];
         }
 
         $this->_options['analyzer'] = new $this->_options['analyzer']($this->_options['analyzer_options']);
@@ -146,7 +146,7 @@ class Doctrine_Search extends Doctrine_Record_Generator
             ->createQuery()
             ->delete();
         foreach ((array) $identifier as $id) {
-            $q->addWhere($id . ' = ?', array($data[$id]));
+            $q->addWhere($id . ' = ?', [$data[$id]]);
         }
         $q->execute();
 
@@ -235,7 +235,7 @@ class Doctrine_Search extends Doctrine_Record_Generator
 
         $rows = $this->readTableData($limit, $offset);
 
-        $ids = array();
+        $ids = [];
         foreach ($rows as $row) {
             foreach ($id as $idcol) {
                 $ids[] = $row[$idcol];
@@ -318,23 +318,23 @@ class Doctrine_Search extends Doctrine_Record_Generator
 
         // move any columns currently in the primary key to the end
         // So that 'keyword' is the first field in the table
-        $previousIdentifier = array();
+        $previousIdentifier = [];
         foreach ($this->_table->getIdentifier() as $name) {
             $previousIdentifier[$name] = $this->_table->getColumnDefinition($name);
             $this->_table->removeColumn($name);
         }
 
-        $columns = array('keyword'  => array('type'    => 'string',
+        $columns = ['keyword'  => ['type'    => 'string',
                                              'length'  => 200,
                                              'primary' => true,
-                                             ),
-                         'field'    => array('type'    => 'string',
+                                             ],
+                         'field'    => ['type'    => 'string',
                                              'length'  => 50,
-                                             'primary' => true),
-                         'position' => array('type'    => 'integer',
+                                             'primary' => true],
+                         'position' => ['type'    => 'integer',
                                              'length'  => 8,
                                              'primary' => true,
-                                             ));
+                                             ]];
 
         $this->hasColumns($columns);
         $this->hasColumns($previousIdentifier);

@@ -107,16 +107,16 @@ SQL;
      */
     public function _makeAutoincrement($name, $table, $start = 1)
     {
-        $sql   = array();
+        $sql   = [];
 
         if ( ! $this->conn->getAttribute(Doctrine_Core::ATTR_QUOTE_IDENTIFIER)) {
         	$table = strtoupper($table);
         }
         $indexName  = $table . '_AI_PK';
-        $definition = array(
+        $definition = [
             'primary' => true,
-            'fields' => array($name => true),
-        );
+            'fields' => [$name => true],
+        ];
 		
         $sql[] = 'DECLARE
   constraints_Count NUMBER;
@@ -265,7 +265,7 @@ END;';
      *
      * @return void
      */
-    public function createTable($name, array $fields, array $options = array())
+    public function createTable($name, array $fields, array $options = [])
     {
         $this->conn->beginTransaction();
 
@@ -307,7 +307,7 @@ END;';
      *
      * @return void
      */
-    public function createTableSql($name, array $fields, array $options = array())
+    public function createTableSql($name, array $fields, array $options = [])
     {
         $sql = parent::createTableSql($name, $fields, $options);
 
@@ -496,7 +496,7 @@ END;';
         $name = $this->conn->quoteIdentifier($name, true);
 
         if ( ! empty($changes['add']) && is_array($changes['add'])) {
-            $fields = array();
+            $fields = [];
             foreach ($changes['add'] as $fieldName => $field) {
                 $fields[] = $this->getDeclaration($fieldName, $field); 
             }
@@ -504,7 +504,7 @@ END;';
         }
 
         if ( ! empty($changes['change']) && is_array($changes['change'])) {
-            $fields = array();
+            $fields = [];
             foreach ($changes['change'] as $fieldName => $field) {
                 $fields[] = $fieldName. ' ' . $this->getDeclaration('', $field['definition']);
             }
@@ -521,7 +521,7 @@ END;';
         }
 
         if ( ! empty($changes['remove']) && is_array($changes['remove'])) {
-            $fields = array();
+            $fields = [];
             foreach ($changes['remove'] as $fieldName => $field) {
                 $fields[] = $this->conn->quoteIdentifier($fieldName, true);
             }
@@ -547,7 +547,7 @@ END;';
      *                          );
      * @return string
      */
-    public function createSequenceSql($seqName, $start = 1, array $options = array())
+    public function createSequenceSql($seqName, $start = 1, array $options = [])
     {
         $sequenceName = $this->conn->quoteIdentifier($this->conn->formatter->getSequenceName($seqName), true);
         $query  = 'CREATE SEQUENCE ' . $sequenceName . ' START WITH ' . $start . ' INCREMENT BY 1 NOCACHE';

@@ -32,7 +32,7 @@
  */
 class Doctrine_Record_Filter_Compound extends Doctrine_Record_Filter
 {
-    protected $_aliases = array();
+    protected $_aliases = [];
 
     public function __construct(array $aliases)
     {

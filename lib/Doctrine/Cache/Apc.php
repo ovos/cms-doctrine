@@ -38,7 +38,7 @@ class Doctrine_Cache_Apc extends Doctrine_Cache_Driver
      *
      * @param array $options    associative array of cache driver options
      */
-    public function __construct($options = array())
+    public function __construct($options = [])
     {
         if ( ! extension_loaded('apc')) {
             throw new Doctrine_Cache_Exception('The apc extension must be loaded for using this backend !');
@@ -105,7 +105,7 @@ class Doctrine_Cache_Apc extends Doctrine_Cache_Driver
     protected function _getCacheKeys()
     {
         $ci = apc_cache_info('user');
-        $keys = array();
+        $keys = [];
 
         foreach ($ci['cache_list'] as $entry) {
           $keys[] = $entry['info'];

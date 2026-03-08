@@ -32,7 +32,7 @@
  */
 class Doctrine_Query_Registry
 {
-    protected $_queries = array();
+    protected $_queries = [];
 
     public function add($key, $query)
     {

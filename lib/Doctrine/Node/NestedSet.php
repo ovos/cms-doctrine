@@ -133,7 +133,7 @@ class Doctrine_Node_NestedSet extends Doctrine_Node implements Doctrine_Node_Int
     public function getSiblings($includeNode = false)
     {
         $parent = $this->getParent();
-        $siblings = array();
+        $siblings = [];
         if ($parent && $parent->exists()) {
             foreach ($parent->getNode()->getChildren() as $child) {
                 if ($this->isEqualTo($child) && !$includeNode) {
@@ -216,7 +216,7 @@ class Doctrine_Node_NestedSet extends Doctrine_Node implements Doctrine_Node_Int
     {
         $baseAlias = $this->_tree->getBaseAlias();
         $q = $this->_tree->getBaseQuery();
-        $params = array($this->record->get('lft'), $this->record->get('rgt'));
+        $params = [$this->record->get('lft'), $this->record->get('rgt')];
         
         if ($includeNode) {
             $q->addWhere("$baseAlias.lft >= ? AND $baseAlias.rgt <= ?", $params)->addOrderBy("$baseAlias.lft asc");
@@ -247,7 +247,7 @@ class Doctrine_Node_NestedSet extends Doctrine_Node implements Doctrine_Node_Int
     {
         $baseAlias = $this->_tree->getBaseAlias();
         $q = $this->_tree->getBaseQuery();
-        $q->addWhere("$baseAlias.lft < ? AND $baseAlias.rgt > ?", array($this->getLeftValue(), $this->getRightValue()))
+        $q->addWhere("$baseAlias.lft < ? AND $baseAlias.rgt > ?", [$this->getLeftValue(), $this->getRightValue()])
           ->addWhere("$baseAlias.level >= ?", $this->record['level'] - 1)
           ->addOrderBy("$baseAlias.rgt asc");
         $q = $this->_tree->returnQueryWithRootId($q, $this->getRootValue());
@@ -277,7 +277,7 @@ class Doctrine_Node_NestedSet extends Doctrine_Node implements Doctrine_Node_Int
     {
         $baseAlias = $this->_tree->getBaseAlias();
         $q = $this->_tree->getBaseQuery();
-        $q->addWhere("$baseAlias.lft < ? AND $baseAlias.rgt > ?", array($this->getLeftValue(), $this->getRightValue()))
+        $q->addWhere("$baseAlias.lft < ? AND $baseAlias.rgt > ?", [$this->getLeftValue(), $this->getRightValue()])
                 ->addOrderBy("$baseAlias.lft asc");
         if ($depth !== null) {
             $q->addWhere("$baseAlias.level >= ?", $this->record['level'] - $depth);
@@ -299,7 +299,7 @@ class Doctrine_Node_NestedSet extends Doctrine_Node implements Doctrine_Node_Int
      */     
     public function getPath($seperator = ' > ', $includeRecord = false)
     {
-        $path = array();
+        $path = [];
         $ancestors = $this->getAncestors();
         if ($ancestors) {
             foreach ($ancestors as $ancestor) {
@@ -381,7 +381,7 @@ class Doctrine_Node_NestedSet extends Doctrine_Node implements Doctrine_Node_Int
             $q->set("$componentName.lft", "$componentName.lft + 1");
             $q->set("$componentName.rgt", "$componentName.rgt + 1");
             $q->set("$componentName.level", "$componentName.level + 1");
-            $q->where("$componentName.lft >= ? AND $componentName.rgt <= ?", array($newLeft, $newRight));
+            $q->where("$componentName.lft >= ? AND $componentName.rgt <= ?", [$newLeft, $newRight]);
     		$q = $this->_tree->returnQueryWithRootId($q, $newRoot);
     		$q->execute();
 
@@ -651,7 +651,7 @@ class Doctrine_Node_NestedSet extends Doctrine_Node implements Doctrine_Node_Int
                 ->set($componentName . '.rgt', $componentName.'.rgt + ?', $diff)
                 ->set($componentName . '.level', $componentName.'.level + ?', $levelDiff)
                 ->set($componentName . '.' . $rootColName, '?', $newRoot)
-                ->where($componentName . '.lft > ? AND ' . $componentName . '.rgt < ?', array($oldLft, $oldRgt));
+                ->where($componentName . '.lft > ? AND ' . $componentName . '.rgt < ?', [$oldLft, $oldRgt]);
             $q = $this->_tree->returnQueryWithRootId($q, $oldRoot);
             $q->execute();
 
@@ -812,11 +812,11 @@ class Doctrine_Node_NestedSet extends Doctrine_Node implements Doctrine_Node_Int
             $q = Doctrine_Core::getTable($componentName)
                 ->createQuery()
                 ->update()
-                ->set($componentName . '.lft', $componentName.'.lft + ?', array($diff))
-                ->set($componentName . '.rgt', $componentName.'.rgt + ?', array($diff))
-                ->set($componentName . '.level', $componentName.'.level - ?', array($oldLevel))
-                ->set($componentName . '.' . $rootColName, '?', array($newRoot))
-                ->where($componentName . '.lft > ? AND ' . $componentName . '.rgt < ?', array($oldLft, $oldRgt));
+                ->set($componentName . '.lft', $componentName.'.lft + ?', [$diff])
+                ->set($componentName . '.rgt', $componentName.'.rgt + ?', [$diff])
+                ->set($componentName . '.level', $componentName.'.level - ?', [$oldLevel])
+                ->set($componentName . '.' . $rootColName, '?', [$newRoot])
+                ->where($componentName . '.lft > ? AND ' . $componentName . '.rgt < ?', [$oldLft, $oldRgt]);
             $q = $this->_tree->returnQueryWithRootId($q, $oldRoot);
             $q->execute();
             
@@ -965,7 +965,7 @@ class Doctrine_Node_NestedSet extends Doctrine_Node implements Doctrine_Node_Int
             $baseAlias = $this->_tree->getBaseAlias();
             $componentName = $this->_tree->getBaseComponent();
 
-            $q = $q->addWhere("$baseAlias.lft >= ? AND $baseAlias.rgt <= ?", array($this->getLeftValue(), $this->getRightValue()));
+            $q = $q->addWhere("$baseAlias.lft >= ? AND $baseAlias.rgt <= ?", [$this->getLeftValue(), $this->getRightValue()]);
 
             $q = $this->_tree->returnQueryWithRootId($q, $oldRoot);
 
@@ -1031,8 +1031,8 @@ class Doctrine_Node_NestedSet extends Doctrine_Node implements Doctrine_Node_Int
             $q = Doctrine_Core::getTable($componentName)
                 ->createQuery()
                 ->update()
-                ->set($componentName . '.level', $componentName.'.level + ?', array($levelDiff))
-                ->where($componentName . '.lft > ? AND ' . $componentName . '.rgt < ?', array($left, $right));
+                ->set($componentName . '.level', $componentName.'.level + ?', [$levelDiff])
+                ->where($componentName . '.lft > ? AND ' . $componentName . '.rgt < ?', [$left, $right]);
             $q = $this->_tree->returnQueryWithRootId($q, $rootId);
             $q->execute();
 
@@ -1116,7 +1116,7 @@ class Doctrine_Node_NestedSet extends Doctrine_Node implements Doctrine_Node_Int
 
         // shift left column values
         $qLeft = $qLeft->set($componentName . '.lft', $componentName.'.lft + ?', $delta)
-                       ->where($componentName . '.lft >= ? AND ' . $componentName . '.lft <= ?', array($first, $last));
+                       ->where($componentName . '.lft >= ? AND ' . $componentName . '.lft <= ?', [$first, $last]);
         
         $qLeft = $this->_tree->returnQueryWithRootId($qLeft, $rootId);
 
@@ -1124,7 +1124,7 @@ class Doctrine_Node_NestedSet extends Doctrine_Node implements Doctrine_Node_Int
         
         // shift right column values
         $qRight = $qRight->set($componentName . '.rgt', $componentName.'.rgt + ?', $delta)
-                        ->where($componentName . '.rgt >= ? AND ' . $componentName . '.rgt <= ?', array($first, $last));
+                        ->where($componentName . '.rgt >= ? AND ' . $componentName . '.rgt <= ?', [$first, $last]);
 
         $qRight = $this->_tree->returnQueryWithRootId($qRight, $rootId);
 
@@ -1182,7 +1182,7 @@ class Doctrine_Node_NestedSet extends Doctrine_Node implements Doctrine_Node_Int
             $baseAlias = $this->_tree->getBaseAlias();
             $componentName = $this->_tree->getBaseComponent();
             $q = $this->_tree->getBaseQuery();
-            $q = $q->addWhere("$baseAlias.lft < ? AND $baseAlias.rgt > ?", array($this->getLeftValue(), $this->getRightValue()));
+            $q = $q->addWhere("$baseAlias.lft < ? AND $baseAlias.rgt > ?", [$this->getLeftValue(), $this->getRightValue()]);
 
             $q = $this->_tree->returnQueryWithRootId($q, $this->getRootValue());
             

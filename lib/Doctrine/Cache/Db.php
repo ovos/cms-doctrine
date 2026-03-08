@@ -39,7 +39,7 @@ class Doctrine_Cache_Db extends Doctrine_Cache_Driver
      *
      * @param array $_options      an array of options
      */
-    public function __construct($options = array())
+    public function __construct($options = [])
     {
         if ( ! isset($options['connection']) ||
              ! ($options['connection'] instanceof Doctrine_Connection)) {
@@ -83,7 +83,7 @@ class Doctrine_Cache_Db extends Doctrine_Cache_Driver
             $sql .= " AND (expire is null OR expire > '" . date('Y-m-d H:i:s') . "')";
         }
 
-        $result = $this->getConnection()->execute($sql, array($id))->fetchAll(Doctrine_Core::FETCH_NUM);
+        $result = $this->getConnection()->execute($sql, [$id])->fetchAll(Doctrine_Core::FETCH_NUM);
 
         if ( ! isset($result[0])) {
             return false;
@@ -103,7 +103,7 @@ class Doctrine_Cache_Db extends Doctrine_Cache_Driver
         $sql = 'SELECT id, expire FROM ' . $this->_options['tableName']
              . ' WHERE id = ?';
 
-        $result = $this->getConnection()->fetchOne($sql, array($id));
+        $result = $this->getConnection()->fetchOne($sql, [$id]);
 
         if (isset($result[0] )) {
             return time();
@@ -134,7 +134,7 @@ class Doctrine_Cache_Db extends Doctrine_Cache_Driver
                 $expire = NULL;
             }
 
-            $params = array(bin2hex(serialize($data)), $expire, $id);
+            $params = [bin2hex(serialize($data)), $expire, $id];
         } else {
             //record is not in database, do insert
             $sql = 'INSERT INTO ' . $this->_options['tableName']
@@ -146,7 +146,7 @@ class Doctrine_Cache_Db extends Doctrine_Cache_Driver
                 $expire = NULL;
             }
 
-            $params = array($id, bin2hex(serialize($data)), $expire);
+            $params = [$id, bin2hex(serialize($data)), $expire];
         }
 
         return $this->getConnection()->exec($sql, $params);
@@ -162,7 +162,7 @@ class Doctrine_Cache_Db extends Doctrine_Cache_Driver
     protected function _doDelete($id)
     {
         $sql = 'DELETE FROM ' . $this->_options['tableName'] . ' WHERE id = ?';
-        return $this->getConnection()->exec($sql, array($id));
+        return $this->getConnection()->exec($sql, [$id]);
     }
 
     /**
@@ -174,22 +174,22 @@ class Doctrine_Cache_Db extends Doctrine_Cache_Driver
     {
         $name = $this->_options['tableName'];
 
-        $fields = array(
-            'id' => array(
+        $fields = [
+            'id' => [
                 'type'   => 'string',
                 'length' => 255
-            ),
-            'data' => array(
+            ],
+            'data' => [
                 'type'    => 'blob'
-            ),
-            'expire' => array(
+            ],
+            'expire' => [
                 'type'    => 'timestamp'
-            )
-        );
+            ]
+        ];
 
-        $options = array(
-            'primary' => array('id')
-        );
+        $options = [
+            'primary' => ['id']
+        ];
 
         $this->getConnection()->export->createTable($name, $fields, $options);
     }
@@ -222,7 +222,7 @@ class Doctrine_Cache_Db extends Doctrine_Cache_Driver
     protected function _getCacheKeys()
     {
         $sql = 'SELECT id FROM ' . $this->_options['tableName'];
-        $keys = array();
+        $keys = [];
         $results = $this->getConnection()->execute($sql)->fetchAll(Doctrine_Core::FETCH_NUM);
         for ($i = 0, $count = count($results); $i < $count; $i++) {
             $keys[] = $results[$i][0];
