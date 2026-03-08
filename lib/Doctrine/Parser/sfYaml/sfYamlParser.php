@@ -125,7 +125,7 @@ class sfYamlParser
 
         if ('<<' === $key)
         {
-          if (isset($values['value']) && '*' === substr($values['value'], 0, 1))
+          if (isset($values['value']) && str_starts_with($values['value'], '*'))
           {
             $isInPlace = substr($values['value'], 1);
             if (!array_key_exists($isInPlace, $this->refs))
@@ -222,7 +222,7 @@ class sfYamlParser
           if (is_array($value))
           {
             $first = reset($value);
-            if ('*' === substr($first, 0, 1))
+            if (str_starts_with($first, '*'))
             {
               $data = [];
               foreach ($value as $alias)
@@ -396,7 +396,7 @@ class sfYamlParser
    */
   protected function parseValue($value)
   {
-    if ('*' === substr($value, 0, 1))
+    if (str_starts_with($value, '*'))
     {
       if (false !== $pos = strpos($value, '#'))
       {

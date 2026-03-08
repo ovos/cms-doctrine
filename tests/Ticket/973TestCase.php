@@ -47,7 +47,7 @@ class Doctrine_Ticket_973_TestCase extends Doctrine_UnitTestCase
        $query = Doctrine_Query::create()
                 ->from('T973_Day d')
                 ->where('d.id IN(46)');
-        $this->assertEqual(' FROM T973_Day d WHERE d.id IN(46)', $query->getDql());
+        $this->assertEqual('FROM T973_Day d WHERE d.id IN(46)', $query->getDql());
         $this->assertEqual($query->getSqlQuery(), 'SELECT t.id AS t__id, t.number AS t__number FROM t973_days t WHERE (d.id IN(46))');
     }
 }

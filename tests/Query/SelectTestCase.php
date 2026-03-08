@@ -121,7 +121,7 @@ class Doctrine_Query_Select_TestCase extends Doctrine_UnitTestCase
         $q->select();
 
         $this->assertEqual($q->getType(), Doctrine_Query_Abstract::SELECT);
-        $this->assertEqual($q->getDql(), ' FROM User u WHERE u.username = ?');
+        $this->assertEqual($q->getDql(), 'FROM User u WHERE u.username = ?');
     }
 
     public function testUnknownAggregateFunction() 

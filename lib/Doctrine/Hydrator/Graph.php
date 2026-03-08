@@ -39,6 +39,12 @@ abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
     protected $_rootAlias;
 
     /**
+     * @var array  Cache for inheritance map data used in _getClassnameToReturn().
+     *             Keyed by component name, contains pre-resolved field names and table references.
+     */
+    protected $_inheritanceCache = [];
+
+    /**
      * Gets the custom field used for indexing for the specified component alias.
      *
      * @return string  The field name of the field used for indexing or NULL
@@ -295,7 +301,7 @@ abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
         $rowData = [];
 
         foreach ($data as $key => $value) {
-            // Parse each column name only once. Cache the results. 
+            // Parse each column name only once. Cache the results.
             if ( ! isset($cache[$key])) {
                 // check ignored names. fastest solution for now. if we get more we'll start
                 // to introduce a list.
@@ -305,51 +311,44 @@ abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
 
                 $e = explode('__', $key);
                 $last = strtolower(array_pop($e));
-                $cache[$key]['dqlAlias'] = $this->_tableAliases[strtolower(implode('__', $e))];
-                $table = $this->_queryComponents[$cache[$key]['dqlAlias']]['table'];
+                $dqlAlias = $this->_tableAliases[strtolower(implode('__', $e))];
+                $table = $this->_queryComponents[$dqlAlias]['table'];
                 $fieldName = $table->getFieldName($last);
-                $cache[$key]['fieldName'] = $fieldName;
-                if ($table->isIdentifier($fieldName)) {
-                    $cache[$key]['isIdentifier'] = true;
-                } else {
-                  $cache[$key]['isIdentifier'] = false;
-                }
                 $type = $table->getTypeOfColumn($last);
-                if ($type == 'integer' || $type == 'string') {
-                    $cache[$key]['isSimpleType'] = true;
-                } else {
-                    $cache[$key]['type'] = $type;
-                    $cache[$key]['isSimpleType'] = false;
-                }
+
+                // Pre-compute aggregate field name to avoid per-row lookup
+                $aggFieldName = $this->_queryComponents[$dqlAlias]['agg'][$fieldName] ?? null;
+
+                $cache[$key] = [
+                    'dqlAlias' => $dqlAlias,
+                    'fieldName' => $fieldName,
+                    'isIdentifier' => $table->isIdentifier($fieldName),
+                    'isSimpleType' => ($type === 'integer' || $type === 'string'),
+                    'type' => $type,
+                    'table' => $table,
+                    'aggFieldName' => $aggFieldName,
+                ];
             }
 
-            $map = $this->_queryComponents[$cache[$key]['dqlAlias']];
-            $table = $map['table'];
-            $dqlAlias = $cache[$key]['dqlAlias'];
-            $fieldName = $cache[$key]['fieldName'];
-            $agg = false;
-            if (isset($this->_queryComponents[$dqlAlias]['agg'][$fieldName])) {
-                $fieldName = $this->_queryComponents[$dqlAlias]['agg'][$fieldName];
-                $agg = true;
-            }
+            $c = $cache[$key];
+            $dqlAlias = $c['dqlAlias'];
+            $fieldName = $c['fieldName'];
 
-            if ($cache[$key]['isIdentifier']) {
+            if ($c['isIdentifier']) {
                 $id[$dqlAlias] .= '|' . $value;
             }
 
-            if ($cache[$key]['isSimpleType']) {
-                $preparedValue = $value;
-            } else {
-                $preparedValue = $table->prepareValue($fieldName, $value, $cache[$key]['type']);
-            }
+            $preparedValue = $c['isSimpleType']
+                ? $value
+                : $c['table']->prepareValue($fieldName, $value, $c['type']);
 
             // Ticket #1380
             // Hydrate aggregates in to the root component as well.
-            // So we know that all aggregate values will always be available in the root component
-            if ($agg) {
-                $rowData[$this->_rootAlias][$fieldName] = $preparedValue;
+            if ($c['aggFieldName'] !== null) {
+                $aggName = $c['aggFieldName'];
+                $rowData[$this->_rootAlias][$aggName] = $preparedValue;
                 if (isset($rowData[$dqlAlias])) {
-                    $rowData[$dqlAlias][$fieldName] = $preparedValue;
+                    $rowData[$dqlAlias][$aggName] = $preparedValue;
                 }
             } else {
                 $rowData[$dqlAlias][$fieldName] = $preparedValue;
@@ -401,33 +400,48 @@ abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
         if ( ! isset($this->_tables[$component])) {
             $this->_tables[$component] = Doctrine_Core::getTable($component);
         }
-        
+
         if ( ! ($subclasses = $this->_tables[$component]->getOption('subclasses'))) {
             return $component;
         }
-        
-        $matchedComponents = [$component];
-        foreach ($subclasses as $subclass) {
-            $table = Doctrine_Core::getTable($subclass);
-            $inheritanceMap = $table->getOption('inheritanceMap');
-            $needMatches = count($inheritanceMap);
-            foreach ($inheritanceMap as $key => $value) {
-                $key = $this->_tables[$component]->getFieldName($key);
-                if ( isset($data[$key]) && $data[$key] == $value) {
+
+        // Build and cache the inheritance map with pre-resolved field names
+        if ( ! isset($this->_inheritanceCache[$component])) {
+            $cached = [];
+            $parentTable = $this->_tables[$component];
+            foreach ($subclasses as $subclass) {
+                $table = Doctrine_Core::getTable($subclass);
+                $inheritanceMap = $table->getOption('inheritanceMap');
+                $resolvedMap = [];
+                foreach ($inheritanceMap as $key => $value) {
+                    $resolvedMap[$parentTable->getFieldName($key)] = $value;
+                }
+                $cached[] = [
+                    'componentName' => $table->getComponentName(),
+                    'map' => $resolvedMap,
+                    'mapCount' => count($resolvedMap),
+                ];
+            }
+            $this->_inheritanceCache[$component] = $cached;
+        }
+
+        $matchedComponent = $component;
+        foreach ($this->_inheritanceCache[$component] as $entry) {
+            $needMatches = $entry['mapCount'];
+            foreach ($entry['map'] as $key => $value) {
+                if (isset($data[$key]) && $data[$key] == $value) {
                     --$needMatches;
                 }
             }
-            if ($needMatches == 0) {
-                $matchedComponents[] = $table->getComponentName();
+            if ($needMatches === 0) {
+                $matchedComponent = $entry['componentName'];
             }
         }
-        
-        $matchedComponent = $matchedComponents[count($matchedComponents)-1];
-        
+
         if ( ! isset($this->_tables[$matchedComponent])) {
             $this->_tables[$matchedComponent] = Doctrine_Core::getTable($matchedComponent);
         }
-        
+
         return $matchedComponent;
     }
 }

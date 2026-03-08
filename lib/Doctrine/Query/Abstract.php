@@ -93,6 +93,12 @@ abstract class Doctrine_Query_Abstract
     protected $_tableAliasMap = [];
 
     /**
+     * @var array  Reverse table alias map. Keys are DQL aliases, values are SQL aliases.
+     *             Used for O(1) lookup in getSqlTableAlias() instead of array_search().
+     */
+    protected $_reverseTableAliasMap = [];
+
+    /**
      * @var Doctrine_View  The view object used by this query, if any.
      */
     protected $_view;
@@ -395,26 +401,28 @@ abstract class Doctrine_Query_Abstract
      */
     public function getDql()
     {
-        $q = '';
-        if ($this->_type == self::SELECT) {
-            $q .= ( ! empty($this->_dqlParts['select'])) ? 'SELECT ' . implode(', ', $this->_dqlParts['select']) : '';
-            $q .= ( ! empty($this->_dqlParts['from'])) ? ' FROM ' . implode(' ', $this->_dqlParts['from']) : '';
-        } elseif ($this->_type == self::DELETE) {
-            $q .= 'DELETE';
-            $q .= ( ! empty($this->_dqlParts['from'])) ? ' FROM ' . implode(' ', $this->_dqlParts['from']) : '';
-        } elseif ($this->_type == self::UPDATE) {
-            $q .= 'UPDATE ';
-            $q .= ( ! empty($this->_dqlParts['from'])) ? implode(' ', $this->_dqlParts['from']) : '';
-            $q .= ( ! empty($this->_dqlParts['set'])) ? ' SET ' . implode(' ', $this->_dqlParts['set']) : '';
-        }
-        $q .= ( ! empty($this->_dqlParts['where'])) ? ' WHERE ' . implode(' ', $this->_dqlParts['where']) : '';
-        $q .= ( ! empty($this->_dqlParts['groupby'])) ? ' GROUP BY ' . implode(', ', $this->_dqlParts['groupby']) : '';
-        $q .= ( ! empty($this->_dqlParts['having'])) ? ' HAVING ' . implode(' AND ', $this->_dqlParts['having']) : '';
-        $q .= ( ! empty($this->_dqlParts['orderby'])) ? ' ORDER BY ' . implode(', ', $this->_dqlParts['orderby']) : '';
-        $q .= ( ! empty($this->_dqlParts['limit'])) ? ' LIMIT ' . implode(' ', $this->_dqlParts['limit']) : '';
-        $q .= ( ! empty($this->_dqlParts['offset'])) ? ' OFFSET ' . implode(' ', $this->_dqlParts['offset']) : '';
+        $parts = [];
 
-        return $q;
+        if ($this->_type == self::SELECT) {
+            if ( ! empty($this->_dqlParts['select'])) $parts[] = 'SELECT ' . implode(', ', $this->_dqlParts['select']);
+            if ( ! empty($this->_dqlParts['from'])) $parts[] = 'FROM ' . implode(' ', $this->_dqlParts['from']);
+        } elseif ($this->_type == self::DELETE) {
+            $parts[] = 'DELETE';
+            if ( ! empty($this->_dqlParts['from'])) $parts[] = 'FROM ' . implode(' ', $this->_dqlParts['from']);
+        } elseif ($this->_type == self::UPDATE) {
+            $parts[] = 'UPDATE';
+            if ( ! empty($this->_dqlParts['from'])) $parts[] = implode(' ', $this->_dqlParts['from']);
+            if ( ! empty($this->_dqlParts['set'])) $parts[] = 'SET ' . implode(' ', $this->_dqlParts['set']);
+        }
+
+        if ( ! empty($this->_dqlParts['where'])) $parts[] = 'WHERE ' . implode(' ', $this->_dqlParts['where']);
+        if ( ! empty($this->_dqlParts['groupby'])) $parts[] = 'GROUP BY ' . implode(', ', $this->_dqlParts['groupby']);
+        if ( ! empty($this->_dqlParts['having'])) $parts[] = 'HAVING ' . implode(' AND ', $this->_dqlParts['having']);
+        if ( ! empty($this->_dqlParts['orderby'])) $parts[] = 'ORDER BY ' . implode(', ', $this->_dqlParts['orderby']);
+        if ( ! empty($this->_dqlParts['limit'])) $parts[] = 'LIMIT ' . implode(' ', $this->_dqlParts['limit']);
+        if ( ! empty($this->_dqlParts['offset'])) $parts[] = 'OFFSET ' . implode(' ', $this->_dqlParts['offset']);
+
+        return implode(' ', $parts);
     }
 
     // [OV6]
@@ -765,10 +773,8 @@ abstract class Doctrine_Query_Abstract
      */
     public function getSqlTableAlias($componentAlias, $tableName = null)
     {
-        $alias = array_search($componentAlias, $this->_tableAliasMap);
-
-        if ($alias !== false) {
-            return $alias;
+        if (isset($this->_reverseTableAliasMap[$componentAlias])) {
+            return $this->_reverseTableAliasMap[$componentAlias];
         }
 
         if ($tableName === null) {
@@ -863,6 +869,7 @@ abstract class Doctrine_Query_Abstract
     {
         $this->_params =& $query->_params;
         $this->_tableAliasMap =& $query->_tableAliasMap;
+        $this->_reverseTableAliasMap =& $query->_reverseTableAliasMap;
         // [OV5] do not set queryComponents by reference to a subquery - what happens in subquery, stays in subquery
         //$this->_queryComponents =& $query->_queryComponents;
         $this->_queryComponents = $query->_queryComponents;
@@ -944,6 +951,7 @@ abstract class Doctrine_Query_Abstract
         }
 
         $this->_tableAliasMap[$alias] = $componentAlias;
+        $this->_reverseTableAliasMap[$componentAlias] = $alias;
 
         return $alias;
     }
@@ -1310,6 +1318,7 @@ abstract class Doctrine_Query_Abstract
     {
         $cached = unserialize($cached);
         $this->_tableAliasMap = $cached[2];
+        $this->_reverseTableAliasMap = array_flip($this->_tableAliasMap);
         // [OV8] added rootAlias, sqlParts, isLimitSubqueryUsed and limitSubquery to cache
         $this->_rootAlias = $cached[3];
         $this->_sqlParts = $cached[4];
@@ -1418,6 +1427,7 @@ abstract class Doctrine_Query_Abstract
     public function addSqlTableAlias($sqlTableAlias, $componentAlias)
     {
         $this->_tableAliasMap[$sqlTableAlias] = $componentAlias;
+        $this->_reverseTableAliasMap[$componentAlias] = $sqlTableAlias;
         return $this;
     }
 

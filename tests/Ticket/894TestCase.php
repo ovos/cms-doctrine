@@ -49,7 +49,7 @@ class Doctrine_Ticket_894_TestCase extends Doctrine_UnitTestCase {
         $query = Doctrine_Query::create()
                 ->from('T894_Day d')
                 ->where('d.number BETWEEN ? AND ?', array($beginNumber, $endNumber));
-        $this->assertEqual(' FROM T894_Day d WHERE d.number BETWEEN ? AND ?', $query->getDql());
+        $this->assertEqual('FROM T894_Day d WHERE d.number BETWEEN ? AND ?', $query->getDql());
         $this->assertTrue(strstr($query->getSqlQuery(), 'BETWEEN ? AND ?'));
     }
 }
