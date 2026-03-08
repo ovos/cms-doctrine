@@ -957,7 +957,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
     /*public function processPendingSubqueries()
     {
         foreach ($this->_pendingSubqueries as $value) {
-            list($dql, $alias) = $value;
+            [$dql, $alias] = $value;
 
             $subquery = $this->createSubquery();
 
@@ -990,7 +990,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
     {
         // iterate trhough all aggregates
         foreach ($this->_pendingAggregates as $aggregate) {
-            list ($expression, $components, $alias) = $aggregate;
+            [$expression, $components, $alias] = $aggregate;
 
             $tableAliases = array();
 
@@ -1922,7 +1922,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
             if (!str_contains($part, '.')) {
                 continue;
             }
-            list($tableAlias, $columnName) = explode('.', $part);
+            [$tableAlias, $columnName] = explode('.', $part);
             // [OV14] Remove identifier quoting if it exists
             $tableAlias = $callback($tableAlias);
             if ($tableAlias != $mainTableAlias) {

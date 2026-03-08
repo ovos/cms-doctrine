@@ -515,7 +515,7 @@ class Doctrine_Migration
                     $changes = array_reverse($changes);
                 }
                 foreach ($changes as $value) {
-                    list($type, $change) = $value;
+                    [$type, $change] = $value;
                     $funcName = 'process' . Doctrine_Inflector::classify($type);
                     if (method_exists($this->_process, $funcName)) {
                         try {

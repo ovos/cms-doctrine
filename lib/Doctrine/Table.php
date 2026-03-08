@@ -1605,7 +1605,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
 
         // Check for possible cross-access
         if ( ! is_array($name) && str_contains($name, '/')) {
-            list($ns, $m) = explode('/', $name);
+            [$ns, $m] = explode('/', $name);
         }
 
         // Define query to be used
@@ -2137,7 +2137,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
 
         foreach ($this->_uniques as $unique)
         {
-            list($fields, $options) = $unique;
+            [$fields, $options] = $unique;
             $validator->args = $options;
             $validator->field = $fields;
             $values = [];
