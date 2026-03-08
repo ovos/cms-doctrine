@@ -41,7 +41,7 @@ class Doctrine_Task_GenerateSql extends Doctrine_Task
     {
         if (is_dir($this->getArgument('sql_path'))) {
             $path = $this->getArgument('sql_path') . DIRECTORY_SEPARATOR . 'schema.sql';
-        } else if (is_file($this->getArgument('sql_path'))) {
+        } elseif (is_file($this->getArgument('sql_path'))) {
             $path = $this->getArgument('sql_path');
         } else {
             throw new Doctrine_Task_Exception('Invalid sql path.');

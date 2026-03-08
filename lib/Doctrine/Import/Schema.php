@@ -231,7 +231,7 @@ class Doctrine_Import_Schema
                 if (end($e) === $format) {
                     $array = array_merge($array, $this->parseSchema($s, $format));
                 }          
-            } else if (is_dir($s)) {
+            } elseif (is_dir($s)) {
                 $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($s),
                                                       RecursiveIteratorIterator::LEAVES_ONLY);
 

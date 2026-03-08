@@ -55,9 +55,9 @@ class Doctrine_Collection_OnDemand implements Iterator
         $record = $this->_hydrator->hydrateResultSet($this->_stmt);
         if ($record instanceof Doctrine_Collection) {
             $this->_current = $record->getFirst();
-        } else if (is_array($record) && count($record) == 0) {
+        } elseif (is_array($record) && count($record) == 0) {
             $this->_current = null;
-        } else if (is_array($record) && isset($record[0])) {
+        } elseif (is_array($record) && isset($record[0])) {
             $this->_current = $record[0];
         } else {
             $this->_current = $record;

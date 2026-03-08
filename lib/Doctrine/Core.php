@@ -695,7 +695,7 @@ class Doctrine_Core
                                     $loadedModels = array_merge($loadedModels, $previouslyLoaded);
                                 }
                             }
-                        } else if (self::isValidModelClass($className)) {
+                        } elseif (self::isValidModelClass($className)) {
                             $loadedModels[$className] = $className;
                         }
                     }

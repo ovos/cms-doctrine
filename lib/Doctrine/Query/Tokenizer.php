@@ -390,7 +390,7 @@ class Doctrine_Query_Tokenizer
                 }
 
                 $terms = array_merge($terms, $subterms);
-                $i += sizeof($subterms);
+                $i += count($subterms);
             }
         }
         
@@ -535,7 +535,7 @@ class Doctrine_Query_Tokenizer
                         $mode = $val;
                         $i++;
                     }
-                } else if ($mode == $val) {
+                } elseif ($mode == $val) {
                     if ( ! isset($parts[$i])) {
                         $parts[$i] = $val;
                     } else {

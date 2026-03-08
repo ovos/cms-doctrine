@@ -79,7 +79,7 @@ class Doctrine_Parser_Xml extends Doctrine_Parser
                 }
 
                 self::arrayToXml($value, $rootNodeName, $node, $charset);
-            } else if (is_int($key)) {               
+            } elseif (is_int($key)) {               
                 $xml->addChild($value, 'true');
             } else {
                 $charset = $charset ? $charset : 'utf-8';

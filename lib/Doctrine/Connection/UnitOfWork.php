@@ -110,7 +110,7 @@ class Doctrine_Connection_UnitOfWork extends Doctrine_Connection_Module
                             $record->unlinkInDb($alias, [], $exceptIds);
                             // [OV2] - checking for processDiff not neccessary. unlink uses new silentRemove method
                             //$aliasesUnlinkInDb[] = $alias;
-                        } else if ($ids) {
+                        } elseif ($ids) {
                             $record->unlinkInDb($alias, array_keys($ids), $exceptIds);
                             //$aliasesUnlinkInDb[] = $alias;
                         }
@@ -362,7 +362,7 @@ class Doctrine_Connection_UnitOfWork extends Doctrine_Connection_Module
                  if ($relatedObjects instanceof Doctrine_Record && $relatedObjects->exists()
                         && ! isset($deletions[$relatedObjects->getOid()])) {
                      $this->_collectDeletions($relatedObjects, $deletions);
-                 } else if ($relatedObjects instanceof Doctrine_Collection && count($relatedObjects) > 0) {
+                 } elseif ($relatedObjects instanceof Doctrine_Collection && count($relatedObjects) > 0) {
                      // cascade the delete to the other objects
                      foreach ($relatedObjects as $object) {
                          if ( ! isset($deletions[$object->getOid()])) {
@@ -752,7 +752,7 @@ class Doctrine_Connection_UnitOfWork extends Doctrine_Connection_Module
                         $flushList[] = $relatedClassName;
                     }
 
-                } else if ($rel instanceof Doctrine_Relation_LocalKey) {
+                } elseif ($rel instanceof Doctrine_Relation_LocalKey) {
                     // the related component needs to come before the current component
                     // in the list (since this component holds the fk).
 
@@ -771,7 +771,7 @@ class Doctrine_Connection_UnitOfWork extends Doctrine_Connection_Module
                         array_unshift($flushList, $relatedClassName);
                         $index++;
                     }
-                } else if ($rel instanceof Doctrine_Relation_Association) {
+                } elseif ($rel instanceof Doctrine_Relation_Association) {
                     // the association class needs to come after both classes
                     // that are connected through it in the list (since it holds
                     // both fks)

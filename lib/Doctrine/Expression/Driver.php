@@ -308,7 +308,7 @@ class Doctrine_Expression_Driver extends Doctrine_Connection_Module
     {
         $args = func_get_args();
 
-        return 'CONCAT(' . join(', ', (array) $args) . ')';
+        return 'CONCAT(' . implode(', ', (array) $args) . ')';
     }
 
     /**
@@ -628,7 +628,7 @@ class Doctrine_Expression_Driver extends Doctrine_Connection_Module
     {
         $args = func_get_args();
 
-	    return 'COALESCE(' . join(', ', (array) $args) . ')';
+	    return 'COALESCE(' . implode(', ', (array) $args) . ')';
     }
 
     /**

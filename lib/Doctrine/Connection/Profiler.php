@@ -88,7 +88,7 @@ class Doctrine_Connection_Profiler implements Doctrine_Overloadable, IteratorAgg
         }
 
 
-        if (substr($m, 0, 3) === 'pre') {
+        if (str_starts_with($m, 'pre')) {
             // pre-event listener found
             $a[0]->start();
 

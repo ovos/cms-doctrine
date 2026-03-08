@@ -137,7 +137,7 @@ abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
                 if ($activeRootIdentifier === null) { 
                     // first row for this record 
                     $activeRootIdentifier = $id[$rootAlias]; 
-                } else if ($activeRootIdentifier != $id[$rootAlias]) { 
+                } elseif ($activeRootIdentifier != $id[$rootAlias]) { 
                     // first row for the next record 
                     $this->_priorRow = $data; 
                     return $result; 
@@ -167,7 +167,7 @@ abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
                 if ($field = $this->_getCustomIndexField($rootAlias)) {
                     if ( ! isset($element[$field])) {
                         throw new Doctrine_Hydrator_Exception("Couldn't hydrate. Found a non-existent key named '$field'.");
-                    } else if (isset($result[$element[$field]])) {
+                    } elseif (isset($result[$element[$field]])) {
                         throw new Doctrine_Hydrator_Exception("Couldn't hydrate. Found non-unique key mapping named '{$element[$field]}' for the field named '$field'.");
                     }
                     $result[$element[$field]] = $element;
@@ -236,7 +236,7 @@ abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
                             if ($field = $this->_getCustomIndexField($dqlAlias)) {
                                 if ( ! isset($element[$field])) {
                                     throw new Doctrine_Hydrator_Exception("Couldn't hydrate. Found a non-existent key named '$field'.");
-                                } else if (isset($prev[$parent][$relationAlias][$element[$field]])) {
+                                } elseif (isset($prev[$parent][$relationAlias][$element[$field]])) {
                                     throw new Doctrine_Hydrator_Exception("Couldn't hydrate. Found non-unique key mapping named '$field'.");
                                 }
                                 $prev[$parent][$relationAlias][$element[$field]] = $element;
@@ -258,7 +258,7 @@ abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
                     $oneToOne = true;
                     if ( ! isset($nonemptyComponents[$dqlAlias]) && ! isset($prev[$parent][$relationAlias])) {
                         $prev[$parent][$relationAlias] = $this->getNullPointer();
-                    } else if ( ! isset($prev[$parent][$relationAlias])) {
+                    } elseif ( ! isset($prev[$parent][$relationAlias])) {
                         $element = $this->getElement($data, $componentName);
 
 						// [FIX] Tickets #1205 and #1237

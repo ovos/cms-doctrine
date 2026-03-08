@@ -399,10 +399,10 @@ abstract class Doctrine_Query_Abstract
         if ($this->_type == self::SELECT) {
             $q .= ( ! empty($this->_dqlParts['select'])) ? 'SELECT ' . implode(', ', $this->_dqlParts['select']) : '';
             $q .= ( ! empty($this->_dqlParts['from'])) ? ' FROM ' . implode(' ', $this->_dqlParts['from']) : '';
-        } else if ($this->_type == self::DELETE) {
+        } elseif ($this->_type == self::DELETE) {
             $q .= 'DELETE';
             $q .= ( ! empty($this->_dqlParts['from'])) ? ' FROM ' . implode(' ', $this->_dqlParts['from']) : '';
-        } else if ($this->_type == self::UPDATE) {
+        } elseif ($this->_type == self::UPDATE) {
             $q .= 'UPDATE ';
             $q .= ( ! empty($this->_dqlParts['from'])) ? implode(' ', $this->_dqlParts['from']) : '';
             $q .= ( ! empty($this->_dqlParts['set'])) ? ' SET ' . implode(' ', $this->_dqlParts['set']) : '';

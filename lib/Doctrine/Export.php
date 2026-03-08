@@ -1123,7 +1123,7 @@ class Doctrine_Export extends Doctrine_Connection_Module
              // We need these to happen first
              foreach ($sql as $key => $query) {
                  // If create table statement
-                 if (substr($query, 0, strlen('CREATE TABLE')) == 'CREATE TABLE') {
+                 if (str_starts_with($query, 'CREATE TABLE')) {
                      $connections[$connectionName]['create_tables'][] = $query;
 
                      unset($sql[$key]);
@@ -1131,7 +1131,7 @@ class Doctrine_Export extends Doctrine_Connection_Module
                  }
 
                  // If create sequence statement
-                 if (substr($query, 0, strlen('CREATE SEQUENCE')) == 'CREATE SEQUENCE') {
+                 if (str_starts_with($query, 'CREATE SEQUENCE')) {
                      $connections[$connectionName]['create_sequences'][] = $query;
 
                      unset($sql[$key]);
@@ -1147,8 +1147,8 @@ class Doctrine_Export extends Doctrine_Connection_Module
                  }
 
                  // If alter table statement or oracle anonymous block enclosing alter
-                 if (substr($query, 0, strlen('ALTER TABLE')) == 'ALTER TABLE'
-                       || substr($query, 0, strlen('DECLARE')) == 'DECLARE') {
+                 if (str_starts_with($query, 'ALTER TABLE')
+                       || str_starts_with($query, 'DECLARE')) {
                      $connections[$connectionName]['alters'][] = $query;
 
                      unset($sql[$key]);
@@ -1156,7 +1156,7 @@ class Doctrine_Export extends Doctrine_Connection_Module
                  }
 
                  // If create trgger statement
-                 if (substr($query, 0, strlen('CREATE TRIGGER')) == 'CREATE TRIGGER') {
+                 if (str_starts_with($query, 'CREATE TRIGGER')) {
                      $connections[$connectionName]['create_triggers'][] = $query;
 
                  	 unset($sql[$key]);
@@ -1164,7 +1164,7 @@ class Doctrine_Export extends Doctrine_Connection_Module
                  }
 
                  // If comment statement
-                 if (substr($query, 0, strlen('COMMENT ON')) == 'COMMENT ON') {
+                 if (str_starts_with($query, 'COMMENT ON')) {
                      $connections[$connectionName]['comments'][] = $query;
 
                      unset($sql[$key]);

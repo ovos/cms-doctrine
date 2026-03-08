@@ -794,7 +794,7 @@ class Doctrine_Import_Builder extends Doctrine_Builder
                 if ($template == 'actAs') {
                     // found another actAs
                     $build .= $this->innerBuildActAs($options, $level + 1, $parent, $emittedActAs);
-                } else if (is_array($options)) {
+                } elseif (is_array($options)) {
                     // remove actAs from options
                     $realOptions = [];
                     $leftActAs = [];
@@ -1256,7 +1256,7 @@ class Doctrine_Import_Builder extends Doctrine_Builder
             }
         }
         // If is the package class then we need to make the path to the complete package
-        else if (isset($definition['is_package_class']) && $definition['is_package_class']) {
+        elseif (isset($definition['is_package_class']) && $definition['is_package_class']) {
             if (isset($definition['package_custom_path'])) {
               $writePath = $definition['package_custom_path'];
             } else {
@@ -1268,7 +1268,7 @@ class Doctrine_Import_Builder extends Doctrine_Builder
             }
         }
         // If it is the base class of the doctrine record definition
-        else if (isset($definition['is_base_class']) && $definition['is_base_class']) {
+        elseif (isset($definition['is_base_class']) && $definition['is_base_class']) {
             // If it is a part of a package then we need to put it in a package subfolder
             if (isset($definition['is_package']) && $definition['is_package']) {
                 $basePath = $this->_path . DIRECTORY_SEPARATOR . $definition['package_name'];

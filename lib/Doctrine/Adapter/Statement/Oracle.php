@@ -237,7 +237,7 @@ class Doctrine_Adapter_Statement_Oracle implements Doctrine_Adapter_Statement_In
         if ($oci_error) {
             //store the error
             $this->oci_errors[] = $oci_error;
-        } else if (count($this->ociErrors) > 0) {
+        } elseif (count($this->ociErrors) > 0) {
             $oci_error = $this->ociErrors[count($this->ociErrors)-1];
         }
         return $oci_error;
@@ -365,11 +365,11 @@ class Doctrine_Adapter_Statement_Oracle implements Doctrine_Adapter_Statement_In
         if ($fetchStyle == Doctrine_Core::FETCH_BOTH) {
             $flags = OCI_BOTH;
             $numberOfRows = @oci_fetch_all($this->statement, $data, $skip, $maxrows, OCI_FETCHSTATEMENT_BY_ROW + OCI_ASSOC + OCI_RETURN_LOBS);
-        } else if ($fetchStyle == Doctrine_Core::FETCH_ASSOC) {
+        } elseif ($fetchStyle == Doctrine_Core::FETCH_ASSOC) {
             $numberOfRows = @oci_fetch_all($this->statement, $data, $skip, $maxrows, OCI_FETCHSTATEMENT_BY_ROW + OCI_ASSOC + OCI_RETURN_LOBS);
-        } else if ($fetchStyle == Doctrine_Core::FETCH_NUM) {
+        } elseif ($fetchStyle == Doctrine_Core::FETCH_NUM) {
             $numberOfRows = @oci_fetch_all($this->statement, $data, $skip, $maxrows, OCI_FETCHSTATEMENT_BY_ROW + OCI_NUM + OCI_RETURN_LOBS);
-        } else if ($fetchStyle == Doctrine_Core::FETCH_COLUMN) {
+        } elseif ($fetchStyle == Doctrine_Core::FETCH_COLUMN) {
             while ($row = @oci_fetch_array ($this->statement, OCI_NUM+OCI_RETURN_LOBS)) {
                 $data[] = $row[$colnum];
             }

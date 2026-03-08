@@ -435,10 +435,10 @@ class Doctrine_Relation_Parser
                     if ($def['local'] == $localIdColumnName && isset($def['owningSide'])
                             && $def['owningSide'] === true) {
                         $def['localKey'] = true;
-                    } else if (($def['local'] !== $localIdColumnName && $def['type'] == Doctrine_Relation::ONE)) {
+                    } elseif (($def['local'] !== $localIdColumnName && $def['type'] == Doctrine_Relation::ONE)) {
                         $def['localKey'] = true;
                     }
-                } else if ($localIdentifierCount > 1 && ! isset($def['localKey'])) {
+                } elseif ($localIdentifierCount > 1 && ! isset($def['localKey'])) {
                     // It's a composite key and since 'foreign' can not point to a composite
                     // key currently, we know that 'local' must be the foreign key.
                     $def['localKey'] = true;

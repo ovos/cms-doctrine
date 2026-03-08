@@ -73,7 +73,7 @@ class Doctrine_Migration_Diff
 
         if ($migration instanceof Doctrine_Migration) {
             $this->_migration = $migration;
-        } else if (is_dir($migration)) {
+        } elseif (is_dir($migration)) {
             $this->_migration = new Doctrine_Migration($migration);
         }
     }
@@ -224,7 +224,7 @@ class Doctrine_Migration_Diff
                     $indexName = Doctrine_Manager::connection()->generateUniqueIndexName($info['tableName'], $foreignKey['local']);
                     $this->_changes['created_indexes'][$info['tableName']][$indexName] = ['fields' => [$foreignKey['local']]];
                 // If foreign key does exist then lets see if anything has changed with it
-                } else if (isset($from[$className]['options']['foreignKeys'][$name])) {
+                } elseif (isset($from[$className]['options']['foreignKeys'][$name])) {
                     $oldForeignKey = $from[$className]['options']['foreignKeys'][$name];
                     $oldForeignKey['name'] = $name;
                     // If the foreign key has changed any then we need to drop the foreign key and readd it
@@ -385,7 +385,7 @@ class Doctrine_Migration_Diff
                 Doctrine_Core::generateModelsFromYaml($item, $path, $options);
 
                 return $path;
-            } else if ($extension === 'php') {
+            } elseif ($extension === 'php') {
                 Doctrine_Lib::copyDirectory($item, $path);
 
                 return $path;

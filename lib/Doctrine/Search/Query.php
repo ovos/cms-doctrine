@@ -154,7 +154,7 @@ class Doctrine_Search_Query
                         continue;
                     }
     
-                    if (substr($term, 0, 1) === '-') {
+                    if (str_starts_with($term, '-')) {
                         $operator = 'NOT IN';
                         $term = substr($term, 1);
                     } else {

@@ -325,7 +325,7 @@ class Doctrine_Transaction extends Doctrine_Connection_Module
             $this->_internalNestingLevel--;
             $this->_nestingLevel--;
             return false;
-        } else if ($this->_nestingLevel > 1) {
+        } elseif ($this->_nestingLevel > 1) {
             $this->_nestingLevel--;
             return false;
         }

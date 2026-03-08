@@ -1253,7 +1253,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
 
             if ($value &&  ! in_array($columnName, $this->_identifier)) {
                 $this->_identifier[] = $columnName;
-            } else if (!$value && in_array($columnName, $this->_identifier)) {
+            } elseif (!$value && in_array($columnName, $this->_identifier)) {
                 $key = array_search($columnName, $this->_identifier);
                 unset($this->_identifier[$key]);
             }
@@ -2055,9 +2055,9 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
 
         if ($value === self::$_null) {
             $value = null;
-        } else if ($value instanceof Doctrine_Record && $value->exists()) {
+        } elseif ($value instanceof Doctrine_Record && $value->exists()) {
             $value = $value->getIncremented();
-        } else if ($value instanceof Doctrine_Record && ! $value->exists()) {
+        } elseif ($value instanceof Doctrine_Record && ! $value->exists()) {
             foreach($this->getRelations() as $relation) {
                 if ($fieldName == $relation->getLocalFieldName() && (get_class($value) == $relation->getClass() || is_subclass_of($value, $relation->getClass()))) {
                     return $errorStack;
@@ -2334,7 +2334,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
     {
         if ($value === self::$_null) {
             return self::$_null;
-        } else if ($value === null) {
+        } elseif ($value === null) {
             return null;
         } else {
             $type = $typeHint === null ? $this->getTypeOf($fieldName) : $typeHint;
@@ -2463,7 +2463,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
     {
         if (isset($this->_templates['Doctrine_Template_' . $template])) {
             return $this->_templates['Doctrine_Template_' . $template];
-        } else if (isset($this->_templates[$template])) {
+        } elseif (isset($this->_templates[$template])) {
             return $this->_templates[$template];
         }
 
@@ -2804,7 +2804,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
         $fieldName = Doctrine_Inflector::tableize($name);
         if ($this->hasColumn($name) || $this->hasField($name)) {
             return $this->getFieldName($this->getColumnName($name));
-        } else if ($this->hasColumn($fieldName) || $this->hasField($fieldName)) {
+        } elseif ($this->hasColumn($fieldName) || $this->hasField($fieldName)) {
             return $this->getFieldName($this->getColumnName($fieldName));
         } else {
             return false;
@@ -2824,10 +2824,10 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
     {
         $lcMethod = strtolower($method);
 
-        if (substr($lcMethod, 0, 6) == 'findby') {
+        if (str_starts_with($lcMethod, 'findby')) {
             $by = substr($method, 6, strlen($method));
             $method = 'findBy';
-        } else if (substr($lcMethod, 0, 9) == 'findoneby') {
+        } elseif (str_starts_with($lcMethod, 'findoneby')) {
             $by = substr($method, 9, strlen($method));
             $method = 'findOneBy';
         }
@@ -2848,7 +2848,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
             }
             if ($this->hasField($fieldName)) {
                 return $this->$method($fieldName, $arguments[0], $hydrationMode);
-            } else if ($this->hasRelation($by)) {
+            } elseif ($this->hasRelation($by)) {
                 $relation = $this->getRelation($by);
 
                 if ($relation['type'] === Doctrine_Relation::MANY) {

@@ -199,7 +199,7 @@ abstract class Doctrine_Connection extends Doctrine_Configurable implements Coun
 
             $this->isConnected = true;
 
-        } else if (is_array($adapter)) {
+        } elseif (is_array($adapter)) {
             $this->pendingAttributes[Doctrine_Core::ATTR_DRIVER_NAME] = $adapter['scheme'];
 
             $this->options['dsn']      = $adapter['dsn'];

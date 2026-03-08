@@ -505,7 +505,7 @@ class Doctrine_Migration
 
             if (method_exists($migration, $direction)) {
                 $migration->$direction();
-            } else if (method_exists($migration, 'migrate')) {
+            } elseif (method_exists($migration, 'migrate')) {
                 $migration->migrate($direction);
             }
 

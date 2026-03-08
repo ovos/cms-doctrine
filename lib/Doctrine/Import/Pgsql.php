@@ -169,7 +169,7 @@ class Doctrine_Import_Pgsql extends Doctrine_Import
                 // get length from varchar definition
                 $length = preg_replace('~.*\(([0-9]*)\).*~', '$1', $val['complete_type']);
                 $val['length'] = $length;
-            } else if (str_contains($val['complete_type'], 'character varying')) {
+            } elseif (str_contains($val['complete_type'], 'character varying')) {
                 // get length from varchar definition
                 $length = preg_replace('~.*\(([0-9]*)\).*~', '$1', $val['complete_type']);
                 $val['length'] = $length;
@@ -208,14 +208,14 @@ class Doctrine_Import_Pgsql extends Doctrine_Import
             if (preg_match("/^nextval\('(.*)'(::.*)?\)$/", $description['default'], $matches)) { 
                 $description['sequence'] = $this->conn->formatter->fixSequenceName($matches[1]); 
                 $description['default'] = null; 
-            } else if (preg_match("/^'(.*)'::character varying$/", $description['default'], $matches)) {
+            } elseif (preg_match("/^'(.*)'::character varying$/", $description['default'], $matches)) {
                 $description['default'] = $matches[1];
-            } else if (preg_match("/^(.*)::character varying$/", $description['default'], $matches)) {
+            } elseif (preg_match("/^(.*)::character varying$/", $description['default'], $matches)) {
                 $description['default'] = $matches[1];
-            } else if ($description['type'] == 'boolean') {
+            } elseif ($description['type'] == 'boolean') {
                 if ($description['default'] === 'true') {
                    $description['default'] = true;
-                } else if ($description['default'] === 'false') {
+                } elseif ($description['default'] === 'false') {
                    $description['default'] = false;
                 }
             }

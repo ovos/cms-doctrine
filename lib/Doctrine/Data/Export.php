@@ -119,7 +119,7 @@ class Doctrine_Data_Export extends Doctrine_Data
         if ($this->exportIndividualFiles()) {
             if (is_array($directory)) {
                 throw new Doctrine_Data_Exception('You must specify a single path to a folder in order to export individual files.');
-            } else if ( ! is_dir($directory) && is_file($directory)) {
+            } elseif ( ! is_dir($directory) && is_file($directory)) {
                 $directory = dirname($directory);
             }
 
@@ -201,7 +201,7 @@ class Doctrine_Data_Export extends Doctrine_Data
                         $relationValue = $relationClassName . '_' . $value;
 
                         $preparedData[$className][$recordKey][$relationAlias] = $relationValue;
-                    } else if ($record->getTable()->hasField($key)) {                        
+                    } elseif ($record->getTable()->hasField($key)) {                        
                         $preparedData[$className][$recordKey][$key] = $value;
                     }
                 }

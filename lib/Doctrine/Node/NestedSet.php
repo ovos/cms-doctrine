@@ -92,7 +92,7 @@ class Doctrine_Node_NestedSet extends Doctrine_Node implements Doctrine_Node_Int
         
         if ($result instanceof Doctrine_Collection) {
             $sibling = $result->getFirst();
-        } else if (is_array($result)) {
+        } elseif (is_array($result)) {
             $sibling = array_shift($result);
         }
         
@@ -118,7 +118,7 @@ class Doctrine_Node_NestedSet extends Doctrine_Node implements Doctrine_Node_Int
         
         if ($result instanceof Doctrine_Collection) {
             $sibling = $result->getFirst();
-        } else if (is_array($result)) {
+        } elseif (is_array($result)) {
             $sibling = array_shift($result);
         }
         
@@ -164,7 +164,7 @@ class Doctrine_Node_NestedSet extends Doctrine_Node implements Doctrine_Node_Int
         
         if ($result instanceof Doctrine_Collection) {
             $child = $result->getFirst();
-        } else if (is_array($result)) {
+        } elseif (is_array($result)) {
             $child = array_shift($result);
         }
         
@@ -190,7 +190,7 @@ class Doctrine_Node_NestedSet extends Doctrine_Node implements Doctrine_Node_Int
         
         if ($result instanceof Doctrine_Collection) {
             $child = $result->getFirst();
-        } else if (is_array($result)) {
+        } elseif (is_array($result)) {
             $child = array_shift($result);
         }
         
@@ -259,7 +259,7 @@ class Doctrine_Node_NestedSet extends Doctrine_Node implements Doctrine_Node_Int
                
         if ($result instanceof Doctrine_Collection) {
             $parent = $result->getFirst();
-        } else if (is_array($result)) {
+        } elseif (is_array($result)) {
             $parent = array_shift($result);
         }
         
@@ -931,7 +931,7 @@ class Doctrine_Node_NestedSet extends Doctrine_Node implements Doctrine_Node_Int
     {
         if ($record === null) {
             return ($this->getRightValue() > $this->getLeftValue());
-        } else if ( $record instanceof Doctrine_Record ) {
+        } elseif ( $record instanceof Doctrine_Record ) {
             return ($record->getNode()->getRightValue() > $record->getNode()->getLeftValue());
         } else {
             return false;

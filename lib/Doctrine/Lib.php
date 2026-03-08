@@ -245,11 +245,11 @@ class Doctrine_Lib
                         if ($isKey0 && $isKey1 && is_array($args[0][$key]) && is_array($args[1][$key]))
                         {
                             $args[2][$key] = self::arrayDeepMerge($args[0][$key], $args[1][$key]);
-                        } else if ($isKey0 && $isKey1) {
+                        } elseif ($isKey0 && $isKey1) {
                             $args[2][$key] = $args[1][$key];
-                        } else if ( ! $isKey1) {
+                        } elseif ( ! $isKey1) {
                             $args[2][$key] = $args[0][$key];
-                        } else if ( ! $isKey0) {
+                        } elseif ( ! $isKey0) {
                             $args[2][$key] = $args[1][$key];
                         }
                     }
@@ -350,7 +350,7 @@ class Doctrine_Lib
 
                     if (is_dir($value)) {
                         self::removeDirectories($value);
-                    } else if (is_file($value)) {
+                    } elseif (is_file($value)) {
                         unlink($value);
                     }
                 }

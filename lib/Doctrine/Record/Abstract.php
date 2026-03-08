@@ -353,7 +353,7 @@ abstract class Doctrine_Record_Abstract extends Doctrine_Access
 
             if (class_exists($className, true)) {
                 $tpl = new $className($options);
-            } else if (class_exists($tpl, true)) {
+            } elseif (class_exists($tpl, true)) {
                 $tpl = new $tpl($options);
             } else {
                 throw new Doctrine_Record_Exception('Could not load behavior named: "' . $tpl . '"');

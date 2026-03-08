@@ -80,7 +80,7 @@ class Doctrine_Data_Import extends Doctrine_Data
                 if (end($e) == 'yml') {
                     $array = $mergeFunction($array, Doctrine_Parser::load($dir, $this->getFormat()));
                 // If they specified a directory
-                } else if (is_dir($dir)) {
+                } elseif (is_dir($dir)) {
                     $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir),
                                                             RecursiveIteratorIterator::LEAVES_ONLY);
                     $filesOrdered = [];                                        
@@ -220,18 +220,18 @@ class Doctrine_Data_Import extends Doctrine_Data
             if (method_exists($obj, 'set' . Doctrine_Inflector::classify($key))) {
                 $func = 'set' . Doctrine_Inflector::classify($key);
                 $obj->$func($value);
-            } else if ($obj->getTable()->hasField($key)) {
+            } elseif ($obj->getTable()->hasField($key)) {
                 if ($obj->getTable()->getTypeOf($key) == 'object') {
                     $value = unserialize($value);
                 }
                 $obj->set($key, $value);
-            } else if ($obj->getTable()->hasRelation($key)) {
+            } elseif ($obj->getTable()->hasRelation($key)) {
                 if (is_array($value)) {
                     if (isset($value[0]) && ! is_array($value[0])) {
                         foreach ($value as $link) {
                             if ($obj->getTable()->getRelation($key)->getType() === Doctrine_Relation::ONE) {
                                 $obj->set($key, $this->_getImportedObject($link, $obj, $key, $rowKey));
-                            } else if ($obj->getTable()->getRelation($key)->getType() === Doctrine_Relation::MANY) {
+                            } elseif ($obj->getTable()->getRelation($key)->getType() === Doctrine_Relation::MANY) {
                                 $relation = $obj->$key;
 
                                 $relation[] = $this->_getImportedObject($link, $obj, $key, $rowKey);

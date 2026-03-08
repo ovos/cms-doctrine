@@ -45,7 +45,7 @@ class Doctrine_Expression_Oracle extends Doctrine_Expression_Driver
     {
         $args = func_get_args();
 
-        return join(' || ' , $args);
+        return implode(' || ' , $args);
     }
 
     /**

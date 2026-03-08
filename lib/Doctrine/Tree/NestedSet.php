@@ -143,7 +143,7 @@ class Doctrine_Tree_NestedSet extends Doctrine_Tree implements Doctrine_Tree_Int
         if ($data instanceof Doctrine_Collection) {
             $root = $data->getFirst();
             $root['level'] = 0;
-        } else if (is_array($data)) {
+        } elseif (is_array($data)) {
             $root = array_shift($data);
             $root['level'] = 0;
         } else {

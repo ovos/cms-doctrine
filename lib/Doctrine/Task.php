@@ -103,7 +103,7 @@ abstract class Doctrine_Task
             $args = func_get_args();
             
             return call_user_func_array([$this->dispatcher, 'notify'], $args);
-        } else if ( $notification !== null ) {
+        } elseif ( $notification !== null ) {
             return $notification;
         } else {
             return false;

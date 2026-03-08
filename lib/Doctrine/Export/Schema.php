@@ -119,7 +119,7 @@ class Doctrine_Export_Schema
                 
                 if ($relationData['type'] === Doctrine_Relation::ONE) {
                     $table['relations'][$relationKey]['type'] = 'one';
-                } else if ($relationData['type'] === Doctrine_Relation::MANY) {
+                } elseif ($relationData['type'] === Doctrine_Relation::MANY) {
                     $table['relations'][$relationKey]['type'] = 'many';
                 } else {
                     $table['relations'][$relationKey]['type'] = 'one';

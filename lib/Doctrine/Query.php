@@ -301,7 +301,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
 
         if ($collection instanceof Doctrine_Collection) {
             return $collection->getFirst();
-        } else if (is_array($collection)) {
+        } elseif (is_array($collection)) {
             return array_shift($collection);
         }
 
@@ -344,11 +344,11 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
             $this->_expressionMap[$dqlAlias][1] = true;
 
             return $this->_aggregateAliasMap[$dqlAlias];
-        } /*else if ( ! empty($this->_pendingAggregates)) { // [OV17] _pendingAggregates are not used
+        } /*elseif ( ! empty($this->_pendingAggregates)) { // [OV17] _pendingAggregates are not used
             $this->processPendingAggregates();
 
             return $this->getSqlAggregateAlias($dqlAlias);
-        } */else if( ! ($this->_conn->getAttribute(Doctrine_Core::ATTR_PORTABILITY) & Doctrine_Core::PORTABILITY_EXPR)){
+        } */elseif( ! ($this->_conn->getAttribute(Doctrine_Core::ATTR_PORTABILITY) & Doctrine_Core::PORTABILITY_EXPR)){
             return $dqlAlias;
         } else {
             throw new Doctrine_Query_Exception('Unknown aggregate alias: ' . $dqlAlias);
@@ -669,7 +669,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
                 }
 
                 // Fix for http://www.doctrine-project.org/jira/browse/DC-706
-                if ($pos !== false && substr($expression, 0, 1) !== "'" && substr($expression, 0, $pos) == '') {
+                if ($pos !== false && !str_starts_with($expression, "'") && substr($expression, 0, $pos) == '') {
                     $_queryComponents = $this->_queryComponents;
                     reset($_queryComponents);
                     $componentAlias = key($_queryComponents);
@@ -750,12 +750,12 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
         foreach ($terms as $term) {
             $pos = strpos($term[0], '(');
 
-            if ($pos !== false && substr($term[0], 0, 1) !== "'") {
+            if ($pos !== false && !str_starts_with($term[0], "'")) {
                 $name = substr($term[0], 0, $pos);
 
                 $term[0] = $this->parseFunctionExpression($term[0]);
             } else {
-                if (substr($term[0], 0, 1) !== "'" && substr($term[0], -1) !== "'") {
+                if (!str_starts_with($term[0], "'") && !str_ends_with($term[0], "'")) {
                     if (str_contains($term[0], '.')) {
                         if ( ! is_numeric($term[0])) {
                             $e = explode('.', $term[0]);
@@ -814,7 +814,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
                         }
                     } else {
                         if ( ! empty($term[0]) && ! in_array(strtoupper($term[0]), self::$_keywords) &&
-                             ! is_numeric($term[0]) && $term[0] !== '?' && substr($term[0], 0, 1) !== ':') {
+                             ! is_numeric($term[0]) && $term[0] !== '?' && !str_starts_with($term[0], ':')) {
 
                             $componentAlias = $this->getRootAlias();
 
@@ -887,7 +887,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
 
         // [OV20] let the parser be forgivable if a closing bracket is omitted
         $argStr = substr($expr, ($pos + 1));
-        if(substr($argStr, -1) == ')') {
+        if(str_ends_with($argStr, ')')) {
             $argStr = substr($argStr, 0, -1);
         }
         $args   = [];
@@ -913,7 +913,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
         $trimmed = trim($this->_tokenizer->bracketTrim($subquery));
 
         // check for possible subqueries
-        if (substr($trimmed, 0, 4) == 'FROM' || substr($trimmed, 0, 6) == 'SELECT') {
+        if (str_starts_with($trimmed, 'FROM') || str_starts_with($trimmed, 'SELECT')) {
             // parse subquery
             $q = $this->createSubquery()->parseDqlQuery($trimmed);
             $trimmed = $q->getSqlQuery();
@@ -923,7 +923,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
             $this->addDependences(null, $dependences);
 
             $q->free();
-        } else if (substr($trimmed, 0, 4) == 'SQL:') {
+        } elseif (str_starts_with($trimmed, 'SQL:')) {
             $trimmed = substr($trimmed, 4);
         } else {
             $e = $this->_tokenizer->sqlExplode($trimmed, ',');
@@ -1114,7 +1114,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
                             $this->_sqlParts['where'][] = 'AND';
                         }
 
-                        if (substr($where, 0, 1) === '(' && substr($where, -1) === ')') {
+                        if (str_starts_with($where, '(') && str_ends_with($where, ')')) {
                             $this->_sqlParts['where'][] = $where;
                         } else {
                             $this->_sqlParts['where'][] = '(' . $where . ')';
@@ -1132,7 +1132,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
             if ( ! preg_match('/\bJOIN\b/i', $part) && ! isset($this->_pendingJoinConditions[$k])) {
                 $q .= ', ' . $part;
             } else {
-                if (substr($part, 0, 9) === 'LEFT JOIN') {
+                if (str_starts_with($part, 'LEFT JOIN')) {
                     $aliases = array_merge($this->_subqueryAliases,
                     // WTF? by mh - shouldn't it be just array values? $this->_neededTable is like array('c', 'm', 'm2', 'm4')
                     // otherwise the following condition does not make sense - it checks in_array of table alias in array of integers (from array_keys)
@@ -1447,7 +1447,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
                 $this->_sqlParts['where'][] = 'AND';
             }
 
-            if (substr($string, 0, 1) === '(' && substr($string, -1) === ')') {
+            if (str_starts_with($string, '(') && str_ends_with($string, ')')) {
                 $this->_sqlParts['where'][] = $string;
             } else {
                 $this->_sqlParts['where'][] = '(' . $string . ')';
@@ -1534,7 +1534,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
 
         if ( ! ($emptyWhere && $limitSubquerySql == '')) {
             $where = implode(' ', $this->_sqlParts['where']);
-            $where = ($where == '' || (substr($where, 0, 1) === '(' && substr($where, -1) === ')'))
+            $where = ($where == '' || (str_starts_with($where, '(') && str_ends_with($where, ')')))
                 ? $where : '(' . $where . ')';
 
             $q .= ' WHERE ' . $limitSubquerySql . $where;
@@ -1765,7 +1765,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
 
         foreach ($this->_sqlParts['from'] as $part) {
             // preserve LEFT JOINs only if needed
-            if (substr($part, 0, 9) === 'LEFT JOIN') {
+            if (str_starts_with($part, 'LEFT JOIN')) {
                 $e = explode(' ', $part);
                 // Fix for http://www.doctrine-project.org/jira/browse/DC-706
                 // Fix for http://www.doctrine-project.org/jira/browse/DC-594
@@ -2236,11 +2236,11 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
 
             if (count($terms) == 1) {
                 $indexBy = $terms[0];
-            } else if (count($terms) == 2) {
+            } elseif (count($terms) == 2) {
                 $column = true;
                 $indexBy = $terms[1];
             }
-        } else if ($table->getBoundQueryPart('indexBy') !== null) {
+        } elseif ($table->getBoundQueryPart('indexBy') !== null) {
             $indexBy = $table->getBoundQueryPart('indexBy');
         }
 

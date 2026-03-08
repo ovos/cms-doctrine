@@ -110,7 +110,7 @@ class Doctrine_Validator_Email extends Doctrine_Validator_Driver
             }
             
             return false;
-        } else if (function_exists('checkdnsrr')) {
+        } elseif (function_exists('checkdnsrr')) {
             return checkdnsrr($host, 'MX');
         }
         

@@ -396,7 +396,7 @@ class Doctrine_Pager
     {
         if ($max > 0) {
             $this->_maxPerPage = $max;
-        } else if ($max == 0) {
+        } elseif ($max == 0) {
             $this->_maxPerPage = 25;
         } else {
             $this->_maxPerPage = abs($max);

@@ -50,7 +50,7 @@ class Doctrine_Validator extends Doctrine_Locator_Injectable
             $class = 'Doctrine_Validator_' . ucwords(strtolower($name));
             if (class_exists($class)) {
                 self::$validators[$name] = new $class;
-            } else if (class_exists($name)) {
+            } elseif (class_exists($name)) {
                 self::$validators[$name] = new $name;
             } else {
                 throw new Doctrine_Exception("Validator named '$name' not available.");
@@ -94,9 +94,9 @@ class Doctrine_Validator extends Doctrine_Locator_Injectable
         }
         if ($type == 'timestamp' || $type == 'integer' || $type == 'enum') {
             return true;
-        } else if ($type == 'array' || $type == 'object') {
+        } elseif ($type == 'array' || $type == 'object') {
             $length = strlen(serialize($value));
-        } else if ($type == 'decimal' || $type == 'float') {
+        } elseif ($type == 'decimal' || $type == 'float') {
             $value = abs($value);
 
             $localeInfo = localeconv();
@@ -108,7 +108,7 @@ class Doctrine_Validator extends Doctrine_Locator_Injectable
             if (isset($e[1])) {
                 $length = $length + strlen($e[1]);
             }
-        } else if ($type == 'blob') {
+        } elseif ($type == 'blob') {
             $length = strlen($value);
         } else {
             $length = self::getStringLength($value);
@@ -157,9 +157,9 @@ class Doctrine_Validator extends Doctrine_Locator_Injectable
      {
          if ($var instanceof Doctrine_Expression) {
              return true;
-         } else if ($var === null) {
+         } elseif ($var === null) {
              return true;
-         } else if (is_object($var)) {
+         } elseif (is_object($var)) {
              return $type == 'object';
          }
 

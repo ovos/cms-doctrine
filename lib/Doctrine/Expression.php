@@ -99,7 +99,7 @@ class Doctrine_Expression
     public function parseExpression($expr)
     {
         $pos  = strpos($expr, '(');
-        $quoted = (substr($expr, 0, 1) === "'" && substr($expr, -1) === "'");
+        $quoted = (str_starts_with($expr, "'") && str_ends_with($expr, "'"));
         if ($pos === false || $quoted) {
             return $expr;
         }

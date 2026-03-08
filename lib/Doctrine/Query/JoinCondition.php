@@ -55,7 +55,7 @@ class Doctrine_Query_JoinCondition extends Doctrine_Query_Condition
                 $e[2] = $e[3]; // Move "(XXX)" to previous index
 
                 unset($e[3]); // Remove unused index
-            } else if ($l >= 5) {
+            } elseif ($l >= 5) {
                 // FIX: "field BETWEEN field2 AND field3" issue
                 // Related to ticket #1488
                 $e[2] .= ' ' . $e[3] . ' ' . $e[4];
@@ -63,7 +63,7 @@ class Doctrine_Query_JoinCondition extends Doctrine_Query_Condition
                 unset($e[3], $e[4]); // Remove unused indexes
             }
 
-            if (substr(trim($e[2]), 0, 1) != '(') {
+            if (!str_starts_with(trim($e[2]), '(')) {
                 $expr = new Doctrine_Expression($e[2], $this->query->getConnection());
                 $e[2] = $expr->getSql();
             }
@@ -98,18 +98,18 @@ class Doctrine_Query_JoinCondition extends Doctrine_Query_Condition
             // Defining needed information
             $value = $e[2];
 
-            if (substr($value, 0, 1) == '(') {
+            if (str_starts_with($value, '(')) {
                 // trim brackets
                 $trimmed   = $this->_tokenizer->bracketTrim($value);
                 $trimmed_upper = strtoupper($trimmed);
 
-                if (substr($trimmed_upper, 0, 4) == 'FROM' || substr($trimmed_upper, 0, 6) == 'SELECT') {
+                if (str_starts_with($trimmed_upper, 'FROM') || str_starts_with($trimmed_upper, 'SELECT')) {
                     // subquery found
                     $q = $this->query->createSubquery()
                         ->parseDqlQuery($trimmed, false);
                     $value   = '(' . $q->getSqlQuery() . ')';
                     $q->free();
-                } elseif (substr($trimmed_upper, 0, 4) == 'SQL:') {
+                } elseif (str_starts_with($trimmed_upper, 'SQL:')) {
                     // Change due to bug "(" XXX ")"
                     //$value = '(' . substr($trimmed, 4) . ')';
                     $value = substr($trimmed, 4);
@@ -163,7 +163,7 @@ class Doctrine_Query_JoinCondition extends Doctrine_Query_Condition
             $expr = $matches[2];
 
             // We need to process possible comma separated items
-            if (substr(trim($matches[3]), 0, 1) == ',') {
+            if (str_starts_with(trim($matches[3]), ',')) {
                 $xplod = $this->_tokenizer->sqlExplode(trim($matches[3], ' )'), ',');
 
                 $matches[3] = array();

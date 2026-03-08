@@ -285,7 +285,7 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
             }
 
             $driverName = $adapter->getAttribute(Doctrine_Core::ATTR_DRIVER_NAME);
-        } else if (is_array($adapter)) {
+        } elseif (is_array($adapter)) {
             if ( ! isset($adapter[0])) {
                 throw new Doctrine_Manager_Exception('Empty data source name given.');
             }

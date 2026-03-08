@@ -84,7 +84,7 @@ class Doctrine_Template_Listener_Sluggable extends Doctrine_Record_Listener
                 ! array_key_exists($name, $record->getModified())
             )) {
                 $record->$name = $this->buildSlugFromFields($record);
-            } else if ( ! empty($record->$name) &&
+            } elseif ( ! empty($record->$name) &&
                 false !== $this->_options['canUpdate'] &&
                 array_key_exists($name, $record->getModified()
             )) {
@@ -104,7 +104,7 @@ class Doctrine_Template_Listener_Sluggable extends Doctrine_Record_Listener
         if (empty($this->_options['fields'])) {
             if (is_callable($this->_options['provider'])) {
             	$value = call_user_func($this->_options['provider'], $record);
-            } else if (method_exists($record, 'getUniqueSlug')) {
+            } elseif (method_exists($record, 'getUniqueSlug')) {
                 $value = $record->getUniqueSlug($record);
             } else {
                 $value = (string) $record;
