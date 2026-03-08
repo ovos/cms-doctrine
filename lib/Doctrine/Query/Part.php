@@ -1,4 +1,7 @@
 <?php
+
+use Zf1s\Compat\Types;
+
 /*
  *  $Id: Part.php 7490 2010-03-29 19:53:27Z jwage $
  *
@@ -36,14 +39,16 @@ abstract class Doctrine_Query_Part
      * @var Doctrine_Query $query           the query object associated with this parser
      */
     protected $query;
-    
+
     protected $_tokenizer;
 
     /**
      * @param Doctrine_Query $query         the query object associated with this parser
      */
-    public function __construct($query, Doctrine_Query_Tokenizer $tokenizer = null)
+    public function __construct($query, $tokenizer = null)
     {
+        Types::isNullable('tokenizer', $tokenizer, 'Doctrine_Query_Tokenizer');
+
         $this->query = $query;
 
         if ( ! $tokenizer) {

@@ -1,4 +1,7 @@
 <?php
+
+use Zf1s\Compat\Types;
+
 /*
  *  $Id: RawSql.php 7490 2010-03-29 19:53:27Z jwage $
  *
@@ -46,10 +49,13 @@ class Doctrine_RawSql extends Doctrine_Query_Abstract
     /**
      * Constructor.
      *
-     * @param Doctrine_Connection  The connection object the query will use.
-     * @param Doctrine_Hydrator_Abstract  The hydrator that will be used for generating result sets.
+     * @param Doctrine_Connection|null  The connection object the query will use.
+     * @param Doctrine_Hydrator_Abstract|null  The hydrator that will be used for generating result sets.
      */
-    function __construct(Doctrine_Connection $connection = null, Doctrine_Hydrator_Abstract $hydrator = null) {
+    function __construct($connection = null, $hydrator = null) {
+        Types::isNullable('connection', $connection, 'Doctrine_Connection');
+        Types::isNullable('hydrator', $hydrator, 'Doctrine_Hydrator_Abstract');
+
         parent::__construct($connection, $hydrator);
 
         // Fix #1472. It's alid to disable QueryCache since there's no DQL for RawSql.
@@ -87,7 +93,7 @@ class Doctrine_RawSql extends Doctrine_Query_Abstract
      	if ( ! isset($this->_sqlParts[$queryPartName])) {
      	    $this->_sqlParts[$queryPartName] = array();
      	}
-     	
+
      	if ( ! $append) {
      	    $this->_sqlParts[$queryPartName] = array($queryPart);
      	} else {
@@ -95,7 +101,7 @@ class Doctrine_RawSql extends Doctrine_Query_Abstract
      	}
      	return $this;
     }
-    
+
     /**
      * Adds a DQL query part. Overrides Doctrine_Query_Abstract::_addDqlQueryPart().
      * This implementation for RawSql parses the new parts right away, generating the SQL.
@@ -104,7 +110,7 @@ class Doctrine_RawSql extends Doctrine_Query_Abstract
     {
         return $this->parseDqlQueryPart($queryPartName, $queryPart, $append);
     }
-    
+
     /**
      * Add select parts to fields.
      *
@@ -116,7 +122,7 @@ class Doctrine_RawSql extends Doctrine_Query_Abstract
         $this->fields = $m[1];
         $this->_sqlParts['select'] = array();
     }
-    
+
     /**
      * parseDqlQuery
      * parses an sql query and adds the parts to internal array.
@@ -168,7 +174,7 @@ class Doctrine_RawSql extends Doctrine_Query_Abstract
                         $parts[$type][0] = $part;
                     } else {
                         // why does this add to index 0 and not append to the
-                        // array. If it had done that one could have used 
+                        // array. If it had done that one could have used
                         // parseQueryPart.
                         $parts[$type][0] .= ' '.$part;
                     }
@@ -188,7 +194,7 @@ class Doctrine_RawSql extends Doctrine_Query_Abstract
      * @return string       the built sql query
      */
     public function getSqlQuery($params = array())
-    {        
+    {
         // Assign building/execution specific params
         $this->_params['exec'] = $params;
 
@@ -199,7 +205,7 @@ class Doctrine_RawSql extends Doctrine_Query_Abstract
         $this->fixArrayParameterValues($this->_execParams);
 
         $select = array();
-        
+
         $formatter = $this->getConnection()->formatter;
 
         foreach ($this->fields as $field) {
@@ -217,7 +223,7 @@ class Doctrine_RawSql extends Doctrine_Query_Abstract
             }
 
             $componentAlias = $this->getComponentAlias($e[0]);
-            
+
             if ($e[1] == '*') {
                 foreach ($this->_queryComponents[$componentAlias]['table']->getColumnNames() as $name) {
                     $field = $formatter->quoteIdentifier($e[0]) . '.' . $formatter->quoteIdentifier($name);
@@ -254,7 +260,7 @@ class Doctrine_RawSql extends Doctrine_Query_Abstract
         // first add the fields of the root component
         reset($this->_queryComponents);
         $componentAlias = key($this->_queryComponents);
-        
+
         $this->_rootAlias = $componentAlias;
 
         $q .= implode(', ', $select[$componentAlias]);
@@ -422,7 +428,7 @@ class Doctrine_RawSql extends Doctrine_Query_Abstract
             if ( ! isset($table)) {
                 $conn = Doctrine_Manager::getInstance()
                         ->getConnectionForComponent($component);
-                        
+
                 $table = $conn->getTable($component);
                 $this->_queryComponents[$componentAlias] = array('table' => $table);
             } else {

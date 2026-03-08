@@ -14,12 +14,19 @@
         {"name": "Konsta Vesterinen", "email": "kvesteri@cc.hut.fi"},
         {"name": "Jonathan Wage", "email": "jonwage@gmail.com"}
     ],
+    "repositories": [
+        {
+            "type": "git",
+            "url": "git@github.com:zf1s/compat.git"
+        }
+    ],
     "replace": {
         "doctrine/doctrine1": "*"
     },
     "require": {
         "php": ">=5.3.3",
-        "ext-pdo": "*"
+        "ext-pdo": "*",
+        "zf1s/compat": "^1.0"
     },
     "autoload": {
         "psr-0": {

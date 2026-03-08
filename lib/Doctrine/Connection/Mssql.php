@@ -1,4 +1,7 @@
 <?php
+
+use Zf1s\Compat\Types;
+
 /*
  *  $Id: Mssql.php 7690 2010-08-31 17:11:24Z jwage $
  *
@@ -86,17 +89,17 @@ class Doctrine_Connection_Mssql extends Doctrine_Connection_Common
         if ($checkOption && ! $this->getAttribute(Doctrine_Core::ATTR_QUOTE_IDENTIFIER)) {
             return $identifier;
         }
-        
-        if (strpos($identifier, '.') !== false) { 
-            $parts = explode('.', $identifier); 
-            $quotedParts = array(); 
-            foreach ($parts as $p) { 
-                $quotedParts[] = $this->quoteIdentifier($p); 
+
+        if (strpos($identifier, '.') !== false) {
+            $parts = explode('.', $identifier);
+            $quotedParts = array();
+            foreach ($parts as $p) {
+                $quotedParts[] = $this->quoteIdentifier($p);
             }
-            
-            return implode('.', $quotedParts); 
+
+            return implode('.', $quotedParts);
         }
-        
+
         return '[' . str_replace(']', ']]', $identifier) . ']';
     }
 
@@ -108,21 +111,21 @@ class Doctrine_Connection_Mssql extends Doctrine_Connection_Common
      *
      * Copyright (c) 2005-2008, Zend Technologies USA, Inc.
      * All rights reserved.
-     * 
+     *
      * Redistribution and use in source and binary forms, with or without modification,
      * are permitted provided that the following conditions are met:
-     * 
+     *
      *     * Redistributions of source code must retain the above copyright notice,
      *       this list of conditions and the following disclaimer.
-     * 
+     *
      *     * Redistributions in binary form must reproduce the above copyright notice,
      *       this list of conditions and the following disclaimer in the documentation
      *       and/or other materials provided with the distribution.
-     * 
+     *
      *     * Neither the name of Zend Technologies USA, Inc. nor the names of its
      *       contributors may be used to endorse or promote products derived from this
      *       software without specific prior written permission.
-     * 
+     *
      * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
      * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
      * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -140,10 +143,12 @@ class Doctrine_Connection_Mssql extends Doctrine_Connection_Common
      * @link http://lists.bestpractical.com/pipermail/rt-devel/2005-June/007339.html
      * @return string
      */
-    public function modifyLimitQuery($query, $limit = false, $offset = false, $isManip = false, $isSubQuery = false, Doctrine_Query $queryOrigin = null)
+    public function modifyLimitQuery($query, $limit = false, $offset = false, $isManip = false, $isSubQuery = false, $queryOrigin = null)
     {
+        Types::isNullable('queryOrigin', $queryOrigin, 'Doctrine_Query');
+
         if ($limit === false || !($limit > 0)) {
-            return $query; 
+            return $query;
         }
 
         $orderby = stristr($query, 'ORDER BY');
@@ -151,7 +156,7 @@ class Doctrine_Connection_Mssql extends Doctrine_Connection_Common
         if ($offset !== false && $orderby === false) {
             throw new Doctrine_Connection_Exception("OFFSET cannot be used in MSSQL without ORDER BY due to emulation reasons.");
         }
-        
+
         $count = intval($limit);
         $offset = intval($offset);
 
@@ -206,14 +211,14 @@ class Doctrine_Connection_Mssql extends Doctrine_Connection_Common
         }
 
         if ($orderby !== false) {
-            $query .= ' ORDER BY '; 
+            $query .= ' ORDER BY ';
 
-            for ($i = 0, $l = count($orders); $i < $l; $i++) { 
-                if ($i > 0) { // not first order clause 
-                    $query .= ', '; 
-                } 
+            for ($i = 0, $l = count($orders); $i < $l; $i++) {
+                if ($i > 0) { // not first order clause
+                    $query .= ', ';
+                }
 
-                $query .= $this->modifyOrderByColumn($tables[$i], $columns[$i], $this->quoteIdentifier('inner_tbl') . '.' . $this->quoteIdentifier($aliases[$i])) . ' '; 
+                $query .= $this->modifyOrderByColumn($tables[$i], $columns[$i], $this->quoteIdentifier('inner_tbl') . '.' . $this->quoteIdentifier($aliases[$i])) . ' ';
                 $query .= (stripos($sorts[$i], 'asc') !== false) ? 'DESC' : 'ASC';
             }
         }
@@ -238,8 +243,8 @@ class Doctrine_Connection_Mssql extends Doctrine_Connection_Common
     }
 
     /**
-     * Parse an OrderBy-Statement into chunks 
-     * 
+     * Parse an OrderBy-Statement into chunks
+     *
      * @param string $orderby
      */
     private function parseOrderBy($orderby)
@@ -250,16 +255,16 @@ class Doctrine_Connection_Mssql extends Doctrine_Connection_Common
         $parsed  = str_ireplace('ORDER BY', '', $orderby);
 
         preg_match_all('/(\w+\(.+?\)\s+(ASC|DESC)),?/', $orderby, $matches);
-        
+
         $matchesWithExpressions = $matches[1];
 
         foreach ($matchesWithExpressions as $match) {
             $chunks[] = $match;
             $parsed = str_replace($match, '##' . (count($chunks) - 1) . '##', $parsed);
         }
-        
+
         $tokens = preg_split('/,/', $parsed);
-        
+
         for ($i = 0, $iMax = count($tokens); $i < $iMax; $i++) {
 
             $tokens[$i] = trim(preg_replace_callback(
@@ -273,15 +278,15 @@ class Doctrine_Connection_Mssql extends Doctrine_Connection_Common
 
         return $tokens;
     }
-    
+
     /**
      * Order and Group By are not possible on columns from type text.
-     * This method fix this issue by wrap the given term (column) into a CAST directive. 
-     * 
+     * This method fix this issue by wrap the given term (column) into a CAST directive.
+     *
      * @see DC-828
      * @param Doctrine_Table $table
      * @param string $field
-     * @param string $term The term which will changed if it's necessary, depending to the field type. 
+     * @param string $term The term which will changed if it's necessary, depending to the field type.
      * @return string
      */
     public function modifyOrderByColumn(Doctrine_Table $table, $field, $term)
@@ -291,7 +296,7 @@ class Doctrine_Connection_Mssql extends Doctrine_Connection_Common
         if ($def['type'] == 'string' && $def['length'] === NULL) {
             $term = 'CAST(' . $term . ' AS varchar(8000))';
         }
-        
+
         return $term;
     }
 
@@ -305,7 +310,7 @@ class Doctrine_Connection_Mssql extends Doctrine_Connection_Common
     {
         return $this->modifyLimitQuery($query, $limit, $offset, $isManip, true);
     }
-    
+
     /**
      * return version information about the server
      *
