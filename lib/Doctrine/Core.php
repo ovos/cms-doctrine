@@ -652,7 +652,7 @@ class Doctrine_Core
                 foreach ($it as $file) {
                     $e = explode('.', $file->getFileName());
                     
-                    if (end($e) === 'php' && strpos($file->getFileName(), '.inc') === false) {
+                    if (end($e) === 'php' && !str_contains($file->getFileName(), '.inc')) {
                         if ($modelLoading == Doctrine_Core::MODEL_LOADING_PEAR) {
                             $className = str_replace($dir . DIRECTORY_SEPARATOR, null, $file->getPathName());
                             $className = str_replace(DIRECTORY_SEPARATOR, '_', $className);
@@ -1116,7 +1116,7 @@ class Doctrine_Core
      */
     public static function autoload($className)
     {
-        if (strpos($className, 'sfYaml') === 0) {
+        if (str_starts_with($className, 'sfYaml')) {
             require dirname(__FILE__) . '/Parser/sfYaml/' . $className . '.php';
 
             return true;

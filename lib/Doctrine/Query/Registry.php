@@ -40,7 +40,7 @@ class Doctrine_Query_Registry
             $query = clone $query;
         }
 
-    	if (strpos($key, '/') === false) {
+    	if (!str_contains($key, '/')) {
             $this->_queries[$key] = $query;
         } else {
             // namespace found

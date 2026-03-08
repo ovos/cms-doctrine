@@ -591,7 +591,7 @@ class Doctrine_Import_Builder extends Doctrine_Builder
 
             // Remove null and empty array values
             foreach ($options as $key => $value) {
-                if (is_null($value) || (is_array($value) && empty($value))) {
+                if ($value === null || (is_array($value) && empty($value))) {
                     unset($options[$key]);
                 }
             }
@@ -972,7 +972,7 @@ class Doctrine_Import_Builder extends Doctrine_Builder
 
         // [OV19] handle namespaces in generated classes
         $namespace = '';
-        if(false !== strpos($extends, '\\')) {
+        if(str_contains($extends, '\\')) {
             $extends = '\\' . $extends;
         }
         if(false !== ($index = strrpos($className, '\\'))) {
@@ -1101,7 +1101,7 @@ class Doctrine_Import_Builder extends Doctrine_Builder
 
         // [OV19] handle namespaces in generated classes
         $namespace = '';
-        if(false !== strpos($extends, '\\')) {
+        if(str_contains($extends, '\\')) {
             $extends = '\\' . $extends;
         }
         if(false !== ($index = strrpos($className, '\\'))) {

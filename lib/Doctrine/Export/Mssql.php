@@ -514,7 +514,7 @@ class Doctrine_Export_Mssql extends Doctrine_Export
                 $default .= ' CONSTRAINT ' . $field['defaultConstraintName'];
             }
 
-            $default .= ' DEFAULT ' . (is_null($field['default'])
+            $default .= ' DEFAULT ' . ($field['default'] === null
                 ? 'NULL'
                 : $this->conn->quote($field['default'], $field['type']));
         }

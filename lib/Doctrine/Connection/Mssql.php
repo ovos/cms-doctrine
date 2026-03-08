@@ -90,7 +90,7 @@ class Doctrine_Connection_Mssql extends Doctrine_Connection_Common
             return $identifier;
         }
 
-        if (strpos($identifier, '.') !== false) {
+        if (str_contains($identifier, '.')) {
             $parts = explode('.', $identifier);
             $quotedParts = [];
             foreach ($parts as $p) {
@@ -421,7 +421,7 @@ class Doctrine_Connection_Mssql extends Doctrine_Connection_Common
         $query = preg_replace_callback(
             '/##(\d+)##/',
             function ($m) use($value, $params, $self) {
-                return is_null($value) ? 'NULL' : $self->quote($params[$m[1]]);
+                return $value === null ? 'NULL' : $self->quote($params[$m[1]]);
             },
             $query
 		);
@@ -448,7 +448,7 @@ class Doctrine_Connection_Mssql extends Doctrine_Connection_Common
             $lcIdentifier = strtolower($identifier);
 
             if(array_key_exists($lcIdentifier, $fields)) {
-                if(is_null($fields[$lcIdentifier])) {
+                if($fields[$lcIdentifier] === null) {
                     $settingNullIdentifier = true;
                     unset($fields[$lcIdentifier]);
                 }

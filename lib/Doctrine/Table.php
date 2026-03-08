@@ -1389,7 +1389,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
         }
 
         foreach ($defaultOptions as $key => $value) {
-            if ( ! array_key_exists($key, $options) || is_null($options[$key])) {
+            if ( ! array_key_exists($key, $options) || $options[$key] === null) {
                 $options[$key] = $value;
             }
         }
@@ -1564,7 +1564,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
     {
         $queryRegistry = Doctrine_Manager::getInstance()->getQueryRegistry();
 
-        if (strpos($queryKey, '/') !== false) {
+        if (str_contains($queryKey, '/')) {
             $e = explode('/', $queryKey);
 
             return $queryRegistry->get($e[1], $e[0]);
@@ -1597,7 +1597,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
         // Named Query or IDs
         $name = func_get_arg(0);
 
-        if (is_null($name)) {
+        if ($name === null) {
             return false;
         }
 
@@ -1605,7 +1605,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
         $m = $name;
 
         // Check for possible cross-access
-        if ( ! is_array($name) && strpos($name, '/') !== false) {
+        if ( ! is_array($name) && str_contains($name, '/')) {
             list($ns, $m) = explode('/', $name);
         }
 
@@ -2338,7 +2338,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
         } else if ($value === null) {
             return null;
         } else {
-            $type = is_null($typeHint) ? $this->getTypeOf($fieldName) : $typeHint;
+            $type = $typeHint === null ? $this->getTypeOf($fieldName) : $typeHint;
 
             switch ($type) {
                 case 'enum':
@@ -2436,7 +2436,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
      */
     public function isTree()
     {
-        return ( ! is_null($this->_options['treeImpl'])) ? true : false;
+        return ( $this->_options['treeImpl'] !== null) ? true : false;
     }
 
     /**

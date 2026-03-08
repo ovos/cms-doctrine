@@ -58,7 +58,7 @@ class Doctrine_Migration
     {
         $this->_reflectionClass = new ReflectionClass('Doctrine_Migration_Base');
 
-        if (is_null($connection)) {
+        if ($connection === null) {
             $this->_connection = Doctrine_Manager::connection();
         } else {
             if (is_string($connection)) {

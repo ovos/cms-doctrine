@@ -102,7 +102,7 @@ class sfYamlInline
         return is_string($value) ? "'$value'" : (int) $value;
       case is_numeric($value):
         return is_infinite($value) ? str_ireplace('INF', '.Inf', strval($value)) : (is_string($value) ? "'$value'" : $value);
-      case false !== strpos($value, "\n") || false !== strpos($value, "\r"):
+      case str_contains($value, "\n") || str_contains($value, "\r"):
         return sprintf('"%s"', str_replace(['"', "\n", "\r"], ['\\"', '\n', '\r'], $value));
       case preg_match('/[ \s \' " \: \{ \} \[ \] , & \* \# \?] | \A[ - ? | < > = ! % @ ` ]/x', $value):
         return sprintf("'%s'", str_replace('\'', '\'\'', $value));
@@ -274,7 +274,7 @@ class sfYamlInline
           $isQuoted = in_array($sequence[$i], ['"', "'"]);
           $value = self::parseScalar($sequence, [',', ']'], ['"', "'"], $i);
 
-          if (!$isQuoted && false !== strpos($value, ': '))
+          if (!$isQuoted && str_contains($value, ': '))
           {
             // embedded mapping?
             try
@@ -393,11 +393,11 @@ class sfYamlInline
       case '' == $scalar:
       case '~' == $scalar:
         return null;
-      case 0 === strpos($scalar, '!str'):
+      case str_starts_with($scalar, '!str'):
         return (string) substr($scalar, 5);
-      case 0 === strpos($scalar, '! '):
+      case str_starts_with($scalar, '! '):
         return intval(self::parseScalar(substr($scalar, 2)));
-      case 0 === strpos($scalar, '!!php/object:'):
+      case str_starts_with($scalar, '!!php/object:'):
         return unserialize(substr($scalar, 13));
       case ctype_digit($scalar):
         $raw = $scalar;

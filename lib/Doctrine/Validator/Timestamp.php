@@ -41,11 +41,11 @@ class Doctrine_Validator_Timestamp extends Doctrine_Validator_Driver
      */
     public function validate($value)
     {
-        if (is_null($value)) {
+        if ($value === null) {
             return true;
         }
 
-        $splitChar = false !== strpos($value, 'T') ? 'T' : ' ';
+        $splitChar = str_contains($value, 'T') ? 'T' : ' ';
 
         $e = explode($splitChar, trim($value));
         $date = isset($e[0]) ? $e[0] : null;

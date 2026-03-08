@@ -110,7 +110,7 @@ abstract class Doctrine_Query_Condition extends Doctrine_Query_Part
     public function parseLiteralValue($value)
     {
         // check that value isn't a string
-        if (strpos($value, '\'') === false) {
+        if (!str_contains($value, '\'')) {
             // parse booleans
             $value = $this->query->getConnection()
                      ->dataDict->parseBoolean($value);

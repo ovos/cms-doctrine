@@ -105,7 +105,7 @@ abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
         $event = new Doctrine_Event(null, Doctrine_Event::HYDRATE, null);
 
         if ($this->_hydrationMode == Doctrine_Core::HYDRATE_ON_DEMAND) {
-            if ( ! is_null($this->_priorRow)) {
+            if ( $this->_priorRow !== null) {
                 $data = $this->_priorRow;
                 $this->_priorRow = null;
             } else {
@@ -134,7 +134,7 @@ abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
             $rowData = $this->_gatherRowData($data, $cache, $id, $nonemptyComponents);
 
             if ($this->_hydrationMode == Doctrine_Core::HYDRATE_ON_DEMAND)  { 
-                if (is_null($activeRootIdentifier)) { 
+                if ($activeRootIdentifier === null) { 
                     // first row for this record 
                     $activeRootIdentifier = $id[$rootAlias]; 
                 } else if ($activeRootIdentifier != $id[$rootAlias]) { 

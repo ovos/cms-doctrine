@@ -169,7 +169,7 @@ class Doctrine_Import_Pgsql extends Doctrine_Import
                 // get length from varchar definition
                 $length = preg_replace('~.*\(([0-9]*)\).*~', '$1', $val['complete_type']);
                 $val['length'] = $length;
-            } else if (strpos($val['complete_type'], 'character varying') !== false) {
+            } else if (str_contains($val['complete_type'], 'character varying')) {
                 // get length from varchar definition
                 $length = preg_replace('~.*\(([0-9]*)\).*~', '$1', $val['complete_type']);
                 $val['length'] = $length;
@@ -291,7 +291,7 @@ class Doctrine_Import_Pgsql extends Doctrine_Import
         $results = $this->conn->fetchAssoc($sql, $param);
         foreach ($results as $result) {
             preg_match('/FOREIGN KEY \((.+)\) REFERENCES (.+)\((.+)\)/', $result['condef'], $values);
-            if ((strpos($values[1], ',') === false) && (strpos($values[3], ',') === false)) {
+            if ((!str_contains($values[1], ',')) && (!str_contains($values[3], ','))) {
                 $tableName = trim($values[2], '"');
                 $relations[] = ['table'   => $tableName,
                                      'local'   => $values[1],

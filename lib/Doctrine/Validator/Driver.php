@@ -119,7 +119,7 @@ class Doctrine_Validator_Driver
     public function __toString()
     {
         $className = get_class($this);
-        if (strpos($className, 'Doctrine_Validator_') === 0) { 
+        if (str_starts_with($className, 'Doctrine_Validator_')) { 
             return strtolower(substr($className, 19));
         } else {
             return $className;

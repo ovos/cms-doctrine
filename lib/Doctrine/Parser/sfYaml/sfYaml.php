@@ -69,7 +69,7 @@ class sfYaml
     $file = '';
 
     // if input is a file, process it
-    if (strpos($input, "\n") === false && is_file($input))
+    if (!str_contains($input, "\n") && is_file($input))
     {
       $file = $input;
 

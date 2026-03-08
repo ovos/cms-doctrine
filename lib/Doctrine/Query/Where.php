@@ -63,7 +63,7 @@ class Doctrine_Query_Where extends Doctrine_Query_Condition
             $rightExpr = array_pop($terms);
             $operator = trim(substr($where, strlen($leftExpr), -strlen($rightExpr)));
 
-            if (strpos($leftExpr, "'") === false && strpos($leftExpr, '(') === false) {
+            if (!str_contains($leftExpr, "'") && !str_contains($leftExpr, '(')) {
                 // normal field reference found
                 $a = explode('.', $leftExpr);
                 $fieldname = array_pop($a); // Discard the field name (not needed!)

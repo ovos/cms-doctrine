@@ -55,7 +55,7 @@ class Doctrine_Query_Groupby extends Doctrine_Query_Part
             } else {
                 if (substr($term[0], 0, 1) !== "'" && substr($term[0], -1) !== "'") {
 
-                    if (strpos($term[0], '.') !== false) {
+                    if (str_contains($term[0], '.')) {
                         if ( ! is_numeric($term[0])) {
                             $e = explode('.', $term[0]);
 

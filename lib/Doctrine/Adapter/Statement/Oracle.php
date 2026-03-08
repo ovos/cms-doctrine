@@ -578,7 +578,7 @@ class Doctrine_Adapter_Statement_Oracle implements Doctrine_Adapter_Statement_In
      */
     private function parseQuery($query=null)
     {
-        if (is_null($query)) {
+        if ($query === null) {
             $query = $this->queryString;
         }
         $bind_index = 1;

@@ -81,7 +81,7 @@ class Doctrine_Exception extends Exception
      */
     public function errorMessage($value = null)
     {
-        if (is_null($value)) {
+        if ($value === null) {
             return self::$_errorMessages;
         }
 

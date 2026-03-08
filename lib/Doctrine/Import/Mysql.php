@@ -49,7 +49,7 @@ class Doctrine_Import_Mysql extends Doctrine_Import
     public function listSequences($database = null)
     {
         $query = 'SHOW TABLES';
-        if ( ! is_null($database)) {
+        if ( $database !== null) {
             $query .= ' FROM ' . $database;
         }
         $tableNames = $this->conn->fetchColumn($query);
@@ -165,7 +165,7 @@ class Doctrine_Import_Mysql extends Doctrine_Import
                           'primary'       => (strtolower($val['key']) == 'pri'),
                           'default'       => $val['default'],
                           'notnull'       => (bool) ($val['null'] != 'YES'),
-                          'autoincrement' => (bool) (strpos($val['extra'], 'auto_increment') !== false),
+                          'autoincrement' => (bool) (str_contains($val['extra'], 'auto_increment')),
                           ];
             if (isset($decl['scale'])) {
                 $description['scale'] = $decl['scale'];
@@ -229,7 +229,7 @@ class Doctrine_Import_Mysql extends Doctrine_Import
      */
     public function listViews($database = null)
     {
-        if (is_null($database)) {
+        if ($database === null) {
             $query = 'SELECT table_name FROM information_schema.VIEWS';
         } else {
             $query = sprintf($this->sql['listViews'], ' FROM ' . $database);

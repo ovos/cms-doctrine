@@ -756,7 +756,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
                 $term[0] = $this->parseFunctionExpression($term[0]);
             } else {
                 if (substr($term[0], 0, 1) !== "'" && substr($term[0], -1) !== "'") {
-                    if (strpos($term[0], '.') !== false) {
+                    if (str_contains($term[0], '.')) {
                         if ( ! is_numeric($term[0])) {
                             $e = explode('.', $term[0]);
 
@@ -1150,7 +1150,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
                 }
 
                 if ( ! $ignorePending && isset($this->_pendingJoinConditions[$k])) {
-                    if (strpos($part, ' ON ') !== false) {
+                    if (str_contains($part, ' ON ')) {
                         $part .= ' AND ';
                     } else {
                         $part .= ' ON ';
@@ -1463,7 +1463,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
         // [OV1] modified to convert also multiline orderby definitions + do not split by commas inside parentheses
         $def = [];
         foreach ($this->_sqlParts['orderby'] as $k => $orderBy) {
-            if(false !== strpos($orderBy, '(')) {
+            if(str_contains($orderBy, '(')) {
                 // https://regex101.com/r/yW4aZ3/277
                 // http://stackoverflow.com/questions/24534782/how-do-skip-or-f-work-on-regex
                 // split by commas, which are not in any (nested) parentheses
@@ -1701,12 +1701,12 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
                 foreach ($e as $i => $f) { // modified, added $i - before it was checking $f...
                     if ($i == 0 || $i % 2 == 0) { // modified, added $i - before it was checking $f...
                     // if ($f == 0 || $f % 2 == 0) {
-                        if (strpos($f, '.') === false) {
+                        if (!str_contains($f, '.')) {
                             continue;
                         }
 
                         // don't add functions
-                        if (strpos($f, '(') !== false) {
+                        if (str_contains($f, '(')) {
                             continue;
                         }
 
@@ -1830,7 +1830,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
         $parts = $this->_tokenizer->quoteExplode($subquery, ' ', "'", "'");
 
         foreach ($parts as $k => $part) {
-            if (strpos($part, ' ') !== false) {
+            if (str_contains($part, ' ')) {
                 continue;
             }
 
@@ -1843,7 +1843,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
                 continue;
             }
 
-            if (strpos($part, '.') === false) {
+            if (!str_contains($part, '.')) {
                 continue;
             }
 
@@ -1876,7 +1876,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
 
         if ($driverName == 'mysql' || $driverName == 'pgsql') {
             foreach ($parts as $k => $part) {
-                if (strpos($part, "'") !== false) {
+                if (str_contains($part, "'")) {
                     continue;
                 }
                 if (strpos($part, '__') == false) {
@@ -1919,7 +1919,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
             $part = trim($part);
             $e = $this->_tokenizer->bracketExplode($part, ' ');
             $part = trim($e[0]);
-            if (strpos($part, '.') === false) {
+            if (!str_contains($part, '.')) {
                 continue;
             }
             list($tableAlias, $columnName) = explode('.', $part);
@@ -2440,7 +2440,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
                 foreach ($this->_sqlParts['select'] as $field) {
                     // We only include aggregate expressions to count query
                     // This is needed because HAVING clause will use field aliases
-                    if (strpos($field, '(') !== false) {
+                    if (str_contains($field, '(')) {
                         $selectFields .= ', ' . $field;
                     }
                 }

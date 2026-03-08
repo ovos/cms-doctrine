@@ -87,7 +87,7 @@ class sfYamlParser
         }
 
         // array
-        if (!isset($values['value']) || '' == trim($values['value'], ' ') || 0 === strpos(ltrim($values['value'], ' '), '#'))
+        if (!isset($values['value']) || '' == trim($values['value'], ' ') || str_starts_with(ltrim($values['value'], ' '), '#'))
         {
           $c = $this->getRealCurrentLineNb() + 1;
           $parser = new sfYamlParser($c);
@@ -186,7 +186,7 @@ class sfYamlParser
           $data = $isProcessed;
         }
         // hash
-        else if (!isset($values['value']) || '' == trim($values['value'], ' ') || 0 === strpos(ltrim($values['value'], ' '), '#'))
+        else if (!isset($values['value']) || '' == trim($values['value'], ' ') || str_starts_with(ltrim($values['value'], ' '), '#'))
         {
           // if next line is less indented or equal, then it means that the current value is null
           if ($this->isNextLineIndented())

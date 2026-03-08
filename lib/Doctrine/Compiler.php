@@ -70,8 +70,8 @@ class Doctrine_Compiler
             //@todo what is a versioning file? do we have these anymore? None 
             //exists in my version of doctrine from svn.
             // we don't want to require versioning files
-            if (end($e) === 'php' && strpos($file->getFileName(), '.inc') === false
-                && strpos($file->getFileName(), 'sfYaml') === false) {
+            if (end($e) === 'php' && !str_contains($file->getFileName(), '.inc')
+                && !str_contains($file->getFileName(), 'sfYaml')) {
                 require_once $file->getPathName();
             }
         }

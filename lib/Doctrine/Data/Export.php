@@ -75,7 +75,7 @@ class Doctrine_Data_Export extends Doctrine_Data
         $originalIndexBy = [];
         foreach ($models AS $name) {
           $table = Doctrine_Core::getTable($name);
-          if ( !is_null($indexBy = $table->getBoundQueryPart('indexBy'))) {
+          if (($indexBy = $table->getBoundQueryPart('indexBy')) !== null) {
             $originalIndexBy[$name] = $indexBy;
             $table->bindQueryPart('indexBy', null);
           }

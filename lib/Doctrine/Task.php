@@ -84,7 +84,7 @@ abstract class Doctrine_Task
 
         foreach ($nameParts as &$namePart) {
             $prefix = __CLASS__ . '_';
-            $baseName = strpos($namePart, $prefix) === 0 ? substr($namePart, strlen($prefix)) : $namePart;
+            $baseName = str_starts_with($namePart, $prefix) ? substr($namePart, strlen($prefix)) : $namePart;
             $namePart = str_replace('_', '-', Doctrine_Inflector::tableize($baseName));
         }
 
