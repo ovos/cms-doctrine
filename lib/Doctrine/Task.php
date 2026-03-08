@@ -102,7 +102,7 @@ abstract class Doctrine_Task
         if (is_object($this->dispatcher) && method_exists($this->dispatcher, 'notify')) {
             $args = func_get_args();
             
-            return call_user_func_array([$this->dispatcher, 'notify'], $args);
+            return $this->dispatcher->notify(...$args);
         } elseif ( $notification !== null ) {
             return $notification;
         } else {
@@ -119,7 +119,7 @@ abstract class Doctrine_Task
     {
         $args = func_get_args();
         
-        call_user_func_array([$this, 'notify'], $args);
+        $this->notify(...$args);
         
         $answer = strtolower(trim(fgets(STDIN)));
         

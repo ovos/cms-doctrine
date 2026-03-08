@@ -2540,7 +2540,7 @@ abstract class Doctrine_Query_Abstract
 
         $dependences = $this->getDependences($sqlParts, $exceptRoot);
         if(count($dependences) > 1) {
-            $dependences = call_user_func_array('array_merge', array_values($dependences));
+            $dependences = array_merge(...array_values($dependences));
         } else {
             $dependences = array_shift($dependences) ?? [];
         }

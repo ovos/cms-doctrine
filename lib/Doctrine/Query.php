@@ -894,12 +894,12 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
         // parse args
 
         foreach ($this->_tokenizer->sqlExplode($argStr, ',') as $arg) {
-           $args[] = $parseCallback ? call_user_func_array($parseCallback, [$arg]) : $this->parseClause($arg);
+           $args[] = $parseCallback ? $parseCallback($arg) : $this->parseClause($arg);
         }
 
         // convert DQL function to its RDBMS specific equivalent
         try {
-            $expr = call_user_func_array([$this->_conn->expression, $name], $args);
+            $expr = $this->_conn->expression->$name(...$args);
         } catch (Doctrine_Expression_Exception $e) {
             throw new Doctrine_Query_Exception('Unknown function ' . $name . '.');
         }
@@ -1924,7 +1924,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
             }
             list($tableAlias, $columnName) = explode('.', $part);
             // [OV14] Remove identifier quoting if it exists
-            $tableAlias = call_user_func($callback, $tableAlias);
+            $tableAlias = $callback($tableAlias);
             if ($tableAlias != $mainTableAlias) {
                 return true;
             }

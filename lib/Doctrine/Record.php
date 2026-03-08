@@ -2526,7 +2526,7 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
             $fieldName = $args[0];
             $args[0] = $this->get($fieldName);
 
-            $newvalue = call_user_func_array($callback, $args);
+            $newvalue = $callback(...$args);
 
             $this->_data[$fieldName] = $newvalue;
         }
@@ -2914,7 +2914,7 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
     {
         if (($template = $this->_table->getMethodOwner($method)) !== false) {
             $template->setInvoker($this);
-            return call_user_func_array([$template, $method], $args);
+            return $template->$method(...$args);
         }
 
         foreach ($this->_table->getTemplates() as $template) {
@@ -2922,7 +2922,7 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
                 $template->setInvoker($this);
                 $this->_table->setMethodOwner($method, $template);
 
-                return call_user_func_array([$template, $method], $args);
+                return $template->$method(...$args);
             }
         }
 

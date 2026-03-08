@@ -85,7 +85,7 @@ class Doctrine_Validator_Exception extends Doctrine_Exception implements Countab
     public function inspect($function)
     {
         foreach ($this->invalid as $record) {
-            call_user_func($function, $record->getErrorStack());
+            $function($record->getErrorStack());
         }
     }
 }

@@ -103,7 +103,7 @@ class Doctrine_Template_Listener_Sluggable extends Doctrine_Record_Listener
     {
         if (empty($this->_options['fields'])) {
             if (is_callable($this->_options['provider'])) {
-            	$value = call_user_func($this->_options['provider'], $record);
+            	$value = ($this->_options['provider'])($record);
             } elseif (method_exists($record, 'getUniqueSlug')) {
                 $value = $record->getUniqueSlug($record);
             } else {
@@ -121,7 +121,7 @@ class Doctrine_Template_Listener_Sluggable extends Doctrine_Record_Listener
     		return $this->getUniqueSlug($record, $value);
     	}
 
-        return call_user_func_array($this->_options['builder'], [$value, $record]);
+        return ($this->_options['builder'])($value, $record);
     }
 
     /**
@@ -139,7 +139,7 @@ class Doctrine_Template_Listener_Sluggable extends Doctrine_Record_Listener
             return $this->getUniqueSlug($record, $value);
         }
 
-        return call_user_func_array($this->_options['builder'], [$value, $record]);
+        return ($this->_options['builder'])($value, $record);
     }
 
     /**
@@ -168,7 +168,7 @@ class Doctrine_Template_Listener_Sluggable extends Doctrine_Record_Listener
         }
 
         $name = $table->getFieldName($this->_options['name']);
-        $proposal =  call_user_func_array($this->_options['builder'], [$slugFromFields, $record]);
+        $proposal = ($this->_options['builder'])($slugFromFields, $record);
         $slug = $proposal;
 
         $whereString = 'r.' . $name . ' LIKE ?';
@@ -232,7 +232,7 @@ class Doctrine_Template_Listener_Sluggable extends Doctrine_Record_Listener
 
         $i = 1;
         while (in_array(strtolower($slug), $similarSlugs)) {
-            $slug = call_user_func_array($this->_options['builder'], [$proposal.'-'.$i, $record]);
+            $slug = ($this->_options['builder'])($proposal.'-'.$i, $record);
             $i++;
         }
 

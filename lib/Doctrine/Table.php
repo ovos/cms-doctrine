@@ -2863,7 +2863,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
 
         // Forward the method on to the record instance and see if it has anything or one of its behaviors
         try {
-            return call_user_func_array([$this->getRecordInstance(), $method . 'TableProxy'], $arguments);
+            return $this->getRecordInstance()->{$method . 'TableProxy'}(...$arguments);
         } catch (Doctrine_Record_UnknownPropertyException $e) {}
 
         throw new Doctrine_Table_Exception(sprintf('Unknown method %s::%s', get_class($this), $method));
