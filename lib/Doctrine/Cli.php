@@ -1,6 +1,5 @@
 <?php
 
-use Zf1s\Compat\Types;
 
 /*
  *  $Id: Cli.php 2761 2007-10-07 23:42:29Z zYne $
@@ -79,8 +78,6 @@ class Doctrine_Cli
      */
     public function __construct($config = [], $formatter = null)
     {
-        Types::isNullable('config', $config, 'array');
-        Types::isNullable('formatter', $formatter, 'Doctrine_Cli_Formatter');
 
         $this->setConfig($config);
         $this->setFormatter($formatter ? $formatter : new Doctrine_Cli_AnsiColorFormatter());

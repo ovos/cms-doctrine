@@ -1,6 +1,5 @@
 <?php
 
-use Zf1s\Compat\Types;
 
 /*
  *  $Id: Collection.php 7686 2010-08-24 16:54:40Z jwage $
@@ -940,7 +939,6 @@ class Doctrine_Collection extends Doctrine_Access implements Countable, Iterator
      */
     public function save($conn = null, $processDiff = true)
     {
-        Types::isNullable('conn', $conn, 'Doctrine_Connection');
 
         if ($conn == null) {
             $conn = $this->_table->getConnection();
@@ -977,7 +975,6 @@ class Doctrine_Collection extends Doctrine_Access implements Countable, Iterator
      */
     public function replace($conn = null, $processDiff = true)
     {
-        Types::isNullable('conn', $conn, 'Doctrine_Connection');
 
         if ($conn == null) {
             $conn = $this->_table->getConnection();
@@ -1012,7 +1009,6 @@ class Doctrine_Collection extends Doctrine_Access implements Countable, Iterator
      */
     public function delete($conn = null, $clearColl = true)
     {
-        Types::isNullable('conn', $conn, 'Doctrine_Connection');
 
         if ($conn == null) {
             $conn = $this->_table->getConnection();

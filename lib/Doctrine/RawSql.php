@@ -1,6 +1,5 @@
 <?php
 
-use Zf1s\Compat\Types;
 
 /*
  *  $Id: RawSql.php 7490 2010-03-29 19:53:27Z jwage $
@@ -53,8 +52,6 @@ class Doctrine_RawSql extends Doctrine_Query_Abstract
      * @param Doctrine_Hydrator_Abstract|null  The hydrator that will be used for generating result sets.
      */
     function __construct($connection = null, $hydrator = null) {
-        Types::isNullable('connection', $connection, 'Doctrine_Connection');
-        Types::isNullable('hydrator', $hydrator, 'Doctrine_Hydrator_Abstract');
 
         parent::__construct($connection, $hydrator);
 

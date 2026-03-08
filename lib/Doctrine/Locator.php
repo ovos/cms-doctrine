@@ -1,6 +1,5 @@
 <?php
 
-use Zf1s\Compat\Types;
 
 /**
  *  $Id$
@@ -61,7 +60,6 @@ class Doctrine_Locator implements Countable, IteratorAggregate
      */
     public function __construct($defaults = null)
     {
-        Types::isNullable('defaults', $defaults, 'array');
 
         if (null !== $defaults) {
             foreach ($defaults as $name => $resource) {

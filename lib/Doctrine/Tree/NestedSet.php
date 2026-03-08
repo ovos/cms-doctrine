@@ -1,6 +1,5 @@
 <?php
 
-use Zf1s\Compat\Types;
 
 /*
  *  $Id: NestedSet.php 7490 2010-03-29 19:53:27Z jwage $
@@ -89,7 +88,6 @@ class Doctrine_Tree_NestedSet extends Doctrine_Tree implements Doctrine_Tree_Int
      */
     public function createRoot($record = null)
     {
-        Types::isNullable('record', $record, 'Doctrine_Record');
 
         if ($this->getAttribute('hasManyRoots')) {
             if ( ! $record || ( ! $record->exists() && ! $record->getNode()->getRootValue())

@@ -1,6 +1,5 @@
 <?php
 
-use Zf1s\Compat\Types;
 
 /*
  *  $Id: Mssql.php 7690 2010-08-31 17:11:24Z jwage $
@@ -145,7 +144,6 @@ class Doctrine_Connection_Mssql extends Doctrine_Connection_Common
      */
     public function modifyLimitQuery($query, $limit = false, $offset = false, $isManip = false, $isSubQuery = false, $queryOrigin = null)
     {
-        Types::isNullable('queryOrigin', $queryOrigin, 'Doctrine_Query');
 
         if ($limit === false || !($limit > 0)) {
             return $query;

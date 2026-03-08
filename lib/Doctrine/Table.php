@@ -1,6 +1,5 @@
 <?php
 
-use Zf1s\Compat\Types;
 
 /*
  *  $Id: Table.php 7681 2010-08-24 15:55:34Z jwage $
@@ -2044,7 +2043,6 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
      */
     public function validateField($fieldName, $value, $record = null)
     {
-        Types::isNullable('record', $record, 'Doctrine_Record');
 
         if ($record instanceof Doctrine_Record) {
             $errorStack = $record->getErrorStack();
@@ -2197,7 +2195,6 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
      */
     public function getColumnNames($fieldNames = null)
     {
-        Types::isNullable('fieldNames', $fieldNames, 'array');
 
         if ($fieldNames === null) {
             return array_keys($this->_columns);

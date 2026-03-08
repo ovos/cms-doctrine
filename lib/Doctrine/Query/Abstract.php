@@ -1,6 +1,5 @@
 <?php
 
-use Zf1s\Compat\Types;
 
 /*
  *  $Id: Query.php 1393 2007-05-19 17:49:16Z zYne $
@@ -323,8 +322,6 @@ abstract class Doctrine_Query_Abstract
     public function __construct($connection = null,
             $hydrator = null)
     {
-        Types::isNullable('connection', $connection, 'Doctrine_Connection');
-        Types::isNullable('hydrator', $hydrator, 'Doctrine_Hydrator_Abstract');
 
         if ($connection === null) {
             $connection = Doctrine_Manager::getInstance()->getCurrentConnection();

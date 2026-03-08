@@ -1,6 +1,5 @@
 <?php
 
-use Zf1s\Compat\Types;
 
 /*
  *  $Id: Record.php 7673 2010-06-08 20:49:54Z jwage $
@@ -1828,7 +1827,6 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
      */
     public function save($conn = null)
     {
-        Types::isNullable('conn', $conn, 'Doctrine_Connection');
 
         if ($conn === null) {
             $conn = $this->_table->getConnection();
@@ -1846,7 +1844,6 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
      * @return TRUE if the record was saved sucessfully without errors, FALSE otherwise.
      */
     public function trySave($conn = null) {
-        Types::isNullable('conn', $conn, 'Doctrine_Connection');
 
         try {
             $this->save($conn);
@@ -1875,7 +1872,6 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
      */
     public function replace($conn = null)
     {
-        Types::isNullable('conn', $conn, 'Doctrine_Connection');
 
         if ($conn === null) {
             $conn = $this->_table->getConnection();
@@ -2316,7 +2312,6 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
      */
     public function delete($conn = null)
     {
-        Types::isNullable('conn', $conn, 'Doctrine_Connection');
 
         if ($conn == null) {
             $conn = $this->_table->getConnection();
