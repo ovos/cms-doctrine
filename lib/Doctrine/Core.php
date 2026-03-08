@@ -661,7 +661,7 @@ class Doctrine_Core
                             $className = $e[0];
                         }
 
-                        if ($classPrefix && $classPrefix != substr($className, 0, strlen($classPrefix))) {
+                        if ($classPrefix && !str_starts_with($className, $classPrefix)) {
                             $className = $classPrefix . $className;
                         }
 

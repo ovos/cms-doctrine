@@ -191,7 +191,7 @@ abstract class Doctrine_Cache_Driver implements Doctrine_Cache_Interface
         $keys = $this->_getCacheKeys();
         if (is_array($keys)) {
             foreach ($keys as $key) {
-                if (substr($key, -1 * strlen($suffix)) == $suffix) {
+                if (str_ends_with($key, $suffix)) {
                     $count++;
                     $this->delete($key);
                 }
