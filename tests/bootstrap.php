@@ -7,9 +7,6 @@ $startTime = time();
 //sleep(10);
 
 error_reporting(E_ALL);
-if (PHP_VERSION_ID < 70400) {
-    error_reporting(E_ALL | E_STRICT);
-}
 ini_set('max_execution_time', 900);
 ini_set('date.timezone', 'GMT+0');
 
