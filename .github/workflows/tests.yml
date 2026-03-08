@@ -24,7 +24,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
-          ini-values: apc.enable_cli=1, opcache.enable=1, opcache.jit=tracing, opcache.jit_buffer_size=128M
+          ini-values: apc.enable_cli=1, opcache.enable=1, opcache.enable_cli=1, opcache.jit=tracing, opcache.jit_buffer_size=128M
           tools: composer:v2
         env:
             fail-fast: true
