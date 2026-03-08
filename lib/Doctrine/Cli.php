@@ -483,7 +483,7 @@ class Doctrine_Cli
     {        
         $this->_scriptName = $args[0];
         
-        $requestedTaskName = isset($args[1]) ? $args[1] : null;
+        $requestedTaskName = $args[1] ?? null;
         
         if ( ! $requestedTaskName || $requestedTaskName == 'help') {
             $this->printTasks(null, $requestedTaskName == 'help' ? true : false);

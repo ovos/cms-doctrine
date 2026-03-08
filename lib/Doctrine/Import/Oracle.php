@@ -145,7 +145,7 @@ QEND;
                'default'    => $val['data_default'],
                'length'     => $val['data_length'],
                'primary'    => (bool) $val['primary'],
-               'scale'      => isset($val['scale']) ? $val['scale']:null,
+               'scale'      => $val['scale'] ??null,
             ];
         }
 

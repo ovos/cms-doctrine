@@ -111,7 +111,7 @@ class Doctrine_Tree
      */     
     public function getAttribute($name)
     {
-      return isset($this->options[$name]) ? $this->options[$name] : null;
+      return $this->options[$name] ?? null;
     }
 
     /**

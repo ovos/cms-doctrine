@@ -461,7 +461,7 @@ class Doctrine_DataDict_Pgsql extends Doctrine_DataDict
         $dbType = strtolower($field['type']);
 
         // Default from field for enum support
-        $default = isset($field['default']) ? $field['default'] : null;
+        $default = $field['default'] ?? null;
         $enumName = null;
         if (str_contains($dbType, 'enum')){
             $enumName = $dbType;
@@ -596,7 +596,7 @@ class Doctrine_DataDict_Pgsql extends Doctrine_DataDict
                 break;
             default:
                 $type[] = $field['type'];
-                $length = isset($field['length']) ? $field['length']:null;
+                $length = $field['length'] ??null;
         }
 
         $ret = ['type'     => $type,

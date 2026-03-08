@@ -161,7 +161,7 @@ class Doctrine_Search extends Doctrine_Record_Generator
         } else {
             foreach ($fields as $field) {
 
-                $value = isset($data[$field]) ? $data[$field] : null;
+                $value = $data[$field] ?? null;
 
                 $terms = $this->analyze($value, $encoding);
 

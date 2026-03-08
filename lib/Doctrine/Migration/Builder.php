@@ -528,7 +528,7 @@ END;
      */
     public function buildMigrationClass($className, $fileName = null, $options = [], $up = null, $down = null)
     {
-        $extends = isset($options['extends']) ? $options['extends']:'Doctrine_Migration_Base';
+        $extends = $options['extends'] ??'Doctrine_Migration_Base';
 
         $content  = '<?php' . PHP_EOL;
 

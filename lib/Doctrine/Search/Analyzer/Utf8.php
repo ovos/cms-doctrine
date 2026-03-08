@@ -38,7 +38,7 @@ class Doctrine_Search_Analyzer_Utf8 extends Doctrine_Search_Analyzer_Standard
     public function analyze($text, $encoding = null)
     {
         if ($encoding === null) {
-          $encoding = isset($this->_options['encoding']) ? $this->_options['encoding']:'utf-8';
+          $encoding = $this->_options['encoding'] ??'utf-8';
         }
 
         // check that $text encoding is utf-8, if not convert it

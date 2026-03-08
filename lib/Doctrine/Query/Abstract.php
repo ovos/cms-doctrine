@@ -1316,7 +1316,7 @@ abstract class Doctrine_Query_Abstract
         $this->_isLimitSubqueryUsed = $cached[5];
         $this->_limitSubquerySql = $cached[6];
         // [OV17] added dependences to cache
-        $this->_dependences = isset($cached[7]) ? $cached[7] : [];
+        $this->_dependences = $cached[7] ?? [];
         $customComponent = $cached[0];
 
         $queryComponents = [];

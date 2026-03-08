@@ -106,7 +106,7 @@ class Doctrine_Validator_ErrorStack extends Doctrine_Access implements Countable
      */
     public function get($fieldName)
     {
-        return isset($this->_errors[$fieldName]) ? $this->_errors[$fieldName] : null;
+        return $this->_errors[$fieldName] ?? null;
     }
 
     /**

@@ -858,7 +858,7 @@ class Doctrine_Core
     {
         $directory = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'tmp_doctrine_models';
 
-        $options['generateBaseClasses'] = isset($options['generateBaseClasses']) ? $options['generateBaseClasses']:false;
+        $options['generateBaseClasses'] = $options['generateBaseClasses'] ??false;
         $result = Doctrine_Core::generateModelsFromDb($directory, $connections, $options);
 
         if ( empty($result) && ! is_dir($directory)) {

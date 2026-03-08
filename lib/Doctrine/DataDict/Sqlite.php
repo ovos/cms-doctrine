@@ -251,7 +251,7 @@ class Doctrine_DataDict_Sqlite extends Doctrine_DataDict
                 break;
             default:
                 $type[] = $field['type'];
-                $length = isset($field['length']) ? $field['length']:null;
+                $length = $field['length'] ??null;
         }
 
         return ['type'     => $type,

@@ -250,8 +250,8 @@ abstract class Doctrine_Migration_Base
         // Add the columns
         foreach ($columnNames as $columnName => $def) {
             $type = $def['type'];
-            $length = isset($def['length']) ? $def['length'] : null;
-            $options = isset($def['options']) ? $def['options'] : [];
+            $length = $def['length'] ?? null;
+            $options = $def['options'] ?? [];
 
             $this->addColumn($tableName, $columnName, $type, $length, $options);
 
