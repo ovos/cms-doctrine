@@ -15,6 +15,14 @@ ini_set('date.timezone', 'GMT+0');
 
 define('DOCTRINE_DIR', $_SERVER['DOCTRINE_DIR']);
 
+/**
+ * Composer autoloader
+ */
+require DOCTRINE_DIR . '/vendor/autoload.php';
+
+/**
+ * Doctrine autoloader
+ */
 require_once(DOCTRINE_DIR . '/lib/Doctrine.php');
 
 spl_autoload_register(array('Doctrine', 'autoload'));
