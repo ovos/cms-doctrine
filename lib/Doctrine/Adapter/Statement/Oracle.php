@@ -521,7 +521,7 @@ class Doctrine_Adapter_Statement_Oracle implements Doctrine_Adapter_Statement_In
     public function setAttribute($attribute, $value)
     {
         switch ($attribute) {
-            case Doctrine_Core::ATTR_ERRMODE;
+            case Doctrine_Core::ATTR_ERRMODE:
             break;
             default:
                 throw new Doctrine_Adapter_Exception("Unsupported Attribute: $attribute");

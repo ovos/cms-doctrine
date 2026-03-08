@@ -384,32 +384,32 @@ class Doctrine_Collection extends Doctrine_Access implements Countable, Iterator
      */
     public function get($key)
     {
-        if ( ! isset($this->data[$key])) {
-            $record = $this->_table->create();
-
-            if (isset($this->referenceField)) {
-                $value = $this->reference->get($this->relation->getLocalFieldName());
-
-                if ($value !== null) {
-                    $record->set($this->referenceField, $value, false);
-                } else {
-                    $record->set($this->referenceField, $this->reference, false);
-                }
-            }
-            if ($key === null) {
-                $this->data[] = $record;
-            } else {
-                $this->data[$key] = $record;
-            }
-
-            if (isset($this->keyColumn)) {
-                $record->set($this->keyColumn, $key);
-            }
-
-            return $record;
+        if ($key !== null && isset($this->data[$key])) {
+            return $this->data[$key];
         }
 
-        return $this->data[$key];
+        $record = $this->_table->create();
+
+        if (isset($this->referenceField)) {
+            $value = $this->reference->get($this->relation->getLocalFieldName());
+
+            if ($value !== null) {
+                $record->set($this->referenceField, $value, false);
+            } else {
+                $record->set($this->referenceField, $this->reference, false);
+            }
+        }
+        if ($key === null) {
+            $this->data[] = $record;
+        } else {
+            $this->data[$key] = $record;
+        }
+
+        if (isset($this->keyColumn)) {
+            $record->set($this->keyColumn, $key);
+        }
+
+        return $record;
     }
 
     /**

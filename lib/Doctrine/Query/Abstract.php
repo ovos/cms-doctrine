@@ -2464,7 +2464,7 @@ abstract class Doctrine_Query_Abstract
             return $this;
         }
 
-        $this->_dependences[$sqlPart][$tableAlias] = true;
+        $this->_dependences[$sqlPart][$tableAlias ?? ''] = true;
         return $this;
     }
 
@@ -2542,7 +2542,7 @@ abstract class Doctrine_Query_Abstract
         if(count($dependences) > 1) {
             $dependences = call_user_func_array('array_merge', array_values($dependences));
         } else {
-            $dependences = array_shift($dependences);
+            $dependences = array_shift($dependences) ?? [];
         }
 
         return $dependences;
