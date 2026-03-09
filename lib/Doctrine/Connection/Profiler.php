@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id$
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,153 +30,147 @@
  */
 class Doctrine_Connection_Profiler implements Doctrine_Overloadable, IteratorAggregate, Countable
 {
-    /**
-     * @param array $listeners      an array containing all availible listeners
-     */
-    private $listeners  = ['query',
-                                'prepare',
-                                'commit',
-                                'rollback',
-                                'connect',
-                                'begintransaction',
-                                'exec',
-                                'execute'];
-
-    /**
-     * @param array $events         an array containing all listened events
-     */
-    private $events     = [];
-
-    /**
-     * @param array $eventSequences         an array containing sequences of all listened events as keys
-     */
-    private $eventSequences = [];
-
-    /**
-     * constructor
-     */
-    public function __construct() {
-
-    }
-
-    /**
-     * setFilterQueryType
-     *
-     * @param integer $filter
-     * @return boolean
-     */
-    public function setFilterQueryType() {
-                                             
-    }                                         
-    /**
-     * method overloader
-     * this method is used for invoking different listeners, for the full
-     * list of availible listeners, see Doctrine_EventListener
-     *
-     * @param string $m     the name of the method
-     * @param array $a      method arguments
-     * @see Doctrine_EventListener
-     * @return boolean
-     */
-    public function __call($m, $a)
-    {
-        // first argument should be an instance of Doctrine_Event
-        if ( ! ($a[0] instanceof Doctrine_Event)) {
-            throw new Doctrine_Connection_Profiler_Exception("Couldn't listen event. Event should be an instance of Doctrine_Event.");
-        }
-
-
-        if (str_starts_with($m, 'pre')) {
-            // pre-event listener found
-            $a[0]->start();
-
-            $eventSequence = $a[0]->getSequence();
-            if ( ! isset($this->eventSequences[$eventSequence])) {
-                $this->events[] = $a[0];
-                $this->eventSequences[$eventSequence] = true;
-            }
-        } else {
-            // after-event listener found
-            $a[0]->end();
-        }
-    }
-
-    /**
-     * get
-     *
-     * @param mixed $key
-     * @return Doctrine_Event
-     */
-    public function get($key) 
-    {
-        if (isset($this->events[$key])) {
-            return $this->events[$key];
-        }
-        return null;
-    }
-
-    /**
-     * getAll
-     * returns all profiled events as an array
-     *
-     * @return array        all events in an array
-     */
-    public function getAll() 
-    {
-        return $this->events;
-    }
-
-    /**
-     * getIterator
-     * returns an iterator that iterates through the logged events
-     *
-     * @return ArrayIterator
-     */
-    #[\ReturnTypeWillChange]
-    public function getIterator()
-    {
-        return new ArrayIterator($this->events);
-    }
-
-    /**
-     * count
-     * 
-     * @return integer
-     */
-    #[\ReturnTypeWillChange]
-    public function count() 
-    {
-        return count($this->events);
-    }
-
-    /**
-     * pop the last event from the event stack
-     *
-     * @return Doctrine_Event
-     */
-    public function pop() 
-    {
-        $event = array_pop($this->events);
-        if ($event !== null)
-        {
-            unset($this->eventSequences[$event->getSequence()]);
-        }
-        return $event;
-    }
-
-    /**
-     * Get the Doctrine_Event object for the last query that was run, regardless if it has
-     * ended or not. If the event has not ended, it's end time will be Null.
-     *
-     * @return Doctrine_Event
-     */
-    public function lastEvent()
-    {
-        if (empty($this->events)) {
-            return false;
-        }
-
-        end($this->events);
-        return current($this->events);
-    }
+	/**
+	 * @param array $listeners      an array containing all availible listeners
+	 */
+	private array $listeners = [
+		'query', 'prepare', 'commit', 'rollback',
+		'connect', 'begintransaction', 'exec', 'execute',
+	];
+	
+	/**
+	 * @param array $events         an array containing all listened events
+	 */
+	private array $events     = [];
+	
+	/**
+	 * @param array $eventSequences         an array containing sequences of all listened events as keys
+	 */
+	private array $eventSequences = [];
+	
+	/**
+	 * constructor
+	 */
+	public function __construct() {
+	
+	}
+	
+	/**
+	 * setFilterQueryType
+	 *
+	 * @param integer $filter
+	 * @return boolean
+	 */
+	public function setFilterQueryType() {
+	
+	}                                         
+	/**
+	 * method overloader
+	 * this method is used for invoking different listeners, for the full
+	 * list of availible listeners, see Doctrine_EventListener
+	 *
+	 * @param string $m     the name of the method
+	 * @param array $a      method arguments
+	 * @see Doctrine_EventListener
+	 * @return boolean
+	 */
+	public function __call($m, $a)
+	{
+		// first argument should be an instance of Doctrine_Event
+		if ( ! ($a[0] instanceof Doctrine_Event)) {
+			throw new Doctrine_Connection_Profiler_Exception("Couldn't listen event. Event should be an instance of Doctrine_Event.");
+		}
+		
+		
+		if (str_starts_with($m, 'pre')) {
+			// pre-event listener found
+			$a[0]->start();
+			
+			$eventSequence = $a[0]->getSequence();
+			if ( ! isset($this->eventSequences[$eventSequence])) {
+				$this->events[] = $a[0];
+				$this->eventSequences[$eventSequence] = true;
+			}
+		} else {
+			// after-event listener found
+			$a[0]->end();
+		}
+	}
+	
+	/**
+	 * get
+	 *
+	 * @param mixed $key
+	 * @return Doctrine_Event
+	 */
+	public function get($key) 
+	{
+		if (isset($this->events[$key])) {
+			return $this->events[$key];
+		}
+		return null;
+	}
+	
+	/**
+	 * getAll
+	 * returns all profiled events as an array
+	 *
+	 * @return array        all events in an array
+	 */
+	public function getAll() 
+	{
+		return $this->events;
+	}
+	
+	/**
+	 * getIterator
+	 * returns an iterator that iterates through the logged events
+	 *
+	 * @return ArrayIterator
+	 */
+	public function getIterator(): \Iterator
+	{
+		return new ArrayIterator($this->events);
+	}
+	
+	/**
+	 * count
+	 * 
+	 * @return integer
+	 */
+	public function count(): int
+	{
+		return count($this->events);
+	}
+	
+	/**
+	 * pop the last event from the event stack
+	 *
+	 * @return Doctrine_Event
+	 */
+	public function pop() 
+	{
+		$event = array_pop($this->events);
+		if ($event !== null)
+		{
+			unset($this->eventSequences[$event->getSequence()]);
+		}
+		return $event;
+	}
+	
+	/**
+	 * Get the Doctrine_Event object for the last query that was run, regardless if it has
+	 * ended or not. If the event has not ended, it's end time will be Null.
+	 *
+	 * @return Doctrine_Event
+	 */
+	public function lastEvent()
+	{
+		if (empty($this->events)) {
+			return false;
+		}
+		
+		end($this->events);
+		return current($this->events);
+	}
 }

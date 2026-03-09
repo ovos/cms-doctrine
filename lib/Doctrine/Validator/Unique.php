@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Unique.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,64 +30,64 @@
  */
 class Doctrine_Validator_Unique extends Doctrine_Validator_Driver
 {
-    /**
-     * checks if given value is unique
-     *
-     * @param mixed $value
-     * @return boolean
-     */
-    public function validate($value)
-    {
-        if ($value === null) {
-            return true;
-        }
-
-        $table = $this->invoker->getTable();
-        $conn = $table->getConnection();
-        $pks = $table->getIdentifierColumnNames();
-
-        if (is_array($pks)) {
-            for ($i = 0, $l = count($pks); $i < $l; $i++) {
-                $pks[$i] = $conn->quoteIdentifier($pks[$i]);
-            }
-            
-            $pks = implode(', ', $pks);
-        }
-
-        $sql = 'SELECT ' . $pks . ' FROM ' . $conn->quoteIdentifier($table->getTableName()) . ' WHERE ';
-        
-        if (is_array($this->field)) {
-            foreach ($this->field as $k => $v) {
-                $this->field[$k] = $conn->quoteIdentifier($table->getColumnName($v));
-            }
-        
-            $sql .= implode(' = ? AND ', $this->field) . ' = ?';
-            $values = $value;
-        } else {
-            $sql .= $conn->quoteIdentifier($table->getColumnName($this->field)) . ' = ?';
-            $values = [];
-            $values[] = $value;
-        }
-        
-        // If the record is not new we need to add primary key checks because its ok if the 
-        // unique value already exists in the database IF the record in the database is the same
-        // as the one that is validated here.
-        $state = $this->invoker->state();
-        if ( ! ($state == Doctrine_Record::STATE_TDIRTY || $state == Doctrine_Record::STATE_TCLEAN)) {
-            foreach ((array) $table->getIdentifierColumnNames() as $pk) {
-                $sql .= ' AND ' . $conn->quoteIdentifier($pk) . ' != ?';
-                $pkFieldName = $table->getFieldName($pk);
-                $values[] = $this->invoker->$pkFieldName;
-            }
-        }
-
-        if (isset($this->args) && is_array($this->args) && isset($this->args['where'])) {
-            $sql .= ' AND ' . $this->args['where'];
-        }
-
-        $stmt  = $table->getConnection()->getDbh()->prepare($sql);
-        $stmt->execute($values);
-
-        return ( ! is_array($stmt->fetch()));
-    }
+	/**
+	 * checks if given value is unique
+	 *
+	 * @param mixed $value
+	 * @return boolean
+	 */
+	public function validate($value)
+	{
+		if ($value === null) {
+			return true;
+		}
+		
+		$table = $this->invoker->getTable();
+		$conn = $table->getConnection();
+		$pks = $table->getIdentifierColumnNames();
+		
+		if (is_array($pks)) {
+			for ($i = 0, $l = count($pks); $i < $l; $i++) {
+				$pks[$i] = $conn->quoteIdentifier($pks[$i]);
+			}
+			
+			$pks = implode(', ', $pks);
+		}
+		
+		$sql = 'SELECT ' . $pks . ' FROM ' . $conn->quoteIdentifier($table->getTableName()) . ' WHERE ';
+		
+		if (is_array($this->field)) {
+			foreach ($this->field as $k => $v) {
+				$this->field[$k] = $conn->quoteIdentifier($table->getColumnName($v));
+			}
+			
+			$sql .= implode(' = ? AND ', $this->field) . ' = ?';
+			$values = $value;
+		} else {
+			$sql .= $conn->quoteIdentifier($table->getColumnName($this->field)) . ' = ?';
+			$values = [];
+			$values[] = $value;
+		}
+		
+		// If the record is not new we need to add primary key checks because its ok if the 
+		// unique value already exists in the database IF the record in the database is the same
+		// as the one that is validated here.
+		$state = $this->invoker->state();
+		if ( ! ($state === Doctrine_Record::STATE_TDIRTY || $state === Doctrine_Record::STATE_TCLEAN)) {
+			foreach ((array) $table->getIdentifierColumnNames() as $pk) {
+				$sql .= ' AND ' . $conn->quoteIdentifier($pk) . ' != ?';
+				$pkFieldName = $table->getFieldName($pk);
+				$values[] = $this->invoker->$pkFieldName;
+			}
+		}
+		
+		if (isset($this->args) && is_array($this->args) && isset($this->args['where'])) {
+			$sql .= ' AND ' . $this->args['where'];
+		}
+		
+		$stmt  = $table->getConnection()->getDbh()->prepare($sql);
+		$stmt->execute($values);
+		
+		return ( ! is_array($stmt->fetch()));
+	}
 }

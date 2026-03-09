@@ -1,3 +1,34 @@
+1.4.0 (2026-03-09)
+------------------
+### PHP 8.3 modernization
+- Converted entire library indentation from spaces to tabs (276+ files)
+- Fixed mixed tab+space indentation to pure tabs (133 files)
+- Removed `#[\ReturnTypeWillChange]` attributes, added proper return types to 34 methods across 17 files (ArrayAccess, Countable, Iterator, IteratorAggregate implementations)
+- Added typed properties to 112 class properties across 44 files (array, bool, int, string, float types inferred from defaults and docblocks)
+- Added strict mode (`true` 3rd argument) to 117 `in_array()` calls across 27 files
+- Added PHP 8.3 typed constants (`int`, `string`, `bool`, `array`) to 246 constants across 10 files
+- Removed Oracle database support (Connection, Adapter, DataDict, Export, Expression, Import, Sequence, Transaction)
+- Removed MSSQL database support (Connection, DataDict, Export, Expression, Import, Sequence, Transaction)
+- Removed Xcache cache driver
+- Removed Memcache cache driver (legacy `ext-memcache`; Memcached via `ext-memcached` was not included)
+- Replaced deprecated `utf8_decode()` with `mb_strlen()` in `Doctrine_Validator`
+- Removed `Zf1s\Compat\Types` usage from test files
+
+1.4.0 (2026-03-09)
+------------------
+- [OV26] Memory usage improvements:
+  - `Doctrine_Query::free()` — comprehensive cleanup of 20+ properties; breaks PHP references shared via `copySubqueryInfo()` (using `unset()` before reassignment) to avoid corrupting parent query state when freeing subqueries
+  - `Doctrine_Record::free()` — now also clears `_pendingDeletes`, `_pendingUnlinks`, `_pendingUnlinksExcept`, `_pendingLinks`, `_modified`, `_oldValues`, `_values`
+  - `Doctrine_Record::resetPendingUnlinks()` — also clears `_pendingDeletes` (was a memory leak — never cleared after save)
+  - `Doctrine_Collection::free()` — clears `_snapshot` array used by `processDiff()`
+- [OV27] `Doctrine_Table::makeRecordInstance()` — protected factory method used by `create()` and `getRecord()`, allowing subclasses to override record instantiation (e.g. for DI container integration)
+- [OV27] `Doctrine_Table::hasLoadedRecord($id)` / `getLoadedRecord($id)` — public helpers to check/retrieve records from the identity map without triggering a database query
+- [OV28] `Doctrine_Record::relatedExists()` — returns `true` for collections instead of throwing an exception (collections always exist as a relation, even if empty)
+- [OV29] `Doctrine_Record::__call()` — caches template method owner even when a non-`BadMethodCallException` is thrown, then re-throws; avoids repeated template lookups on subsequent calls to the same method
+- [OV30] `Doctrine_Connection_Module` — constructor now supports namespaced subclass names (e.g. `CMS\Doctrine\Formatter` correctly resolves module name instead of failing)
+- Added `Doctrine_Table_MakeRecordInstance_TestCase` with 5 tests for the new factory method and identity map helpers
+- Updated `Doctrine_Ticket_2123_TestCase` to reflect the new `relatedExists()` behavior
+
 1.3.4 (2022-10-17)
 - php 8.2 compatibility fixes [#12](https://github.com/ovos/doctrine1/pull/12)
 - php 8.1 compatibility fixes [#11](https://github.com/ovos/doctrine1/pull/11)

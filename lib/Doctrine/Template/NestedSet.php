@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id$
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,24 +30,24 @@
  */
 class Doctrine_Template_NestedSet extends Doctrine_Template
 {
-    /**
-     * Set up NestedSet template
-     *
-     * @return void
-     */
-    public function setUp()
-    {
-        $this->_table->setOption('treeOptions', $this->_options);
-        $this->_table->setOption('treeImpl', 'NestedSet');
-    }
-
-    /**
-     * Call set table definition for the NestedSet behavior
-     *
-     * @return void
-     */
-    public function setTableDefinition()
-    {
-        $this->_table->getTree()->setTableDefinition();
-    }
+	/**
+	 * Set up NestedSet template
+	 *
+	 * @return void
+	 */
+	public function setUp()
+	{
+		$this->_table->setOption('treeOptions', $this->_options);
+		$this->_table->setOption('treeImpl', 'NestedSet');
+	}
+	
+	/**
+	 * Call set table definition for the NestedSet behavior
+	 *
+	 * @return void
+	 */
+	public function setTableDefinition()
+	{
+		$this->_table->getTree()->setTableDefinition();
+	}
 }

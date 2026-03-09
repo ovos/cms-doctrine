@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Hydrate.php 3192 2007-11-19 17:55:23Z romanb $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,90 +30,90 @@
  */
 abstract class Doctrine_Hydrator_Abstract extends Doctrine_Locator_Injectable
 {
-    protected
-        $_queryComponents = [],
-        $_tableAliases = [],
-        $_priorRow,
-        $_hydrationMode;
-
-    public function __construct($queryComponents = null, $tableAliases = null, $hydrationMode = null)
-    {
-        $this->setQueryComponents($queryComponents);
-        $this->setTableAliases($tableAliases);
-        $this->setHydrationMode($hydrationMode);
-    }
-
-    /**
-     * Set the query components (structure and query instructions)
-     *
-     * @param array $queryComponents
-     * @return void
-     */
-    public function setQueryComponents($queryComponents)
-    {
-        $this->_queryComponents = $queryComponents;
-    }
-
-    /**
-     * Set the table aliases for this query
-     *
-     * @param array $tableAliases
-     * @return void
-     */
-    public function setTableAliases($tableAliases)
-    {
-        $this->_tableAliases = $tableAliases;
-    }
-
-    /**
-     * Set the hydration mode
-     *
-     * @param mixed $hydrationMode  One of the Doctrine_Core::HYDRATE_* constants or
-     *                              a string representing the name of the hydration mode or
-     *                              or an instance of the hydration class
-     * @return void
-     */
-    public function setHydrationMode($hydrationMode)
-    {
-        $this->_hydrationMode = $hydrationMode;
-    }
-
-    public function getRootComponent()
-    {
-        $queryComponents = array_values($this->_queryComponents);
-        return $queryComponents[0]['table'];
-    }
-
-    public function onDemandReset()
-    {
-        $this->_priorRow = null;
-    }
-
-    /**
-     * Checks whether a name is ignored. Used during result set parsing to skip
-     * certain elements in the result set that do not have any meaning for the result.
-     * (I.e. ORACLE limit/offset emulation adds doctrine_rownum to the result set).
-     *
-     * @param string $name
-     * @return boolean
-     */
-    protected function _isIgnoredName($name)
-    {
-        return $name == 'DOCTRINE_ROWNUM';
-    }
-
-    /**
-     * hydrateResultSet
-     * parses the data returned by statement object
-     *
-     * This is method defines the core of Doctrine object population algorithm
-     * hence this method strives to be as fast as possible
-     *
-     * The key idea is the loop over the rowset only once doing all the needed operations
-     * within this massive loop.
-     *
-     * @param mixed $stmt
-     * @return mixed
-     */
-    abstract public function hydrateResultSet($stmt);
+	protected
+		$_queryComponents = [],
+		$_tableAliases = [],
+		$_priorRow,
+		$_hydrationMode;
+	
+	public function __construct($queryComponents = null, $tableAliases = null, $hydrationMode = null)
+	{
+		$this->setQueryComponents($queryComponents);
+		$this->setTableAliases($tableAliases);
+		$this->setHydrationMode($hydrationMode);
+	}
+	
+	/**
+	 * Set the query components (structure and query instructions)
+	 *
+	 * @param array $queryComponents
+	 * @return void
+	 */
+	public function setQueryComponents($queryComponents)
+	{
+		$this->_queryComponents = $queryComponents;
+	}
+	
+	/**
+	 * Set the table aliases for this query
+	 *
+	 * @param array $tableAliases
+	 * @return void
+	 */
+	public function setTableAliases($tableAliases)
+	{
+		$this->_tableAliases = $tableAliases;
+	}
+	
+	/**
+	 * Set the hydration mode
+	 *
+	 * @param mixed $hydrationMode  One of the Doctrine_Core::HYDRATE_* constants or
+	 *                              a string representing the name of the hydration mode or
+	 *                              or an instance of the hydration class
+	 * @return void
+	 */
+	public function setHydrationMode($hydrationMode)
+	{
+		$this->_hydrationMode = $hydrationMode;
+	}
+	
+	public function getRootComponent()
+	{
+		$queryComponents = array_values($this->_queryComponents);
+		return $queryComponents[0]['table'];
+	}
+	
+	public function onDemandReset()
+	{
+		$this->_priorRow = null;
+	}
+	
+	/**
+	 * Checks whether a name is ignored. Used during result set parsing to skip
+	 * certain elements in the result set that do not have any meaning for the result.
+	 * (I.e. ORACLE limit/offset emulation adds doctrine_rownum to the result set).
+	 *
+	 * @param string $name
+	 * @return boolean
+	 */
+	protected function _isIgnoredName($name)
+	{
+		return $name === 'DOCTRINE_ROWNUM';
+	}
+	
+	/**
+	 * hydrateResultSet
+	 * parses the data returned by statement object
+	 *
+	 * This is method defines the core of Doctrine object population algorithm
+	 * hence this method strives to be as fast as possible
+	 *
+	 * The key idea is the loop over the rowset only once doing all the needed operations
+	 * within this massive loop.
+	 *
+	 * @param mixed $stmt
+	 * @return mixed
+	 */
+	abstract public function hydrateResultSet($stmt);
 }

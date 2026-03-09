@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Json.php 1080 2007-02-10 18:17:08Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,38 +30,38 @@
  */
 class Doctrine_Parser_Json extends Doctrine_Parser
 {
-    /**
-     * dumpData
-     *
-     * Dump an array of data to a specified path or return
-     * 
-     * @param string $array Array of data to dump to json
-     * @param string $path  Path to dump json data to
-     * @param string $charset The charset of the data being dumped
-     * @return string $json
-     * @return void
-     */
-    public function dumpData($array, $path = null, $charset = null)
-    {
-        $data = json_encode($array);
-        
-        return $this->doDump($data, $path);
-    }
-
-    /**
-     * loadData
-     *
-     * Load and unserialize data from a file or from passed data
-     * 
-     * @param  string $path   Path to dump data to
-     * @return array  $json   Array of json objects
-     */
-    public function loadData($path)
-    {
-        $contents = $this->doLoad($path);
-        
-        $json = json_decode($contents);
-        
-        return $json;
-    }
+	/**
+	 * dumpData
+	 *
+	 * Dump an array of data to a specified path or return
+	 * 
+	 * @param string $array Array of data to dump to json
+	 * @param string $path  Path to dump json data to
+	 * @param string $charset The charset of the data being dumped
+	 * @return string $json
+	 * @return void
+	 */
+	public function dumpData($array, $path = null, $charset = null)
+	{
+		$data = json_encode($array);
+		
+		return $this->doDump($data, $path);
+	}
+	
+	/**
+	 * loadData
+	 *
+	 * Load and unserialize data from a file or from passed data
+	 * 
+	 * @param  string $path   Path to dump data to
+	 * @return array  $json   Array of json objects
+	 */
+	public function loadData($path)
+	{
+		$contents = $this->doLoad($path);
+		
+		$json = json_decode($contents);
+		
+		return $json;
+	}
 }

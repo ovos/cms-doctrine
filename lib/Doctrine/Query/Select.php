@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Select.php 1080 2007-02-10 18:17:08Z romanb $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,8 +30,8 @@
  */
 class Doctrine_Query_Select extends Doctrine_Query_Part
 {
-    public function parse($dql) 
-    {
-        $this->query->parseSelect($dql);
-    }
+	public function parse($dql) 
+	{
+		$this->query->parseSelect($dql);
+	}
 }

@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Dql.php 2761 2007-10-07 23:42:29Z zYne $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,42 +30,42 @@
  */
 class Doctrine_Task_Dql extends Doctrine_Task
 {
-    public $description          =   'Execute dql query and display the results',
-           $requiredArguments    =   ['models_path'    =>  'Specify path to your Doctrine_Record definitions.',
-                                           'dql_query'      =>  'Specify the complete dql query to execute.'],
-           $optionalArguments    =   ['params'         =>  'Comma separated list of the params to replace the ? tokens in the dql'];
-
-    public function execute()
-    {
-        Doctrine_Core::loadModels($this->getArgument('models_path'));
-
-        $dql = $this->getArgument('dql_query');
-
-        $query = Doctrine_Query::create();
-
-        $params = $this->getArgument('params');
-        $params = $params ? explode(',', $params):[];
-
-        $this->notify('executing: "' . $dql . '" (' . implode(', ', $params) . ')');
-
-        $results = $query->query($dql, $params, Doctrine_Core::HYDRATE_ARRAY);
-
-        $this->_printResults($results);
-    }
-
-    protected function _printResults($array)
-    {
-        $yaml = Doctrine_Parser::dump($array, 'yml');
-        $lines = explode("\n", $yaml);
-
-        unset($lines[0]);
-
-        foreach ($lines as $yamlLine) {
-            $line = trim($yamlLine);
-
-            if ($line) {
-                $this->notify($yamlLine);
-            }
-        }
-    }
+	public $description          =   'Execute dql query and display the results',
+			$requiredArguments    =   ['models_path'    =>  'Specify path to your Doctrine_Record definitions.',
+											'dql_query'      =>  'Specify the complete dql query to execute.'],
+			$optionalArguments    =   ['params'         =>  'Comma separated list of the params to replace the ? tokens in the dql'];
+	
+	public function execute()
+	{
+		Doctrine_Core::loadModels($this->getArgument('models_path'));
+		
+		$dql = $this->getArgument('dql_query');
+		
+		$query = Doctrine_Query::create();
+		
+		$params = $this->getArgument('params');
+		$params = $params ? explode(',', $params):[];
+		
+		$this->notify('executing: "' . $dql . '" (' . implode(', ', $params) . ')');
+		
+		$results = $query->query($dql, $params, Doctrine_Core::HYDRATE_ARRAY);
+		
+		$this->_printResults($results);
+	}
+	
+	protected function _printResults($array)
+	{
+		$yaml = Doctrine_Parser::dump($array, 'yml');
+		$lines = explode("\n", $yaml);
+		
+		unset($lines[0]);
+		
+		foreach ($lines as $yamlLine) {
+			$line = trim($yamlLine);
+			
+			if ($line) {
+				$this->notify($yamlLine);
+			}
+		}
+	}
 }

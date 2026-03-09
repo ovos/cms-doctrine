@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Exception.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -33,9 +31,9 @@
  */
 class Doctrine_Table_Exception extends Doctrine_Exception
 {
-    public function __construct($message = "Couldn't initialize table. One instance of this
+	public function __construct($message = "Couldn't initialize table. One instance of this
                             table already exists. Always use Doctrine_Session::getTable(\$name)
                             to get on instance of a Doctrine_Table.") {
-        parent::__construct($message);
-    }
+		parent::__construct($message);
+	}
 }

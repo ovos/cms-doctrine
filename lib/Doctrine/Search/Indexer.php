@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id$
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,40 +30,40 @@
  */
 class Doctrine_Search_Indexer
 {
-    public function indexDirectory($dir)
-    {
-        if ( ! file_exists($dir)) {
-           throw new Doctrine_Search_Indexer_Exception('Unknown directory ' . $dir);
-        }
-
-        $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir), RecursiveIteratorIterator::LEAVES_ONLY);
-
-        $files = [];
-        foreach ($it as $file) {
-            $name = $file->getPathName();
-            if (!str_contains($name, '.svn')) {
-                $files[] = $name;
-            }
-        }
-
-        $q = Doctrine_Core::getTable('Doctrine_File')
-            ->createQuery('f')
-            ->delete()
-            ->where('f.url LIKE ?', [$dir . '%'])
-            ->execute();
-
-        // clear the index
-        $q = Doctrine_Core::getTable('Doctrine_File_Index')
-            ->createQuery('i')
-            ->where('i.file_id = ?')
-            ->execute();
-
-        $coll = Doctrine_Collection::create('Doctrine_File');
-
-        foreach ($files as $file) {
-            $coll[]->url = $file;
-        }
-        
-        $coll->save();
-    }
+	public function indexDirectory($dir)
+	{
+		if ( ! file_exists($dir)) {
+			throw new Doctrine_Search_Indexer_Exception('Unknown directory ' . $dir);
+		}
+		
+		$it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir), RecursiveIteratorIterator::LEAVES_ONLY);
+		
+		$files = [];
+		foreach ($it as $file) {
+			$name = $file->getPathName();
+			if (!str_contains($name, '.svn')) {
+				$files[] = $name;
+			}
+		}
+		
+		$q = Doctrine_Core::getTable('Doctrine_File')
+			->createQuery('f')
+			->delete()
+			->where('f.url LIKE ?', [$dir . '%'])
+			->execute();
+		
+		// clear the index
+		$q = Doctrine_Core::getTable('Doctrine_File_Index')
+			->createQuery('i')
+			->where('i.file_id = ?')
+			->execute();
+		
+		$coll = Doctrine_Collection::create('Doctrine_File');
+		
+		foreach ($files as $file) {
+			$coll[]->url = $file;
+		}
+		
+		$coll->save();
+	}
 }

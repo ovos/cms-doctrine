@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: GenerateYamlDb.php 2761 2007-10-07 23:42:29Z zYne $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,14 +30,14 @@
  */
 class Doctrine_Task_GenerateYamlDb extends Doctrine_Task
 {
-    public $description          =   'Generates a Yaml schema file from an existing database',
-           $requiredArguments    =   ['yaml_schema_path'   =>  'Specify the path to your yaml schema files.'],
-           $optionalArguments    =   [];
-    
-    public function execute()
-    {
-        Doctrine_Core::generateYamlFromDb($this->getArgument('yaml_schema_path'));
-        
-        $this->notify('Generate YAML schema successfully from database');
-    }
+	public $description          =   'Generates a Yaml schema file from an existing database',
+			$requiredArguments    =   ['yaml_schema_path'   =>  'Specify the path to your yaml schema files.'],
+			$optionalArguments    =   [];
+	
+	public function execute()
+	{
+		Doctrine_Core::generateYamlFromDb($this->getArgument('yaml_schema_path'));
+		
+		$this->notify('Generate YAML schema successfully from database');
+	}
 }

@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: BuildAllLoad.php 2761 2007-10-07 23:42:29Z zYne $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,37 +30,37 @@
  */
 class Doctrine_Task_BuildAllLoad extends Doctrine_Task
 {
-    public $description          =   'Calls build-all, and load-data',
-           $requiredArguments    =   [],
-           $optionalArguments    =   [];
-
-    /**
-     * @var Doctrine_Task_BuildAll
-     */
-    protected $buildAll;
-
-    /**
-     * @var Doctrine_Task_LoadData
-     */
-    protected $loadData;
-
-    public function __construct($dispatcher = null)
-    {
-        parent::__construct($dispatcher);
-
-        $this->buildAll = new Doctrine_Task_BuildAll($this->dispatcher);
-        $this->loadData = new Doctrine_Task_LoadData($this->dispatcher);
-        
-        $this->requiredArguments = array_merge($this->requiredArguments, $this->buildAll->requiredArguments, $this->loadData->requiredArguments);
-        $this->optionalArguments = array_merge($this->optionalArguments, $this->buildAll->optionalArguments, $this->loadData->optionalArguments);
-    }
-    
-    public function execute()
-    {
-        $this->buildAll->setArguments($this->getArguments());
-        $this->buildAll->execute();
-        
-        $this->loadData->setArguments($this->getArguments());
-        $this->loadData->execute();
-    }
+	public $description          =   'Calls build-all, and load-data',
+			$requiredArguments    =   [],
+			$optionalArguments    =   [];
+	
+	/**
+	 * @var Doctrine_Task_BuildAll
+	 */
+	protected $buildAll;
+	
+	/**
+	 * @var Doctrine_Task_LoadData
+	 */
+	protected $loadData;
+	
+	public function __construct($dispatcher = null)
+	{
+		parent::__construct($dispatcher);
+		
+		$this->buildAll = new Doctrine_Task_BuildAll($this->dispatcher);
+		$this->loadData = new Doctrine_Task_LoadData($this->dispatcher);
+		
+		$this->requiredArguments = array_merge($this->requiredArguments, $this->buildAll->requiredArguments, $this->loadData->requiredArguments);
+		$this->optionalArguments = array_merge($this->optionalArguments, $this->buildAll->optionalArguments, $this->loadData->optionalArguments);
+	}
+	
+	public function execute()
+	{
+		$this->buildAll->setArguments($this->getArguments());
+		$this->buildAll->execute();
+		
+		$this->loadData->setArguments($this->getArguments());
+		$this->loadData->execute();
+	}
 }

@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: GenerateMigrationsModels.php 2761 2007-10-07 23:42:29Z zYne $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,15 +30,15 @@
  */
 class Doctrine_Task_GenerateMigrationsModels extends Doctrine_Task
 {
-    public $description          =   'Generate migration classes for an existing set of models',
-           $requiredArguments    =   ['migrations_path' => 'Specify the path to your migration classes folder.',
-                                           'models_path'     => 'Specify the path to your doctrine models folder.'],
-           $optionalArguments    =   [];
-    
-    public function execute()
-    {   
-        Doctrine_Core::generateMigrationsFromModels($this->getArgument('migrations_path'), $this->getArgument('models_path'));
-        
-        $this->notify('Generated migration classes successfully from models');
-    }
+	public $description          =   'Generate migration classes for an existing set of models',
+			$requiredArguments    =   ['migrations_path' => 'Specify the path to your migration classes folder.',
+											'models_path'     => 'Specify the path to your doctrine models folder.'],
+			$optionalArguments    =   [];
+	
+	public function execute()
+	{   
+		Doctrine_Core::generateMigrationsFromModels($this->getArgument('migrations_path'), $this->getArgument('models_path'));
+		
+		$this->notify('Generated migration classes successfully from models');
+	}
 }

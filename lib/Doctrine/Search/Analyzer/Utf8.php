@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id$
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -35,37 +33,37 @@
  */
 class Doctrine_Search_Analyzer_Utf8 extends Doctrine_Search_Analyzer_Standard
 {
-    public function analyze($text, $encoding = null)
-    {
-        if ($encoding === null) {
-          $encoding = $this->_options['encoding'] ??'utf-8';
-        }
-
-        // check that $text encoding is utf-8, if not convert it
-        if (strcasecmp($encoding, 'utf-8') != 0 && strcasecmp($encoding, 'utf8') != 0) {
-            $text = iconv($encoding, 'UTF-8', $text);
-        }
-
-        $text = preg_replace('/[^\p{L}\p{N}]+/u', ' ', $text);
-        $text = str_replace('  ', ' ', $text);
-
-        $terms = explode(' ', $text);
-        
-        $ret = [];
-        if ( ! empty($terms)) {
-            foreach ($terms as $i => $term) {
-                if (empty($term)) {
-                    continue;
-                }
-                $lower = mb_strtolower(trim($term), 'UTF-8');
-
-                if (in_array($lower, self::$_stopwords)) {
-                    continue;
-                }
-
-                $ret[$i] = $lower;
-            }
-        }
-        return $ret;
-    }
+	public function analyze($text, $encoding = null)
+	{
+		if ($encoding === null) {
+			$encoding = $this->_options['encoding'] ??'utf-8';
+		}
+		
+		// check that $text encoding is utf-8, if not convert it
+		if (strcasecmp($encoding, 'utf-8') !== 0 && strcasecmp($encoding, 'utf8') !== 0) {
+			$text = iconv($encoding, 'UTF-8', $text);
+		}
+		
+		$text = preg_replace('/[^\p{L}\p{N}]+/u', ' ', $text);
+		$text = str_replace('  ', ' ', $text);
+		
+		$terms = explode(' ', $text);
+		
+		$ret = [];
+		if ( ! empty($terms)) {
+			foreach ($terms as $i => $term) {
+				if (empty($term)) {
+					continue;
+				}
+				$lower = mb_strtolower(trim($term), 'UTF-8');
+				
+				if (in_array($lower, self::$_stopwords, true)) {
+					continue;
+				}
+				
+				$ret[$i] = $lower;
+			}
+		}
+		return $ret;
+	}
 }

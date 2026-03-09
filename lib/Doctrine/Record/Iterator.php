@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Iterator.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,51 +30,50 @@
  */
 class Doctrine_Record_Iterator extends ArrayIterator
 {
-    /**
-     * @var Doctrine_Record $record
-     */
-    private $record;
-
-    /**
-     * @var Doctrine_Null $null
-     */
-    private static $null;
-
-    /**
-     * constructor
-     *
-     * @param Doctrine_Record $record
-     */
-    public function __construct(Doctrine_Record $record)
-    {
-        $this->record = $record;
-        parent::__construct($record->getData());
-    }
-
-    /**
-     * initNullObject
-     *
-     * @param Doctrine_Null $null
-     */
-    public static function initNullObject(Doctrine_Null $null)
-    {
-        self::$null = $null;
-    }
-
-    /**
-     * current
-     *
-     * @return mixed
-     */
-    #[\ReturnTypeWillChange]
-    public function current()
-    {
-        $value = parent::current();
-
-        if ($value === self::$null) {
-            return null;
-        } else {
-            return $value;
-        }
-    }
+	/**
+	 * @var Doctrine_Record $record
+	 */
+	private $record;
+	
+	/**
+	 * @var Doctrine_Null $null
+	 */
+	private static $null;
+	
+	/**
+	 * constructor
+	 *
+	 * @param Doctrine_Record $record
+	 */
+	public function __construct(Doctrine_Record $record)
+	{
+		$this->record = $record;
+		parent::__construct($record->getData());
+	}
+	
+	/**
+	 * initNullObject
+	 *
+	 * @param Doctrine_Null $null
+	 */
+	public static function initNullObject(Doctrine_Null $null)
+	{
+		self::$null = $null;
+	}
+	
+	/**
+	 * current
+	 *
+	 * @return mixed
+	 */
+	public function current(): mixed
+	{
+		$value = parent::current();
+		
+		if ($value === self::$null) {
+			return null;
+		} else {
+			return $value;
+		}
+	}
 }

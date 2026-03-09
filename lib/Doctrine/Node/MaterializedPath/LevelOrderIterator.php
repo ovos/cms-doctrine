@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: LevelOrderIterator.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,37 +30,37 @@
  */
 class Doctrine_Node_MaterializedPath_LevelOrderIterator implements Iterator
 {
-    private $topNode = null;
-
-    private $curNode = null;
-
-    public function __construct($node, $opts)
-    {
-        throw new Doctrine_Exception('Not yet implemented');
-    }
-
-    public function rewind()
-    {
-        throw new Doctrine_Exception('Not yet implemented');
-    }
-
-    public function valid()
-    {
-        throw new Doctrine_Exception('Not yet implemented');
-    }
-
-    public function current()
-    {
-        throw new Doctrine_Exception('Not yet implemented');
-    }
-
-    public function key()
-    {
-        throw new Doctrine_Exception('Not yet implemented');
-    }
-
-    public function next()
-    {
-        throw new Doctrine_Exception('Not yet implemented');
-    }
+	private $topNode = null;
+	
+	private $curNode = null;
+	
+	public function __construct($node, $opts)
+	{
+		throw new Doctrine_Exception('Not yet implemented');
+	}
+	
+	public function rewind()
+	{
+		throw new Doctrine_Exception('Not yet implemented');
+	}
+	
+	public function valid()
+	{
+		throw new Doctrine_Exception('Not yet implemented');
+	}
+	
+	public function current()
+	{
+		throw new Doctrine_Exception('Not yet implemented');
+	}
+	
+	public function key()
+	{
+		throw new Doctrine_Exception('Not yet implemented');
+	}
+	
+	public function next()
+	{
+		throw new Doctrine_Exception('Not yet implemented');
+	}
 }

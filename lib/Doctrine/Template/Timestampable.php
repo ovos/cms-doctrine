@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id$
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -35,50 +33,56 @@
  */
 class Doctrine_Template_Timestampable extends Doctrine_Template
 {
-    /**
-     * Array of Timestampable options
-     *
-     * @var string
-     */
-    protected $_options = ['created' =>  ['name'          =>  'created_at',
-                                                    'alias'         =>  null,
-                                                    'type'          =>  'timestamp',
-                                                    'format'        =>  'Y-m-d H:i:s',
-                                                    'disabled'      =>  false,
-                                                    'expression'    =>  false,
-                                                    'options'       =>  ['notnull' => true]],
-                                'updated' =>  ['name'          =>  'updated_at',
-                                                    'alias'         =>  null,
-                                                    'type'          =>  'timestamp',
-                                                    'format'        =>  'Y-m-d H:i:s',
-                                                    'disabled'      =>  false,
-                                                    'expression'    =>  false,
-                                                    'onInsert'      =>  true,
-                                                    'options'       =>  ['notnull' => true]]];
-
-    /**
-     * Set table definition for Timestampable behavior
-     *
-     * @return void
-     */
-    public function setTableDefinition()
-    {
-        if ( ! $this->_options['created']['disabled']) {
-            $name = $this->_options['created']['name'];
-            if ($this->_options['created']['alias']) {
-                $name .= ' as ' . $this->_options['created']['alias'];
-            }
-            $this->hasColumn($name, $this->_options['created']['type'], null, $this->_options['created']['options']);
-        }
-
-        if ( ! $this->_options['updated']['disabled']) {
-            $name = $this->_options['updated']['name'];
-            if ($this->_options['updated']['alias']) {
-                $name .= ' as ' . $this->_options['updated']['alias'];
-            }
-            $this->hasColumn($name, $this->_options['updated']['type'], null, $this->_options['updated']['options']);
-        }
-
-        $this->addListener(new Doctrine_Template_Listener_Timestampable($this->_options));
-    }
+	/**
+	 * Array of Timestampable options
+	 *
+	 * @var string
+	 */
+	protected array $_options = [
+		'created' => [
+			'name'       => 'created_at',
+			'alias'      => null,
+			'type'       => 'timestamp',
+			'format'     => 'Y-m-d H:i:s',
+			'disabled'   => false,
+			'expression' => false,
+			'options'    => ['notnull' => true],
+		],
+		'updated' => [
+			'name'       => 'updated_at',
+			'alias'      => null,
+			'type'       => 'timestamp',
+			'format'     => 'Y-m-d H:i:s',
+			'disabled'   => false,
+			'expression' => false,
+			'onInsert'   => true,
+			'options'    => ['notnull' => true],
+		],
+	];
+	
+	/**
+	 * Set table definition for Timestampable behavior
+	 *
+	 * @return void
+	 */
+	public function setTableDefinition()
+	{
+		if ( ! $this->_options['created']['disabled']) {
+			$name = $this->_options['created']['name'];
+			if ($this->_options['created']['alias']) {
+				$name .= ' as ' . $this->_options['created']['alias'];
+			}
+			$this->hasColumn($name, $this->_options['created']['type'], null, $this->_options['created']['options']);
+		}
+		
+		if ( ! $this->_options['updated']['disabled']) {
+			$name = $this->_options['updated']['name'];
+			if ($this->_options['updated']['alias']) {
+				$name .= ' as ' . $this->_options['updated']['alias'];
+			}
+			$this->hasColumn($name, $this->_options['updated']['type'], null, $this->_options['updated']['options']);
+		}
+		
+		$this->addListener(new Doctrine_Template_Listener_Timestampable($this->_options));
+	}
 }

@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id$
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,13 +30,13 @@
  */
 class Doctrine_Hydrator_ArrayShallowDriver extends Doctrine_Hydrator_ScalarDriver
 {
-    public function hydrateResultSet($stmt)
-    {
-        $cache = [];
-        $result = [];
-        while ($data = $stmt->fetch(Doctrine_Core::FETCH_ASSOC)) {
-            $result[] = $this->_gatherRowData($data, $cache, false);
-        }
-        return $result;
-    }
+	public function hydrateResultSet($stmt)
+	{
+		$cache = [];
+		$result = [];
+		while ($data = $stmt->fetch(Doctrine_Core::FETCH_ASSOC)) {
+			$result[] = $this->_gatherRowData($data, $cache, false);
+		}
+		return $result;
+	}
 }

@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: CreateDb.php 2761 2007-10-07 23:42:29Z zYne $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,19 +30,19 @@
  */
 class Doctrine_Task_CreateDb extends Doctrine_Task
 {
-    public $description          =   'Create all databases for your connections. If the database already exists, nothing happens.',
-           $optionalArguments    =   [];
-    
-    public function execute()
-    {
-        $manager = Doctrine_Manager::getInstance();
-        foreach ($manager as $name => $connection) {
-            try {
-                $connection->createDatabase();
-                $this->notify("Successfully created database for connection named '" . $name . "'");
-            } catch (Exception $e) {
-                $this->notify($e->getMessage());
-            }
-        }
-    }
+	public $description          =   'Create all databases for your connections. If the database already exists, nothing happens.',
+			$optionalArguments    =   [];
+	
+	public function execute()
+	{
+		$manager = Doctrine_Manager::getInstance();
+		foreach ($manager as $name => $connection) {
+			try {
+				$connection->createDatabase();
+				$this->notify("Successfully created database for connection named '" . $name . "'");
+			} catch (Exception $e) {
+				$this->notify($e->getMessage());
+			}
+		}
+	}
 }

@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id$
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,24 +30,24 @@
  */
 class Doctrine_File extends Doctrine_Record
 {
-    public function setTableDefinition()
-    {
-        $this->hasColumn('url', 'string', 255);
-    }
-
-    public function setUp()
-    {
-        $this->actAs('Searchable', ['className' => 'Doctrine_File_Index',
-                                         'fields' => ['url', 'content']]);
-        
-        $this->index('url', ['fields' => ['url']]);
-    }
-
-    public function get($name, $load = true)
-    {
-        if ($name === 'content') {
-            return file_get_contents(parent::get('url'));
-        }
-        return parent::get($name, $load);
-    }
+	public function setTableDefinition()
+	{
+		$this->hasColumn('url', 'string', 255);
+	}
+	
+	public function setUp()
+	{
+		$this->actAs('Searchable', ['className' => 'Doctrine_File_Index',
+											'fields' => ['url', 'content']]);
+		
+		$this->index('url', ['fields' => ['url']]);
+	}
+	
+	public function get($name, $load = true)
+	{
+		if ($name === 'content') {
+			return file_get_contents(parent::get('url'));
+		}
+		return parent::get($name, $load);
+	}
 }

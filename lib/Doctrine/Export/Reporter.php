@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Reporter.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,20 +30,20 @@
  */
 class Doctrine_Export_Reporter implements IteratorAggregate
 {
-    protected $messages = [];
-
-    public function add($code, $message)
-    {
-        $this->messages[] = [$code, $message];
-    }
-
-    public function pop()
-    {
-        return array_pop($this->messages);
-    }
-
-    public function getIterator()
-    {
-        return new ArrayIterator($this->messages);
-    }
+	protected array $messages = [];
+	
+	public function add($code, $message)
+	{
+		$this->messages[] = [$code, $message];
+	}
+	
+	public function pop()
+	{
+		return array_pop($this->messages);
+	}
+	
+	public function getIterator()
+	{
+		return new ArrayIterator($this->messages);
+	}
 }

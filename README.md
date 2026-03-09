@@ -1,15 +1,13 @@
 Doctrine 1
 ==========
 
-[![Build Status](https://travis-ci.com/ovos/doctrine1.svg?branch=master)](https://travis-ci.com/ovos/doctrine1)
-
 #### [Documentation](https://www.doctrine-project.org/projects/doctrine1/en/latest/index.html) ↗
 
-This is a fork of [doctrine/doctrine1](https://github.com/doctrine/doctrine1), adjusted for compatibility with php 5.3-8.3
-and mysql 5.7 and 8.0. Tested only with mysql.
+This is a fork of [doctrine/doctrine1](https://github.com/doctrine/doctrine1).
+Requires **PHP 8.3+** and **MySQL 8.0+**. Tested only with MySQL.
 
 It will be maintained as long as we are using it.
-Feel free to submit your [Issues](https://github.com/ovos/doctrine1/issues) and [Pull Requests](https://github.com/ovos/doctrine1/pulls).
+Feel free to submit your [Issues](https://github.com/ovos/cms-doctrine/issues) and [Pull Requests](https://github.com/ovos/cms-doctrine/pulls).
 
 There are also some performance tweaks and features added, i.a.:
 - **[BC BREAK]** modified doctrine collection & record serialization - store less data in cache, but losing the feature of keeping state of modified data
@@ -25,12 +23,23 @@ There are also some performance tweaks and features added, i.a.:
   - cache queries without limit and offset (to save less cache records) - added `Doctrine_Core::ATTR_QUERY_CACHE_NO_OFFSET_LIMIT` - set to true to enable the feature
   - added parent query components for subqueries, to indicate subquery context - changing cache hash
   - WHERE IN adjustments for better caching and performance
-- Limit subquery adjustments for mysql 5.7 and performance
+- Limit subquery adjustments and smart LEFT JOIN pruning for performance
+- MySQL 8.0+ `ROW_NUMBER()` window function for limit subquery deduplication (replaces deprecated `@rownum` user variables)
+- Memory usage improvements:
+  - `Doctrine_Query::free()` — comprehensive cleanup of 20+ properties with proper reference-breaking for properties shared between parent/subqueries via `copySubqueryInfo()`
+  - `Doctrine_Record::free()` — clears pending deletes/unlinks/links, modified tracking, old values, and mapped values
+  - `Doctrine_Record::resetPendingUnlinks()` — also clears `_pendingDeletes` (was a memory leak — never cleared after save)
+  - `Doctrine_Collection::free()` — clears snapshot data used by `processDiff()`
+- `Doctrine_Table::makeRecordInstance()` — protected factory method for DI-compatible record instantiation, used by `create()` and `getRecord()`
+- `Doctrine_Table::hasLoadedRecord()` / `getLoadedRecord()` — identity map helpers to check/retrieve records without triggering a query
+- `Doctrine_Record::relatedExists()` — returns `true` for collections instead of throwing an exception
+- `Doctrine_Record::__call()` — caches template method owner even when a non-`BadMethodCallException` is thrown (avoids repeated lookups on subsequent calls)
+- `Doctrine_Connection_Module` — supports namespaced subclass names (e.g. `CMS\Doctrine\Formatter` resolves module name correctly)
 
 These are only highlights, [full changelog here](CHANGELOG.md).
 
 
-### Installation: 
+### Installation
 ```
-composer require ovos/doctrine1
+composer require ovos/cms-doctrine
 ```

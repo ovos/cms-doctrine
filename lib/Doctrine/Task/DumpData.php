@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: GenerateSql.php 2761 2007-10-07 23:42:29Z zYne $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,31 +30,31 @@
  */
 class Doctrine_Task_DumpData extends Doctrine_Task
 {
-    public $description          =   'Dump data to a yaml data fixture file.',
-           $requiredArguments    =   ['data_fixtures_path' =>  'Specify path to write the yaml data fixtures file to.',
-                                           'models_path'        =>  'Specify path to your Doctrine_Record definitions.'],
-           $optionalArguments    =   [];
-
-    public function execute()
-    {
-        $models = Doctrine_Core::loadModels($this->getArgument('models_path')); 
-
-        if (empty($models)) { 
-            throw new Doctrine_Task_Exception('No models were loaded'); 
-        }
-
-        $path = $this->getArgument('data_fixtures_path');
-
-        if (is_array($path) && count($path) > 0) {
-            $path = $path[0];
-        }
-
-        if ( ! empty($path)) {
-            Doctrine_Core::dumpData($path);
-
-            $this->notify(sprintf('Dumped data successfully to: %s', $path));
-        } else {
-            throw new Doctrine_Task_Exception('Unable to find data fixtures path.');
-        }
-    }
+	public $description          =   'Dump data to a yaml data fixture file.',
+			$requiredArguments    =   ['data_fixtures_path' =>  'Specify path to write the yaml data fixtures file to.',
+											'models_path'        =>  'Specify path to your Doctrine_Record definitions.'],
+			$optionalArguments    =   [];
+	
+	public function execute()
+	{
+		$models = Doctrine_Core::loadModels($this->getArgument('models_path')); 
+		
+		if (empty($models)) { 
+			throw new Doctrine_Task_Exception('No models were loaded'); 
+		}
+		
+		$path = $this->getArgument('data_fixtures_path');
+		
+		if (is_array($path) && count($path) > 0) {
+			$path = $path[0];
+		}
+		
+		if ( ! empty($path)) {
+			Doctrine_Core::dumpData($path);
+			
+			$this->notify(sprintf('Dumped data successfully to: %s', $path));
+		} else {
+			throw new Doctrine_Task_Exception('Unable to find data fixtures path.');
+		}
+	}
 }

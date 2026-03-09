@@ -8,8 +8,6 @@
  */
 
 /*
- *  $Id: Formatter.php 2702 2007-10-03 21:43:22Z Jonathan.Wage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -42,75 +40,75 @@
  */
 class Doctrine_Cli_Formatter
 {
-    protected $_size = 65;
-
-    /**
-     * __construct
-     *
-     * @param string $maxLineSize 
-     * @return void
-     */
-    function __construct($maxLineSize = 65)
-    {
-        $this->_size = $maxLineSize;
-    }
-
-    /**
-     * Formats a text according to the given parameters.
-     *
-     * @param  string The test to style
-     * @param  mixed  An array of parameters
-     * @param  stream A stream (default to STDOUT)
-     *
-     * @return string The formatted text
-     */
-    public function format($text = '', $parameters = [], $stream = STDOUT)
-    {
-        return $text;
-    }
-
-    /**
-     * Formats a message within a section.
-     *
-     * @param string  The section name
-     * @param string  The text message
-     * @param integer The maximum size allowed for a line (65 by default)
-     */
-    public function formatSection($section, $text, $size = null)
-    {
-        return sprintf(">> %-$9s %s", $section, $this->excerpt($text, $size));
-    }
-
-    /**
-     * Truncates a line.
-     *
-     * @param string  The text
-     * @param integer The maximum size of the returned string (65 by default)
-     *
-     * @return string The truncated string
-     */
-    public function excerpt($text, $size = null)
-    {
-        if ( ! $size) {
-            $size = $this->_size;
-        }
-
-        if (strlen($text) < $size) {
-            return $text;
-        }
-
-        $subsize = floor(($size - 3) / 2);
-
-        return substr($text, 0, $subsize).'...'.substr($text, -$subsize);
-    }
-
-    /**
-     * Sets the maximum line size.
-     *
-     * @param integer The maximum line size for a message
-     */
-    public function setMaxLineSize($size)
-    {
-        $this->_size = $size;
-    }
+	protected int $_size = 65;
+	
+	/**
+	 * __construct
+	 *
+	 * @param string $maxLineSize 
+	 * @return void
+	 */
+	function __construct($maxLineSize = 65)
+	{
+		$this->_size = $maxLineSize;
+	}
+	
+	/**
+	 * Formats a text according to the given parameters.
+	 *
+	 * @param  string The test to style
+	 * @param  mixed  An array of parameters
+	 * @param  stream A stream (default to STDOUT)
+	 *
+	 * @return string The formatted text
+	 */
+	public function format($text = '', $parameters = [], $stream = STDOUT)
+	{
+		return $text;
+	}
+	
+	/**
+	 * Formats a message within a section.
+	 *
+	 * @param string  The section name
+	 * @param string  The text message
+	 * @param integer The maximum size allowed for a line (65 by default)
+	 */
+	public function formatSection($section, $text, $size = null)
+	{
+		return sprintf(">> %-$9s %s", $section, $this->excerpt($text, $size));
+	}
+	
+	/**
+	 * Truncates a line.
+	 *
+	 * @param string  The text
+	 * @param integer The maximum size of the returned string (65 by default)
+	 *
+	 * @return string The truncated string
+	 */
+	public function excerpt($text, $size = null)
+	{
+		if ( ! $size) {
+			$size = $this->_size;
+		}
+		
+		if (strlen($text) < $size) {
+			return $text;
+		}
+		
+		$subsize = floor(($size - 3) / 2);
+		
+		return substr($text, 0, $subsize).'...'.substr($text, -$subsize);
+	}
+	
+	/**
+	 * Sets the maximum line size.
+	 *
+	 * @param integer The maximum line size for a message
+	 */
+	public function setMaxLineSize($size)
+	{
+		$this->_size = $size;
+	}
 }

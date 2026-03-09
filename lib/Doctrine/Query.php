@@ -1,9 +1,5 @@
 <?php
-
-
 /*
- *  $Id: Query.php 7674 2010-06-08 22:59:01Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -60,2645 +56,2680 @@
  */
 class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
 {
-    /**
-     * @var array  The DQL keywords.
-     */
-    protected static $_keywords  = ['ALL',
-                                         'AND',
-                                         'ANY',
-                                         'AS',
-                                         'ASC',
-                                         'AVG',
-                                         'BETWEEN',
-                                         'BIT_LENGTH',
-                                         'BY',
-                                         'CHARACTER_LENGTH',
-                                         'CHAR_LENGTH',
-                                         'CURRENT_DATE',
-                                         'CURRENT_TIME',
-                                         'CURRENT_TIMESTAMP',
-                                         'DELETE',
-                                         'DESC',
-                                         'DISTINCT',
-                                         'EMPTY',
-                                         'EXISTS',
-                                         'FALSE',
-                                         'FETCH',
-                                         'FROM',
-                                         'GROUP',
-                                         'HAVING',
-                                         'IN',
-                                         'INDEXBY',
-                                         'INNER',
-                                         'IS',
-                                         'JOIN',
-                                         'LEFT',
-                                         'LIKE',
-                                         'LOWER',
-                                         'MEMBER',
-                                         'MOD',
-                                         'NEW',
-                                         'NOT',
-                                         'NULL',
-                                         'OBJECT',
-                                         'OF',
-                                         'OR',
-                                         'ORDER',
-                                         'OUTER',
-                                         'POSITION',
-                                         'SELECT',
-                                         'SOME',
-                                         'TRIM',
-                                         'TRUE',
-                                         'UNKNOWN',
-                                         'UPDATE',
-                                         'WHERE'];
-
-    /**
-     * @var array
-     */
-    protected $_subqueryAliases = [];
-
-    /**
-     * @var array $_aggregateAliasMap       an array containing all aggregate aliases, keys as dql aliases
-     *                                      and values as sql aliases
-     */
-    protected $_aggregateAliasMap      = [];
-
-    // [OV17] property not used
-    /*
-     * @var array
-     */
-    // protected $_pendingAggregates = array();
-
-    /**
-     * @param boolean $needsSubquery
-     */
-    protected $_needsSubquery = false;
-
-    /**
-     * @param boolean $isSubquery           whether or not this query object is a subquery of another
-     *                                      query object
-     */
-    protected $_isSubquery;
-
-    /**
-     * @var array $_neededTables            an array containing the needed table aliases
-     */
-    protected $_neededTables = [];
-
-    /**
-     * @var array $_fromAliases             an array containing table aliases used in FROM part
-     *                                      - fix for DC-815 (Model's default sorting breaks subqueries)
-     */
-    protected $_fromAliases = [];
-
-    // [OV17] property not used
-    /*
-     * @var array $pendingSubqueries        SELECT part subqueries, these are called pending subqueries since
-     *                                      they cannot be parsed directly (some queries might be correlated)
-     */
-    // protected $_pendingSubqueries = array();
-
-    /**
-     * @var array $_pendingFields           an array of pending fields (fields waiting to be parsed)
-     */
-    protected $_pendingFields = [];
-
-    /**
-     * @var array $_parsers                 an array of parser objects, each DQL query part has its own parser
-     */
-    protected $_parsers = [];
-
-    /**
-     * @var array
-     */
-    protected $_expressionMap = [];
-
-    /**
-     * @var string $_sql            cached SQL query
-     */
-    protected $_sql;
-
-    /**
-     * create
-     * returns a new Doctrine_Query object
-     *
-     * @param Doctrine_Connection $conn  optional connection parameter
-     * @param string $class              Query class to instantiate
-     * @return Doctrine_Query
-     */
-    public static function create($conn = null, $class = null)
-    {
-        if ( ! $class) {
-            $class = Doctrine_Manager::getInstance()
-                ->getAttribute(Doctrine_Core::ATTR_QUERY_CLASS);
-        }
-        return new $class($conn);
-    }
-
-    /**
-     * Clears all the sql parts.
-     */
-    protected function clear()
-    {
-        $this->_preQueried = false;
-        $this->_pendingJoinConditions = [];
-        $this->_state = self::STATE_DIRTY;
-    }
-
-    /**
-     * Resets the query to the state just after it has been instantiated.
-     */
-    public function reset()
-    {
-        $this->_subqueryAliases = [];
-        $this->_aggregateAliasMap = [];
-        // [OV17] properties not used
-        //$this->_pendingAggregates = array();
-        //$this->_pendingSubqueries = array();
-        $this->_pendingFields = [];
-        $this->_neededTables = [];
-        $this->_expressionMap = [];
-        $this->_subqueryAliases = [];
-        $this->_needsSubquery = false;
-        $this->_isLimitSubqueryUsed = false;
-        $this->_limitSubquerySql = null; // [OV8]
-        // [OV17] clear dependency map
-        $this->_dependences = [];
-        $this->_currentDependencyPart = null;
-    }
-
-    /**
-     * createSubquery
-     * creates a subquery
-     *
-     * @return Doctrine_Hydrate
-     */
-    public function createSubquery()
-    {
-        $class = get_class($this);
-        $obj   = new $class();
-
-        // copy the aliases to the subquery
-        $obj->copySubqueryInfo($this);
-
-        // this prevents the 'id' being selected, re ticket #307
-        $obj->isSubquery(true);
-
-        return $obj;
-    }
-
-    /**
-     * addPendingJoinCondition
-     *
-     * @param string $componentAlias    component alias
-     * @param string $joinCondition     dql join condition
-     * @return Doctrine_Query           this object
-     */
-    public function addPendingJoinCondition($componentAlias, $joinCondition)
-    {
-        if ( ! isset($this->_pendingJoinConditions[$componentAlias])) {
-            $this->_pendingJoinConditions[$componentAlias] = [];
-        }
-
-        $this->_pendingJoinConditions[$componentAlias][] = $joinCondition;
-    }
-
-    /**
-     * fetchArray
-     * Convenience method to execute using array fetching as hydration mode.
-     *
-     * @param string $params
-     * @return array
-     */
-    public function fetchArray($params = [])
-    {
-        return $this->execute($params, Doctrine_Core::HYDRATE_ARRAY);
-    }
-
-    /**
-     * fetchOne
-     * Convenience method to execute the query and return the first item
-     * of the collection.
-     *
-     * @param string $params        Query parameters
-     * @param int $hydrationMode    Hydration mode: see Doctrine_Core::HYDRATE_* constants
-     * @return mixed                Array or Doctrine_Collection, depending on hydration mode. False if no result.
-     */
-    public function fetchOne($params = [], $hydrationMode = null)
-    {
-        $collection = $this->execute($params, $hydrationMode);
-
-        if (is_scalar($collection)) {
-            return $collection;
-        }
-
-        if (count($collection) === 0) {
-            return false;
-        }
-
-        if ($collection instanceof Doctrine_Collection) {
-            return $collection->getFirst();
-        } elseif (is_array($collection)) {
-            return array_shift($collection);
-        }
-
-        return false;
-    }
-
-    /**
-     * isSubquery
-     * if $bool parameter is set this method sets the value of
-     * Doctrine_Query::$isSubquery. If this value is set to true
-     * the query object will not load the primary key fields of the selected
-     * components.
-     *
-     * If null is given as the first parameter this method retrieves the current
-     * value of Doctrine_Query::$isSubquery.
-     *
-     * @param boolean $bool     whether or not this query acts as a subquery
-     * @return Doctrine_Query|bool
-     */
-    public function isSubquery($bool = null)
-    {
-        if ($bool === null) {
-            return $this->_isSubquery;
-        }
-
-        $this->_isSubquery = (bool) $bool;
-        return $this;
-    }
-
-    /**
-     * getSqlAggregateAlias
-     *
-     * @param string $dqlAlias      the dql alias of an aggregate value
-     * @return string
-     */
-    public function getSqlAggregateAlias($dqlAlias)
-    {
-        if (isset($this->_aggregateAliasMap[$dqlAlias])) {
-            // mark the expression as used
-            $this->_expressionMap[$dqlAlias][1] = true;
-
-            return $this->_aggregateAliasMap[$dqlAlias];
-        } /*elseif ( ! empty($this->_pendingAggregates)) { // [OV17] _pendingAggregates are not used
-            $this->processPendingAggregates();
-
-            return $this->getSqlAggregateAlias($dqlAlias);
-        } */elseif( ! ($this->_conn->getAttribute(Doctrine_Core::ATTR_PORTABILITY) & Doctrine_Core::PORTABILITY_EXPR)){
-            return $dqlAlias;
-        } else {
-            throw new Doctrine_Query_Exception('Unknown aggregate alias: ' . $dqlAlias);
-        }
-    }
-
-    /**
-     * Check if a dql alias has a sql aggregate alias
-     *
-     * @param string $dqlAlias
-     * @return boolean
-     */
-    public function hasSqlAggregateAlias($dqlAlias)
-    {
-        try {
-            $this->getSqlAggregateAlias($dqlAlias);
-            return true;
-        } catch (Exception $e) {
-            return false;
-        }
-    }
-
-    /**
-     * Adjust the processed param index for "foo.bar IN ?" support
-     *
-     */
-    public function adjustProcessedParam($index)
-    {
-        // [OV13] method logic moved to parent class
-        $this->_execParams = $this->_adjustProcessedParam($this->_execParams, $index);
-
-        /*// Retrieve all params
-        $params = $this->getInternalParams();
-
-        // Retrieve already processed values
-        $first = array_slice($params, 0, $index);
-        $last = array_slice($params, $index, count($params) - $index);
-
-        // Include array as values splicing the params array
-        array_splice($last, 0, 1, $last[0]);
-
-        // Put all param values into a single index
-        $this->_execParams = array_merge($first, $last);*/
-    }
-
-    /**
-     * Retrieves a specific DQL query part.
-     *
-     * @see Doctrine_Query_Abstract::$_dqlParts
-     * <code>
-     * var_dump($q->getDqlPart('where'));
-     * // array(2) { [0] => string(8) 'name = ?' [1] => string(8) 'date > ?' }
-     * </code>
-     * @param string $queryPart     the name of the query part; can be:
-     *     array from, containing strings;
-     *     array select, containg string;
-     *     boolean forUpdate;
-     *     array set;
-     *     array join;
-     *     array where;
-     *     array groupby;
-     *     array having;
-     *     array orderby, containing strings such as 'id ASC';
-     *     array limit, containing numerics;
-     *     array offset, containing numerics;
-     * @return array
-     */
-    public function getDqlPart($queryPart)
-    {
-        if ( ! isset($this->_dqlParts[$queryPart])) {
-           throw new Doctrine_Query_Exception('Unknown query part ' . $queryPart);
-        }
-
-        return $this->_dqlParts[$queryPart];
-    }
-
-    /**
-     * contains
-     *
-     * Method to check if a arbitrary piece of dql exists
-     *
-     * @param string $dql Arbitrary piece of dql to check for
-     * @return boolean
-     */
-    public function contains($dql)
-    {
-      return stripos($this->getDql(), $dql) === false ? false : true;
-    }
-
-    /**
-     * processPendingFields
-     * the fields in SELECT clause cannot be parsed until the components
-     * in FROM clause are parsed, hence this method is called everytime a
-     * specific component is being parsed. For instance, the wildcard '*'
-     * is expanded in the list of columns.
-     *
-     * @throws Doctrine_Query_Exception     if unknown component alias has been given
-     * @param string $componentAlias        the alias of the component
-     * @return string SQL code
-     * @todo Description: What is a 'pending field' (and are there non-pending fields, too)?
-     *       What is 'processed'? (Meaning: What information is gathered & stored away)
-     */
-    public function processPendingFields($componentAlias)
-    {
-        $tableAlias = $this->getSqlTableAlias($componentAlias);
-        $table = $this->_queryComponents[$componentAlias]['table'];
-
-        if ( ! isset($this->_pendingFields[$componentAlias])) {
-            if ($this->_hydrator->getHydrationMode() != Doctrine_Core::HYDRATE_NONE) {
-                if ( ! $this->_isSubquery && $componentAlias == $this->getRootAlias()) {
-                    throw new Doctrine_Query_Exception("The root class of the query (alias $componentAlias) "
-                            . " must have at least one field selected.");
-                }
-            }
-            return;
-        }
-
-        // At this point we know the component is FETCHED (either it's the base class of
-        // the query (FROM xyz) or its a "fetch join").
-
-        // Check that the parent join (if there is one), is a "fetch join", too.
-        if ( ! $this->isSubquery() && isset($this->_queryComponents[$componentAlias]['parent'])) {
-            $parentAlias = $this->_queryComponents[$componentAlias]['parent'];
-            if (is_string($parentAlias) && ! isset($this->_pendingFields[$parentAlias])
-                    && $this->_hydrator->getHydrationMode() != Doctrine_Core::HYDRATE_NONE
-                    && $this->_hydrator->getHydrationMode() != Doctrine_Core::HYDRATE_SCALAR
-                    && $this->_hydrator->getHydrationMode() != Doctrine_Core::HYDRATE_SINGLE_SCALAR) {
-                throw new Doctrine_Query_Exception("The left side of the join between "
-                        . "the aliases '$parentAlias' and '$componentAlias' must have at least"
-                        . " the primary key field(s) selected.");
-            }
-        }
-
-        $fields = $this->_pendingFields[$componentAlias];
-
-        // check for wildcards
-        if (in_array('*', $fields)) {
-            $fields = $table->getFieldNames();
-        } else {
-            $driverClassName = $this->_hydrator->getHydratorDriverClassName();
-            // only auto-add the primary key fields if this query object is not
-            // a subquery of another query object or we're using a child of the Object Graph
-            // hydrator
-            if ( ! $this->_isSubquery && is_subclass_of($driverClassName, 'Doctrine_Hydrator_Graph')) {
-                // [OV15] do not auto-add primary key fields when group by is used (on other columns)
-                // (conform with mysql 5.7 default settings - all non-aggregated columns must be also in group by clause)
-                $identifier = [];
-                $groupBy = implode(', ', $this->_sqlParts['groupby']);
-                foreach((array)$table->getIdentifier() as $idColumn) {
-                    if(empty($groupBy) || preg_match('/(?:^|\s)'.preg_quote($tableAlias . '.' . $idColumn) .'(?:,|\s|$)/', $groupBy)) {
-                        // add primary column only if group by is not used or if it is contained in group by clause
-                        $identifier[] = $idColumn;
-                    }
-                }
-
-                if($identifier) {
-                    $fields = array_unique(array_merge($identifier, $fields));
-                }
-            }
-        }
-
-        $sql = [];
-        foreach ($fields as $fieldAlias => $fieldName) {
-            $columnName = $table->getColumnName($fieldName);
-            if (($owner = $table->getColumnOwner($columnName)) !== null &&
-                    $owner !== $table->getComponentName()) {
-
-                $parent = $this->_conn->getTable($owner);
-                $columnName = $parent->getColumnName($fieldName);
-                $parentAlias = $this->getSqlTableAlias($componentAlias . '.' . $parent->getComponentName());
-                $sql[] = $this->_conn->quoteIdentifier($parentAlias) . '.' . $this->_conn->quoteIdentifier($columnName)
-                       . ' AS '
-                       . $this->_conn->quoteIdentifier($tableAlias . '__' . $columnName);
-
-                // [OV17] remember sql dependences
-                $this->addDependency('select', $parentAlias);
-            } else {
-                // Fix for http://www.doctrine-project.org/jira/browse/DC-585
-                // Take the field alias if available
-                if (isset($this->_aggregateAliasMap[$fieldAlias])) {
-                    $aliasSql = $this->_aggregateAliasMap[$fieldAlias];
-                } else {
-                    $columnName = $table->getColumnName($fieldName);
-                    $aliasSql = $this->_conn->quoteIdentifier($tableAlias . '__' . $columnName);
-                }
-                $sql[] = $this->_conn->quoteIdentifier($tableAlias) . '.' . $this->_conn->quoteIdentifier($columnName)
-                       . ' AS '
-                       . $aliasSql;
-            }
-        }
-
-        $this->_neededTables[] = $tableAlias;
-
-        // [OV17] remember sql dependences
-        $this->addDependency('select', $tableAlias);
-
-        return implode(', ', $sql);
-    }
-
-    /**
-     * Parses a nested field
-     * <code>
-     * $q->parseSelectField('u.Phonenumber.value');
-     * </code>
-     *
-     * @param string $field
-     * @throws Doctrine_Query_Exception     if unknown component alias has been given
-     * @return string   SQL fragment
-     * @todo Description: Explain what this method does. Is there a relation to parseSelect()?
-     *       This method is not used from any class or testcase in the Doctrine package.
-     *
-     */
-    public function parseSelectField($field)
-    {
-        $terms = explode('.', $field);
-
-        if (isset($terms[1])) {
-            $componentAlias = $terms[0];
-            $field = $terms[1];
-        } else {
-            reset($this->_queryComponents);
-            $componentAlias = key($this->_queryComponents);
-            $fields = $terms[0];
-        }
-
-        $tableAlias = $this->getSqlTableAlias($componentAlias);
-        $table      = $this->_queryComponents[$componentAlias]['table'];
-
-
-        // check for wildcards
-        if ($field === '*') {
-            $sql = [];
-
-            foreach ($table->getColumnNames() as $field) {
-                $sql[] = $this->parseSelectField($componentAlias . '.' . $field);
-            }
-
-            return implode(', ', $sql);
-        } else {
-            $name = $table->getColumnName($field);
-
-            $this->_neededTables[] = $tableAlias;
-
-            return $this->_conn->quoteIdentifier($tableAlias . '.' . $name)
-                   . ' AS '
-                   . $this->_conn->quoteIdentifier($tableAlias . '__' . $name);
-        }
-    }
-
-    /**
-     * getExpressionOwner
-     * returns the component alias for owner of given expression
-     *
-     * @param string $expr      expression from which to get to owner from
-     * @return string           the component alias
-     * @todo Description: What does it mean if a component is an 'owner' of an expression?
-     *       What kind of 'expression' are we talking about here?
-     */
-    public function getExpressionOwner($expr)
-    {
-        if (strtoupper(substr(trim($expr, '( '), 0, 6)) !== 'SELECT') {
-            // Fix for http://www.doctrine-project.org/jira/browse/DC-754
-            $expr = preg_replace('/([\'\"])[^\1]*\1/', '', $expr);
-            preg_match_all("/[a-z_][a-z0-9_]*\.[a-z_][a-z0-9_]*[\.[a-z0-9]+]*/i", $expr, $matches);
-
-            $match = current($matches);
-
-            if (isset($match[0])) {
-                $terms = explode('.', $match[0]);
-
-                return $terms[0];
-            }
-        }
-        return $this->getRootAlias();
-
-    }
-
-    /**
-     * parseSelect
-     * parses the query select part and
-     * adds selected fields to pendingFields array
-     *
-     * @param string $dql
-     * @todo Description: What information is extracted (and then stored)?
-     */
-    public function parseSelect($dql)
-    {
-        $refs = $this->_tokenizer->sqlExplode($dql, ',');
-
-        $pos   = strpos(trim($refs[0]), ' ');
-        $first = substr($refs[0], 0, $pos);
-
-        // check for DISTINCT keyword
-        if ($first === 'DISTINCT') {
-            $this->_sqlParts['distinct'] = true;
-
-            $refs[0] = substr($refs[0], ++$pos);
-        }
-
-        $parsedComponents = [];
-
-        foreach ($refs as $reference) {
-            $reference = trim($reference);
-
-            if (empty($reference)) {
-                continue;
-            }
-
-            $terms = $this->_tokenizer->sqlExplode($reference, ' ');
-            $pos   = strpos($terms[0], '(');
-
-            if (count($terms) > 1 || $pos !== false) {
-                $expression = array_shift($terms);
-                $alias = array_pop($terms);
-
-                if ( ! $alias) {
-                    $alias = substr($expression, 0, $pos);
-                }
-
-                // Fix for http://www.doctrine-project.org/jira/browse/DC-706
-                if ($pos !== false && !str_starts_with($expression, "'") && substr($expression, 0, $pos) == '') {
-                    $_queryComponents = $this->_queryComponents;
-                    reset($_queryComponents);
-                    $componentAlias = key($_queryComponents);
-                } else {
-                    $componentAlias = $this->getExpressionOwner($expression);
-                }
-
-                $expression = $this->parseClause($expression);
-
-                $tableAlias = $this->getSqlTableAlias($componentAlias);
-
-                $index    = count($this->_aggregateAliasMap);
-
-                $sqlAlias = $this->_conn->quoteIdentifier($tableAlias . '__' . $index);
-
-                $this->_sqlParts['select'][] = $expression . ' AS ' . $sqlAlias;
-
-                $this->_aggregateAliasMap[$alias] = $sqlAlias;
-                $this->_expressionMap[$alias][0] = $expression;
-
-                $this->_queryComponents[$componentAlias]['agg'][$index] = $alias;
-
-                $this->_neededTables[] = $tableAlias;
-
-                // Fix for http://www.doctrine-project.org/jira/browse/DC-585
-                // Add selected columns to pending fields
-                // [OV-24] fix these quote-matching regexps again
-                if (preg_match('/^([^\(]+)\.[\'`]?(.*?)[\'`]?$/', $expression, $field)) {
-                    $this->_pendingFields[$componentAlias][$alias] = $field[2];
-                }
-
-                // [OV17] remember sql dependences
-                $this->addDependency('select', $tableAlias);
-            } else {
-                $e = explode('.', $terms[0]);
-
-                if (isset($e[1])) {
-                    $componentAlias = $e[0];
-                    $field = $e[1];
-                } else {
-                    reset($this->_queryComponents);
-                    $componentAlias = key($this->_queryComponents);
-                    $field = $e[0];
-                }
-
-                $this->_pendingFields[$componentAlias][] = $field;
-            }
-        }
-    }
-
-    /**
-     * parseClause
-     * parses given DQL clause
-     *
-     * this method handles five tasks:
-     *
-     * 1. Converts all DQL functions to their native SQL equivalents
-     * 2. Converts all component references to their table alias equivalents
-     * 3. Converts all field names to actual column names
-     * 4. Quotes all identifiers
-     * 5. Parses nested clauses and subqueries recursively
-     *
-     * @return string   SQL string
-     * @todo Description: What is a 'dql clause' (and what not)?
-     *       Refactor: Too long & nesting level
-     */
-    public function parseClause($clause)
-    {
-        $clause = $this->_conn->dataDict->parseBoolean(trim($clause));
-
-        if (is_numeric($clause)) {
-           return $clause;
-        }
-
-        $terms = $this->_tokenizer->clauseExplode($clause, [' ', '+', '-', '*', '/', '<', '>', '=', '>=', '<=', '&', '|']);
-        $str = '';
-
-        foreach ($terms as $term) {
-            $pos = strpos($term[0], '(');
-
-            if ($pos !== false && !str_starts_with($term[0], "'")) {
-                $name = substr($term[0], 0, $pos);
-
-                $term[0] = $this->parseFunctionExpression($term[0]);
-            } else {
-                if (!str_starts_with($term[0], "'") && !str_ends_with($term[0], "'")) {
-                    if (str_contains($term[0], '.')) {
-                        if ( ! is_numeric($term[0])) {
-                            $e = explode('.', $term[0]);
-
-                            $field = array_pop($e);
-
-                            // [OV16] improved checks for whether table alias should be used
-                            //if ($this->getType() === Doctrine_Query::SELECT) {
-                            if ($this->shouldUseTableAlias($e)) {
-                                $componentAlias = implode('.', $e);
-
-                                if (empty($componentAlias)) {
-                                    $componentAlias = $this->getRootAlias();
-                                }
-
-                                $this->load($componentAlias);
-
-                                // check the existence of the component alias
-                                if ( ! isset($this->_queryComponents[$componentAlias])) {
-                                    throw new Doctrine_Query_Exception('Unknown component alias ' . $componentAlias);
-                                }
-
-                                $table = $this->_queryComponents[$componentAlias]['table'];
-
-                                $def = $table->getDefinitionOf($field);
-
-                                // get the actual field name from alias
-                                $field = $table->getColumnName($field);
-
-                                // check column existence
-                                if ( ! $def) {
-                                    throw new Doctrine_Query_Exception('Unknown column ' . $field);
-                                }
-
-                                if (isset($def['owner'])) {
-                                    $componentAlias = $componentAlias . '.' . $def['owner'];
-                                }
-
-                                $tableAlias = $this->getSqlTableAlias($componentAlias);
-
-                                // build sql expression
-                                $term[0] = $this->_conn->quoteIdentifier($tableAlias)
-                                         . '.'
-                                         . $this->_conn->quoteIdentifier($field);
-
-                                // [OV17] remember sql dependences
-                                $this->addDependency(null, $tableAlias);
-                            } else {
-                                // build sql expression
-                                $field = $this->getRoot()->getColumnName($field);
-                                $term[0] = $this->_conn->quoteIdentifier($field);
-
-                                // [OV17] remember sql dependences
-                                $this->addDependency();
-                            }
-                        }
-                    } else {
-                        if ( ! empty($term[0]) && ! in_array(strtoupper($term[0]), self::$_keywords) &&
-                             ! is_numeric($term[0]) && $term[0] !== '?' && !str_starts_with($term[0], ':')) {
-
-                            $componentAlias = $this->getRootAlias();
-
-                            $found = false;
-
-                            if ($componentAlias !== false && $componentAlias !== null) {
-                                $table = $this->_queryComponents[$componentAlias]['table'];
-
-                                // check column existence
-                                if ($table->hasField($term[0])) {
-                                    $found = true;
-
-                                    $def = $table->getDefinitionOf($term[0]);
-
-                                    // get the actual column name from field name
-                                    $term[0] = $table->getColumnName($term[0]);
-
-
-                                    if (isset($def['owner'])) {
-                                        $componentAlias = $componentAlias . '.' . $def['owner'];
-                                    }
-
-                                    $tableAlias = $this->getSqlTableAlias($componentAlias);
-
-                                    // [OV16] improved checks for whether table alias should be used
-                                    //if ($this->getType() === Doctrine_Query::SELECT) {
-                                    if ($this->shouldUseTableAlias($componentAlias)) {
-                                        // build sql expression
-                                        $term[0] = $this->_conn->quoteIdentifier($tableAlias)
-                                                 . '.'
-                                                 . $this->_conn->quoteIdentifier($term[0]);
-                                    } else {
-                                        // build sql expression
-                                        $term[0] = $this->_conn->quoteIdentifier($term[0]);
-                                    }
-
-                                    // [OV17] remember sql dependences
-                                    $this->addDependency(null, $tableAlias);
-                                } else {
-                                    $found = false;
-                                }
-                            }
-
-                            if ( ! $found) {
-                                $term[0] = $this->getSqlAggregateAlias($term[0]);
-                            }
-                        }
-                    }
-                }
-            }
-
-            $str .= $term[0] . $term[1];
-        }
-        return $str;
-    }
-
-    public function parseIdentifierReference($expr)
-    {
-
-    }
-
-    public function parseFunctionExpression($expr, $parseCallback = null)
-    {
-        $pos = strpos($expr, '(');
-        $name = substr($expr, 0, $pos);
-
-        if ($name === '') {
-            return $this->parseSubquery($expr);
-        }
-
-        // [OV20] let the parser be forgivable if a closing bracket is omitted
-        $argStr = substr($expr, ($pos + 1));
-        if(str_ends_with($argStr, ')')) {
-            $argStr = substr($argStr, 0, -1);
-        }
-        $args   = [];
-        // parse args
-
-        foreach ($this->_tokenizer->sqlExplode($argStr, ',') as $arg) {
-           $args[] = $parseCallback ? $parseCallback($arg) : $this->parseClause($arg);
-        }
-
-        // convert DQL function to its RDBMS specific equivalent
-        try {
-            $expr = $this->_conn->expression->$name(...$args);
-        } catch (Doctrine_Expression_Exception $e) {
-            throw new Doctrine_Query_Exception('Unknown function ' . $name . '.');
-        }
-
-        return $expr;
-    }
-
-
-    public function parseSubquery($subquery)
-    {
-        $trimmed = trim($this->_tokenizer->bracketTrim($subquery));
-
-        // check for possible subqueries
-        if (str_starts_with($trimmed, 'FROM') || str_starts_with($trimmed, 'SELECT')) {
-            // parse subquery
-            $q = $this->createSubquery()->parseDqlQuery($trimmed);
-            $trimmed = $q->getSqlQuery();
-
-            // [OV17] copy dependences to this query's tables from the subquery
-            $dependences = array_intersect(array_keys($this->getTableAliasMap()), $q->getDependencesMerged());
-            $this->addDependences(null, $dependences);
-
-            $q->free();
-        } elseif (str_starts_with($trimmed, 'SQL:')) {
-            $trimmed = substr($trimmed, 4);
-        } else {
-            $e = $this->_tokenizer->sqlExplode($trimmed, ',');
-
-            $value = [];
-            $index = false;
-
-            foreach ($e as $part) {
-                $value[] = $this->parseClause($part);
-            }
-
-            $trimmed = implode(', ', $value);
-        }
-
-        return '(' . $trimmed . ')';
-    }
-
-
-    // [OV17] method not used
-    /*
-     * processPendingSubqueries
-     * processes pending subqueries
-     *
-     * subqueries can only be processed when the query is fully constructed
-     * since some subqueries may be correlated
-     *
-     * @return void
-     * @todo Better description. i.e. What is a 'pending subquery'? What does 'processed' mean?
-     *       (parsed? sql is constructed? some information is gathered?)
-     */
-    /*public function processPendingSubqueries()
-    {
-        foreach ($this->_pendingSubqueries as $value) {
-            [$dql, $alias] = $value;
-
-            $subquery = $this->createSubquery();
-
-            $sql = $subquery->parseDqlQuery($dql, false)->getQuery();
-            $subquery->free();
-
-            reset($this->_queryComponents);
-            $componentAlias = key($this->_queryComponents);
-            $tableAlias = $this->getSqlTableAlias($componentAlias);
-
-            $sqlAlias = $tableAlias . '__' . count($this->_aggregateAliasMap);
-
-            $this->_sqlParts['select'][] = '(' . $sql . ') AS ' . $this->_conn->quoteIdentifier($sqlAlias);
-
-            $this->_aggregateAliasMap[$alias] = $sqlAlias;
-            $this->_queryComponents[$componentAlias]['agg'][] = $alias;
-        }
-        $this->_pendingSubqueries = array();
-    }*/
-
-    // [OV17] method not used
-    /*
-     * processPendingAggregates
-     * processes pending aggregate values for given component alias
-     *
-     * @return void
-     * @todo Better description. i.e. What is a 'pending aggregate'? What does 'processed' mean?
-     */
-    /*public function processPendingAggregates()
-    {
-        // iterate trhough all aggregates
-        foreach ($this->_pendingAggregates as $aggregate) {
-            [$expression, $components, $alias] = $aggregate;
-
-            $tableAliases = array();
-
-            // iterate through the component references within the aggregate function
-            if ( ! empty ($components)) {
-                foreach ($components as $component) {
-
-                    if (is_numeric($component)) {
-                        continue;
-                    }
-
-                    $e = explode('.', $component);
-
-                    $field = array_pop($e);
-                    $componentAlias = implode('.', $e);
-
-                    // check the existence of the component alias
-                    if ( ! isset($this->_queryComponents[$componentAlias])) {
-                        throw new Doctrine_Query_Exception('Unknown component alias ' . $componentAlias);
-                    }
-
-                    $table = $this->_queryComponents[$componentAlias]['table'];
-
-                    $field = $table->getColumnName($field);
-
-                    // check column existence
-                    if ( ! $table->hasColumn($field)) {
-                        throw new Doctrine_Query_Exception('Unknown column ' . $field);
-                    }
-
-                    $sqlTableAlias = $this->getSqlTableAlias($componentAlias);
-
-                    $tableAliases[$sqlTableAlias] = true;
-
-                    // build sql expression
-
-                    $identifier = $this->_conn->quoteIdentifier($sqlTableAlias . '.' . $field);
-                    $expression = str_replace($component, $identifier, $expression);
-                }
-            }
-
-            if (count($tableAliases) !== 1) {
-                $componentAlias = reset($this->_tableAliasMap);
-                $tableAlias = key($this->_tableAliasMap);
-            }
-
-            $index    = count($this->_aggregateAliasMap);
-            $sqlAlias = $this->_conn->quoteIdentifier($tableAlias . '__' . $index);
-
-            $this->_sqlParts['select'][] = $expression . ' AS ' . $sqlAlias;
-
-            $this->_aggregateAliasMap[$alias] = $sqlAlias;
-            $this->_expressionMap[$alias][0] = $expression;
-
-            $this->_queryComponents[$componentAlias]['agg'][$index] = $alias;
-
-            $this->_neededTables[] = $tableAlias;
-        }
-        // reset the state
-        $this->_pendingAggregates = array();
-    }*/
-
-    /**
-     * _buildSqlQueryBase
-     * returns the base of the generated sql query
-     * On mysql driver special strategy has to be used for DELETE statements
-     * (where is this special strategy??)
-     *
-     * @return string       the base of the generated sql query
-     */
-    protected function _buildSqlQueryBase()
-    {
-        switch ($this->_type) {
-            case self::DELETE:
-                $q = 'DELETE FROM ';
-            break;
-            case self::UPDATE:
-                $q = 'UPDATE ';
-            break;
-            case self::SELECT:
-                $distinct = ($this->_sqlParts['distinct']) ? 'DISTINCT ' : '';
-                $q = 'SELECT ' . $distinct . implode(', ', $this->_sqlParts['select']) . ' FROM ';
-            break;
-        }
-        return $q;
-    }
-
-    /**
-     * _buildSqlFromPart
-     * builds the from part of the query and returns it
-     *
-     * @return string   the query sql from part
-     */
-    protected function _buildSqlFromPart($ignorePending = false)
-    {
-        $q = '';
-
-        foreach ($this->_sqlParts['from'] as $k => $part) {
-            $e = explode(' ', $part);
-
-            if ($k === 0) {
-                // [OV16] improved checks for whether table alias should be used
-                //if ( ! $ignorePending && $this->_type == self::SELECT) {
-                if ( ! $ignorePending && $this->shouldUseTableAlias()) {
-                    // We may still have pending conditions
-                    $alias = count($e) > 1
-                        ? $this->getComponentAlias($e[1])
-                        : null;
-
-                    // [OV17] set current sql part for dependences
-                    $this->setCurrentDependencyPart('where');
-
-                    $where = $this->_processPendingJoinConditions($alias);
-
-                    // [OV17] clear current sql part for dependences
-                    $this->setCurrentDependencyPart(null);
-
-                    // apply inheritance to WHERE part
-                    if ( ! empty($where)) {
-                        if (count($this->_sqlParts['where']) > 0) {
-                            $this->_sqlParts['where'][] = 'AND';
-                        }
-
-                        if (str_starts_with($where, '(') && str_ends_with($where, ')')) {
-                            $this->_sqlParts['where'][] = $where;
-                        } else {
-                            $this->_sqlParts['where'][] = '(' . $where . ')';
-                        }
-                    }
-                }
-
-                $q .= $part;
-
-                continue;
-            }
-
-            // preserve LEFT JOINs only if needed
-            // Check if it's JOIN, if not add a comma separator instead of space
-            if ( ! preg_match('/\bJOIN\b/i', $part) && ! isset($this->_pendingJoinConditions[$k])) {
-                $q .= ', ' . $part;
-            } else {
-                if (str_starts_with($part, 'LEFT JOIN')) {
-                    $aliases = array_merge($this->_subqueryAliases,
-                    // WTF? by mh - shouldn't it be just array values? $this->_neededTable is like array('c', 'm', 'm2', 'm4')
-                    // otherwise the following condition does not make sense - it checks in_array of table alias in array of integers (from array_keys)
-                                //array_keys($this->_neededTables));
-                                $this->_neededTables);
-
-                    // well, the condition also fails if ATTR_QUOTE_IDENTIFIERS is used. $e[3] might be "`m`" and in $aliases there is just "m"
-                    // so let's quote aliases
-                    $aliases = array_map([$this->_conn, 'quoteIdentifier'], $aliases);
-
-                    if ( ! in_array($e[3], $aliases) && ! in_array($e[2], $aliases) && ! empty($this->_pendingFields)) {
-                        continue;
-                    }
-
-                }
-
-                if ( ! $ignorePending && isset($this->_pendingJoinConditions[$k])) {
-                    if (str_contains($part, ' ON ')) {
-                        $part .= ' AND ';
-                    } else {
-                        $part .= ' ON ';
-                    }
-
-                    // [OV17] set current sql part for dependences
-                    $this->setCurrentDependencyPart('join');
-
-                    $part .= $this->_processPendingJoinConditions($k);
-
-                    // [OV17]
-                    if($dependences = $this->getDependences('join', false)) {
-                        $this->addJoinDependences($k, $dependences);
-                        $this->clearDependences('join');
-                    }
-
-                    // [OV17] clear current sql part for dependences
-                    $this->setCurrentDependencyPart(null);
-                }
-
-                $componentAlias = $this->getComponentAlias($e[3]);
-                $string = $this->getInheritanceCondition($componentAlias);
-
-                if ($string) {
-                    $part = $part . ' AND ' . $string;
-                }
-                $q .= ' ' . $part;
-            }
-
-            $this->_sqlParts['from'][$k] = $part;
-        }
-        return $q;
-    }
-
-    /**
-     * Processes the pending join conditions, used for dynamically add conditions
-     * to root component/joined components without interfering in the main dql
-     * handling.
-     *
-     * @param string $alias Component Alias
-     * @return Processed pending conditions
-     */
-    protected function _processPendingJoinConditions($alias)
-    {
-        $parts = [];
-
-        if ($alias !== null && isset($this->_pendingJoinConditions[$alias])) {
-            $parser = new Doctrine_Query_JoinCondition($this, $this->_tokenizer);
-
-            foreach ($this->_pendingJoinConditions[$alias] as $joinCondition) {
-                $parts[] = $parser->parse($joinCondition);
-            }
-
-            // FIX #1860 and #1876: Cannot unset them, otherwise query cannot be reused later
-            //unset($this->_pendingJoinConditions[$alias]);
-        }
-
-        return (count($parts) > 0 ? '(' . implode(') AND (', $parts) . ')' : '');
-    }
-
-    /**
-     * builds the sql query from the given parameters and applies things such as
-     * column aggregation inheritance and limit subqueries if needed
-     *
-     * @param array $params             an array of prepared statement params (needed only in mysql driver
-     *                                  when limit subquery algorithm is used)
-     * @param bool $limitSubquery Whether or not to try and apply the limit subquery algorithm
-     * @return string                   the built sql query
-     */
-    public function getSqlQuery($params = [], $limitSubquery = true)
-    {
-        // Assign building/execution specific params
-        $this->_params['exec'] = $params;
-
-        // [OV8] always prequery the query to call dql callbacks before any sql is generated, not only on execute()
-        // so that cache hash is always calculated properly, and that this method always returns actual end-query incl.
-        // any modifications from dql callbacks.
-        $this->_preQuery();
-
-        // Initialize prepared parameters array
-        $this->_execParams = $this->getFlattenedParams();
-
-        if ($this->_state !== self::STATE_DIRTY) {
-            $this->fixArrayParameterValues($this->getInternalParams());
-
-            // Return compiled SQL
-            return $this->_sql;
-        }
-
-        // [OV8] queryCache modifications - hook it in getSqlQuery method instead of execute method only
-        $cached = false;
-        if ($this->isQueryCacheEnabled()) {
-            $queryCacheDriver = $this->getQueryCacheDriver();
-            $hash = $this->calculateQueryCacheHash($limitSubquery);
-            $cached = $queryCacheDriver->fetch($hash);
-        }
-
-        // If we have a cached query...
-        if ($cached) {
-            // Rebuild query from cache
-            $query = $this->_constructQueryFromCache($cached);
-        }
-        else
-        {
-            $query = $this->buildSqlQuery($limitSubquery);
-
-            // Check again because getSqlQuery() above could have flipped the _queryCache flag
-            // if this query contains the limit sub query algorithm we don't need to cache it
-            if ($this->isQueryCacheEnabled()) {
-                // Convert query into a serialized form
-                $serializedQuery = $this->getCachedForm($query);
-
-                // Save cached query
-                $queryCacheDriver->save($hash, $serializedQuery, $this->getQueryCacheLifeSpan());
-            }
-        }
-
-        // [OV9] cache without limit and offset, attach now
-        if($this->isQueryCacheEnabled() && $this->_conn->getAttribute(Doctrine_Core::ATTR_QUERY_CACHE_NO_OFFSET_LIMIT))
-        {
-            $this->_processDqlQueryPart('offset', $this->_dqlParts['offset']);
-            $this->_processDqlQueryPart('limit', $this->_dqlParts['limit']);
-
-            if($this->_limitSubquerySql != '')
-            {
-                // add offset and limit to subquery and replace the subquery in main query
-                $subquery = $this->_limitSubquerySql;
-                $map = reset($this->_queryComponents);
-                $table = $map['table'];
-                $subquery = $this->_conn->modifyLimitSubquery($table, $subquery, $this->_sqlParts['limit'], $this->_sqlParts['offset']);
-
-                if($subquery != $this->_limitSubquerySql)
-                {
-                    $query = str_replace($this->_limitSubquerySql, $subquery, $query);
-                }
-            }
-            else
-            {
-                // add offset and limit to main query
-                $query = $this->_conn->modifyLimitQuery($query, $this->_sqlParts['limit'], $this->_sqlParts['offset'], false, false, $this);
-            }
-        }
-
-        // [OV13] moved subquery logic from Doctrine_Query_Abstract::_execute
-        // [OV7] mysql should also use limit subquery in the same format as pgsql
-        if ($this->isLimitSubqueryUsed()/* &&
-                $this->_conn->getAttribute(Doctrine_Core::ATTR_DRIVER_NAME) !== 'mysql'*/) {
-
-            // [OV13]
-            $params = $this->_execParams;
-
-            // [OV10] params duplicates for subquery should be inserted in correct place in params array.
-            // count occurrences of '?' character before subquery (which are not in quotes nor double quotes)
-            $queryBeforeSubquery = $this->_limitSubquerySql ?
-            	substr($query, 0, strpos($query, $this->_limitSubquerySql))
-            	: $query;
-            // remove quoted or double-quoted parts
-            $queryBeforeSubquery = preg_replace('/\"[^"]*\"|\'[^\']*\'/', '', $queryBeforeSubquery);
-            $count = substr_count($queryBeforeSubquery, '?');
-            if($count > 0) {
-                array_splice($params, $count, 0, $params);
-            } else {
-                // no question marks, we could have named params then. do it "the original" way
-                $params = array_merge((array) $params, (array) $params);
-            }
-
-            // [OV13]
-            $this->_execParams = $params;
-        }
-
-        // [OV13] adjust WHERE IN array param here, after query cache is saved / restored = cache query with single "?"
-        $query = $this->_adjustWhereInSql($query, $this->_execParams);
-
-        return $query;
-    }
-
-    /**
-     * Build the SQL query from the DQL
-     *
-     * @param bool $limitSubquery Whether or not to try and apply the limit subquery algorithm
-     * @return string $sql The generated SQL string
-     */
-    public function buildSqlQuery($limitSubquery = true)
-    {
-        // reset the state
-        if ( ! $this->isSubquery()) {
-            $this->_queryComponents = [];
-            // [OV17] property not used
-            //$this->_pendingAggregates = array();
-            $this->_aggregateAliasMap = [];
-        }
-
-        $this->reset();
-
-        // invoke the preQuery hook
-        $this->_preQuery();
-
-        // process the DQL parts => generate the SQL parts.
-        // this will also populate the $_queryComponents.
-        foreach ($this->_dqlParts as $queryPartName => $queryParts) {
-            // If we are parsing FROM clause, we'll need to diff the queryComponents later
-            if ($queryPartName == 'from') {
-                // Pick queryComponents before processing
-                $queryComponentsBefore = $this->getQueryComponents();
-            }
-
-            // FIX #1667: _sqlParts are cleaned inside _processDqlQueryPart.
-            if ($queryPartName != 'forUpdate') {
-                $this->_processDqlQueryPart($queryPartName, $queryParts);
-            }
-
-            // We need to define the root alias
-            if ($queryPartName == 'from') {
-                // Pick queryComponents aftr processing
-                $queryComponentsAfter = $this->getQueryComponents();
-
-                // Root alias is the key of difference of query components
-                $diffQueryComponents = array_diff_key($queryComponentsAfter, $queryComponentsBefore);
-                $this->_rootAlias = key($diffQueryComponents);
-            }
-        }
-        $this->_state = self::STATE_CLEAN;
-
-        // Proceed with the generated SQL
-        if (empty($this->_sqlParts['from'])) {
-            return false;
-        }
-
-        $needsSubQuery = false;
-        $subquery = '';
-        $map = $this->getRootDeclaration();
-        $table = $map['table'];
-        $rootAlias = $this->getRootAlias();
-        // [OV13] reset flag
-        $this->_isLimitSubqueryUsed = false;
-
-        if ( ! empty($this->_sqlParts['limit']) && $this->_needsSubquery &&
-                $table->getAttribute(Doctrine_Core::ATTR_QUERY_LIMIT) == Doctrine_Core::LIMIT_RECORDS) {
-            // We do not need a limit-subquery if DISTINCT is used
-            // and the selected fields are either from the root component or from a localKey relation (hasOne)
-            // (i.e. DQL: SELECT DISTINCT u.id FROM User u LEFT JOIN u.phonenumbers LIMIT 5).
-            if(!$this->_sqlParts['distinct']) {
-                $this->_isLimitSubqueryUsed = true;
-                $needsSubQuery = true;
-            } else {
-                foreach( array_keys($this->_pendingFields) as $alias){
-                    //no subquery for root fields
-                    if($alias == $this->getRootAlias()){
-                        continue;
-                    }
-
-                    //no subquery for ONE relations
-                    if(isset($this->_queryComponents[$alias]['relation']) &&
-                        $this->_queryComponents[$alias]['relation']->getType() == Doctrine_Relation::ONE){
-                        continue;
-                    }
-
-                    $this->_isLimitSubqueryUsed = true;
-                    $needsSubQuery = true;
-                }
-            }
-        }
-
-        $sql = [];
-
-        if ( ! empty($this->_pendingFields)) {
-            foreach ($this->_queryComponents as $alias => $map) {
-                $fieldSql = $this->processPendingFields($alias);
-                if ( ! empty($fieldSql)) {
-                    $sql[] = $fieldSql;
-                }
-            }
-        }
-
-        if ( ! empty($sql)) {
-            array_unshift($this->_sqlParts['select'], implode(', ', $sql));
-        }
-
-        $this->_pendingFields = [];
-
-        // build the basic query
-        $q  = $this->_buildSqlQueryBase();
-        $q .= $this->_buildSqlFromPart();
-
-        if ( ! empty($this->_sqlParts['set'])) {
-            $q .= ' SET ' . implode(', ', $this->_sqlParts['set']);
-        }
-
-        $string = $this->getInheritanceCondition($this->getRootAlias());
-
-        // apply inheritance to WHERE part
-        if ( ! empty($string)) {
-            if (count($this->_sqlParts['where']) > 0) {
-                $this->_sqlParts['where'][] = 'AND';
-            }
-
-            if (str_starts_with($string, '(') && str_ends_with($string, ')')) {
-                $this->_sqlParts['where'][] = $string;
-            } else {
-                $this->_sqlParts['where'][] = '(' . $string . ')';
-            }
-
-            // [OV17] remember sql dependences
-            $this->addDependency('where');
-        }
-
-
-        // [OV1] moved this block before limit subquery - for easier checks in subquery
-        // Fix the orderbys so we only have one orderby per value
-        // [OV1] modified to convert also multiline orderby definitions + do not split by commas inside parentheses
-        $def = [];
-        foreach ($this->_sqlParts['orderby'] as $k => $orderBy) {
-            if(str_contains($orderBy, '(')) {
-                // https://regex101.com/r/yW4aZ3/277
-                // http://stackoverflow.com/questions/24534782/how-do-skip-or-f-work-on-regex
-                // split by commas, which are not in any (nested) parentheses
-                $e = preg_split('/[^(),]*(\((?:[^()]|(?1))*\))[^(),]*(*SKIP)(*F)|,/', $orderBy);
-            } else {
-                $e = explode(',', $orderBy);
-            }
-            foreach ($e as $v) {
-                $def[] = trim($v);
-            }
-        }
-        $this->_sqlParts['orderby'] = $def;
-        // end modified
-
-        // [OV1] split adding default orderby to add it separately for root alias before limit subquery and relations after
-        // Only do this for SELECT queries
-        if ($this->_type === self::SELECT) {
-            $this->_addDefaultOrderBy($rootAlias);
-        }
-
-        $modifyLimit = true;
-        $limitSubquerySql = '';
-
-        if ( ( ! empty($this->_sqlParts['limit']) || ! empty($this->_sqlParts['offset'])) && $needsSubQuery && $limitSubquery) {
-            // [OV8] remember current limit subquery, for storing in query cache
-            $this->_limitSubquerySql = $subquery = $this->getLimitSubquery();
-
-            // what about composite keys?
-            $idColumnName = $table->getColumnName($table->getIdentifier());
-
-            switch (strtolower($this->_conn->getDriverName())) {
-                /*case 'mysql':
-                    $this->useQueryCache(false);
-
-                    // mysql doesn't support LIMIT in subqueries
-                    $list = $this->_conn->execute($subquery, $this->_execParams)->fetchAll(Doctrine_Core::FETCH_COLUMN);
-                    $subquery = implode(', ', array_map(array($this->_conn, 'quote'), $list));
-
-                    break;
-                */
-
-                // [OV7] mysql should also use limit subquery in the same format as pgsql
-                case 'mysql':
-                case 'pgsql':
-                    // [OV14] changed alias - added _wrap_ to avoid conflicts with limit subquery ordered by joined column
-                    $subqueryAlias = $this->_conn->quoteIdentifier('doctrine_subquery_wrap_alias');
-
-                    // pgsql needs special nested LIMIT subquery
-                    $subquery = 'SELECT ' . $subqueryAlias . '.' . $this->_conn->quoteIdentifier($idColumnName)
-                            . ' FROM (' . $subquery . ') AS ' . $subqueryAlias;
-
-                    break;
-            }
-
-            $field = $this->getSqlTableAlias($rootAlias) . '.' . $idColumnName;
-
-            // FIX #1868: If not ID under MySQL is found to be restricted, restrict pk column for null
-            //            (which will lead to a return of 0 items)
-            $limitSubquerySql = $this->_conn->quoteIdentifier($field)
-                              . (( ! empty($subquery)) ? ' IN (' . $subquery . ')' : ' IS NULL')
-                              . ((count($this->_sqlParts['where']) > 0) ? ' AND ' : '');
-
-            $modifyLimit = false;
-        }
-
-        // FIX #DC-26: Include limitSubquerySql as major relevance in conditions
-        $emptyWhere = empty($this->_sqlParts['where']);
-
-        if ( ! ($emptyWhere && $limitSubquerySql == '')) {
-            $where = implode(' ', $this->_sqlParts['where']);
-            $where = ($where == '' || (str_starts_with($where, '(') && str_ends_with($where, ')')))
-                ? $where : '(' . $where . ')';
-
-            $q .= ' WHERE ' . $limitSubquerySql . $where;
-            //   .  (($limitSubquerySql == '' && count($this->_sqlParts['where']) == 1) ? substr($where, 1, -1) : $where);
-        }
-
-
-        // [OV1] Add default orderBy for relationships
-        // Only do this for SELECT queries
-        if ($this->_type === self::SELECT) {
-            foreach (array_keys($this->_queryComponents) as $alias) {
-                if($alias == $rootAlias) continue;
-                $this->_addDefaultOrderBy($alias);
-            }
-        }
-
-        $q .= ( ! empty($this->_sqlParts['groupby'])) ? ' GROUP BY ' . implode(', ', $this->_sqlParts['groupby'])  : '';
-        $q .= ( ! empty($this->_sqlParts['having'])) ?  ' HAVING '   . implode(' AND ', $this->_sqlParts['having']): '';
-        $q .= ( ! empty($this->_sqlParts['orderby'])) ? ' ORDER BY ' . implode(', ', $this->_sqlParts['orderby'])  : '';
-
-        // [OV9] cache without limit and offset
-        if ($modifyLimit
-            && !($this->isQueryCacheEnabled()
-                && $this->_conn->getAttribute(Doctrine_Core::ATTR_QUERY_CACHE_NO_OFFSET_LIMIT))) {
-            $q = $this->_conn->modifyLimitQuery($q, $this->_sqlParts['limit'], $this->_sqlParts['offset'], false, false, $this);
-        }
-
-        $q .= $this->_sqlParts['forUpdate'] === true ? ' FOR UPDATE ' : '';
-
-        $this->_sql = $q;
-
-        $this->clear();
-
-        return $q;
-    }
-
-    /**
-     * Add default orderBy statements defined in the relationships and table classes
-     *
-     * @param string $componentAlias
-     */
-    // [OV1] refactored into separate method
-    protected function _addDefaultOrderBy($componentAlias)
-    {
-        $sqlAlias = $this->getSqlTableAlias($componentAlias);
-
-        // added by mh
-        // fix for DC-815 (Model's default sorting breaks subqueries)
-        if (!in_array($sqlAlias, $this->_fromAliases)) {
-            // this component is not from this query scope
-            // e.g. this is subquery and alias is from outer query or vice versa
-            return;
-        }
-
-        $map = $this->_queryComponents[$componentAlias];
-        if (isset($map['relation'])) {
-            if (isset($map['ref'])) {
-                // fix for DC-651 already applied (Doctrine_Record::option('orderBy', ...) of join's right side being applied to refTable in m2m relationship)
-                // modified by mh [WARNING BC BREAK] for ordering m2m relations by columns in refClass use refOrderBy!
-                // fix for OV1
-                if(!empty($map['relation']['refOrderBy'])) {
-                    $orderBy = $map['relation']['refTable']->processOrderBy($sqlAlias, $map['relation']['refOrderBy'], true);
-                    if ($orderBy == $map['relation']['refOrderBy']) {
-                        $orderBy = null;
-                    }
-                } else {
-                    $orderBy = $map['relation']['refTable']->getOrderByStatement($sqlAlias, true);
-                }
-            } else {
-                $orderBy = $map['relation']->getOrderByStatement($sqlAlias, true);
-                if ($orderBy == $map['relation']['orderBy']) {
-                    $orderBy = null;
-                }
-            }
-        } else {
-            $orderBy = $map['table']->getOrderByStatement($sqlAlias, true);
-        }
-
-        if ($orderBy) {
-            $e = explode(',', $orderBy);
-            $e = array_map('trim', $e);
-            foreach ($e as $v) {
-                // [OV1]
-                // added by mh - handle quoteIdentifier
-                $e2 = array_map('trim', explode(' ', $v));
-                $v = $this->_conn->quoteIdentifier($e2[0]);
-                if (isset($e2[1])) { // asc or desc
-                    $v .= ' ' . $e2[1];
-                }
-                // end added
-                // modified by mh - include check for non-specified "ASC" order
-                $check = preg_replace('/\s+(ASC|DESC)/i', '', $v);
-                $found = false;
-                foreach($this->_sqlParts['orderby'] as $o) {
-                    if($o == $v || preg_match('/'.preg_quote($check).'\s+(ASC|DESC)/', $o)) {
-                        $found = true;
-                        break;
-                    }
-                }
-                if(!$found) {
-                    // [OV17] remember sql dependences
-                    if (strpos($e2[0], '.')) {
-                        $tmp = explode('.', $e2[0]);
-                        $tableAlias = $tmp[0];
-                        $this->addDependency('orderby', $tableAlias);
-                    }
-
-                    $this->_sqlParts['orderby'][] = $v;
-                }
-                //if ( ! in_array($v, $this->_sqlParts['orderby'])) {
-                //    $this->_sqlParts['orderby'][] = $v;
-                //}
-                // end modified
-            }
-        }
-    }
-
-    /**
-     * getLimitSubquery
-     * this is method is used by the record limit algorithm
-     *
-     * when fetching one-to-many, many-to-many associated data with LIMIT clause
-     * an additional subquery is needed for limiting the number of returned records instead
-     * of limiting the number of sql result set rows
-     *
-     * @return string       the limit subquery
-     * @todo A little refactor to make the method easier to understand & maybe shorter?
-     */
-    public function getLimitSubquery()
-    {
-        $map = reset($this->_queryComponents);
-        $table = $map['table'];
-        $componentAlias = key($this->_queryComponents);
-
-        // get short alias
-        $alias = $this->getSqlTableAlias($componentAlias);
-        // what about composite keys?
-        $primaryKey = $alias . '.' . $table->getColumnName($table->getIdentifier());
-
-        $driverName = $this->_conn->getAttribute(Doctrine_Core::ATTR_DRIVER_NAME);
-
-        // [OV14] distinct with join and order by on joined column is not determinate, it must be wrapped with another subquery (and not only in oracle)
-        $isOrderedByJoinedColumn = $this->_isOrderedByJoinedColumn();
-        // initialize the base of the subquery
-        //if (($driverName == 'oracle' || $driverName == 'oci') && $this->_isOrderedByJoinedColumn()) {
-        if ($isOrderedByJoinedColumn) {
-            $subquery = 'SELECT ';
-        } else {
-            $subquery = 'SELECT DISTINCT ';
-        }
-        $subquery .= $this->_conn->quoteIdentifier($primaryKey);
-
-        // pgsql & oracle need the order by fields to be preserved in select clause
-        // [OV14] added mysql since it needs it since 5.7 (with ONLY_FULL_GROUP_BY enabled by default in sql-mode)
-        if (($driverName == 'mysql' && !$isOrderedByJoinedColumn) || $driverName == 'pgsql' || $driverName == 'oracle' || $driverName == 'oci' || $driverName == 'mssql' || $driverName == 'odbc') {
-            // [OV14] remember added columns to avoid duplicates + little refactor for optimization
-            // Remove identifier quoting if it exists
-            // [OV22] Replace deprecated create_function with an anonymous function
-            $callback = function($e) { return trim($e, '[]`"'); };
-            $added = [];
-
-            foreach ($this->_sqlParts['orderby'] as $part) {
-                $e = $this->_tokenizer->bracketExplode($part, ' ');
-                foreach ($e as $i => $f) { // modified, added $i - before it was checking $f...
-                    if ($i == 0 || $i % 2 == 0) { // modified, added $i - before it was checking $f...
-                    // if ($f == 0 || $f % 2 == 0) {
-                        if (!str_contains($f, '.')) {
-                            continue;
-                        }
-
-                        // don't add functions
-                        if (str_contains($f, '(')) {
-                            continue;
-                        }
-
-                        $partOriginal = str_replace(',', '', trim($f));
-                        $part = trim(implode('.', array_map($callback, explode('.', $partOriginal))));
-
-                        // don't add primarykey column (its already in the select clause)
-                        // [OV14] watch out for duplicate column names (e.g. ORDER BY col IS NULL, col DESC)
-                        if ($part !== $primaryKey && !isset($added[$partOriginal])) {
-                            $added[$partOriginal] = true;
-
-                            // [OV14] add aliases to selected columns to avoid duplicate column error
-                            $aliasSql = str_replace('.', '__', $part);
-                            $partOriginal .= ' AS ' . $this->_conn->quoteIdentifier($aliasSql);
-
-                            $subquery .= ', ' . $partOriginal;
-                        }
-                    }
-                }
-            }
-
-            unset($added);
-        }
-
-        $orderby = $this->_sqlParts['orderby'];
-        $having = $this->_sqlParts['having'];
-        if ($driverName == 'mysql' || $driverName == 'pgsql') {
-            foreach ($this->_expressionMap as $dqlAlias => $expr) {
-                if (isset($expr[1])) {
-                    $subquery .= ', ' . $expr[0] . ' AS ' . $this->_aggregateAliasMap[$dqlAlias];
-                }
-            }
-        } else {
-            foreach ($this->_expressionMap as $dqlAlias => $expr) {
-                if (isset($expr[1])) {
-                    foreach ($having as $k => $v) {
-                        $having[$k] = str_replace($this->_aggregateAliasMap[$dqlAlias], $expr[0], $v);
-                    }
-                    foreach ($orderby as $k => $v) {
-                        $e = explode(' ', $v);
-                        if ($e[0] == $this->_aggregateAliasMap[$dqlAlias]) {
-                            $orderby[$k] = $expr[0];
-                        }
-                    }
-                }
-            }
-        }
-
-        // Add having fields that got stripped out of select
-        preg_match_all('/`[a-z0-9_]+`\.`[a-z0-9_]+`/i', implode(' ', $having), $matches, PREG_PATTERN_ORDER);
-        if (count($matches[0]) > 0) {
-            $subquery .= ', ' . implode(', ', array_unique($matches[0]));
-        }
-
-        $subquery .= ' FROM';
-
-        foreach ($this->_sqlParts['from'] as $part) {
-            // preserve LEFT JOINs only if needed
-            if (str_starts_with($part, 'LEFT JOIN')) {
-                $e = explode(' ', $part);
-                // Fix for http://www.doctrine-project.org/jira/browse/DC-706
-                // Fix for http://www.doctrine-project.org/jira/browse/DC-594
-                if (empty($this->_sqlParts['orderby']) && empty($this->_sqlParts['where']) && empty($this->_sqlParts['having']) && empty($this->_sqlParts['groupby'])) {
-                    continue;
-                }
-            }
-
-            $subquery .= ' ' . $part;
-        }
-
-        // all conditions must be preserved in subquery
-        $subquery .= ( ! empty($this->_sqlParts['where']))?   ' WHERE '    . implode(' ', $this->_sqlParts['where'])  : '';
-        $subquery .= ( ! empty($this->_sqlParts['groupby']))? ' GROUP BY ' . implode(', ', $this->_sqlParts['groupby'])   : '';
-        $subquery .= ( ! empty($having))?  ' HAVING '   . implode(' AND ', $having) : '';
-        $subquery .= ( ! empty($orderby))? ' ORDER BY ' . implode(', ', $orderby)  : '';
-
-        // [OV14] changed the condition, other databases also need it when query is ordered by joined column
-        // if (($driverName == 'oracle' || $driverName == 'oci') && $this->_isOrderedByJoinedColumn()) {
-        if ($isOrderedByJoinedColumn) {
-            // When using "ORDER BY x.foo" where x.foo is a column of a joined table,
-            // we may get duplicate primary keys because all columns in ORDER BY must appear
-            // in the SELECT list when using DISTINCT. Hence we need to filter out the
-            // primary keys with an additional DISTINCT subquery.
-            // #1038
-            $quotedIdentifierColumnName = $this->_conn->quoteIdentifier($table->getColumnName($table->getIdentifier()));
-            if($driverName == 'oracle' || $driverName == 'oci') {
-                $subquery = 'SELECT doctrine_subquery_alias.' . $quotedIdentifierColumnName
-                        . ' FROM (' . $subquery . ') doctrine_subquery_alias'
-                        . ' GROUP BY doctrine_subquery_alias.' . $quotedIdentifierColumnName
-                        . ' ORDER BY MIN(ROWNUM)';
-            } else {
-                // [OV14] ids returned by the subquery are ordered. The order must be kept while filtering duplicates out in mysql.
-                // otherwise limit would be executed after ids are reordered by distinct / group by, and that order cannot be determined.
-                if ($driverName == 'mysql') {
-                    // assign an incremented number to each row with id
-                    $subquery = 'SELECT @rownum:=@rownum + 1 as ' . $this->_conn->quoteIdentifier('row_number') . ','
-                        . ' doctrine_subquery_rownum_alias.' . $quotedIdentifierColumnName
-                        . ' FROM (' . $subquery . ') doctrine_subquery_rownum_alias,'
-                        . ' (SELECT @rownum := 0) rownum_var';
-
-                    // return unique ids and keep order by using assigned row_number
-                    $subquery = 'SELECT doctrine_subquery_alias.' . $quotedIdentifierColumnName . ', MIN(doctrine_subquery_alias.row_number)'
-                        . ' FROM (' . $subquery . ') doctrine_subquery_alias'
-                        . ' GROUP BY doctrine_subquery_alias.' . $quotedIdentifierColumnName
-                        . ' ORDER BY MIN(doctrine_subquery_alias.row_number)';
-                } else {
-                    // [OV21] @todo not sure if it works correctly with other drivers...
-                    $subquery = 'SELECT DISTINCT doctrine_subquery_alias.' . $quotedIdentifierColumnName
-                        . ' FROM (' . $subquery . ') doctrine_subquery_alias';
-                }
-            }
-        }
-
-        // [OV9] cache without limit and offset
-        if (!($this->isQueryCacheEnabled()
-                && $this->_conn->getAttribute(Doctrine_Core::ATTR_QUERY_CACHE_NO_OFFSET_LIMIT))) {
-            // add driver specific limit clause
-            $subquery = $this->_conn->modifyLimitSubquery($table, $subquery, $this->_sqlParts['limit'], $this->_sqlParts['offset']);
-        }
-
-        $parts = $this->_tokenizer->quoteExplode($subquery, ' ', "'", "'");
-
-        foreach ($parts as $k => $part) {
-            if (str_contains($part, ' ')) {
-                continue;
-            }
-
-            $part = str_replace(['"', "'", '`'], "", $part);
-
-            // Fix DC-645, Table aliases ending with ')' where not replaced properly
-            preg_match('/^(\(?)(.*?)(\)?)$/', $part, $matches);
-            if ($this->hasSqlTableAlias($matches[2])) {
-                $parts[$k] = $matches[1].$this->_conn->quoteIdentifier($this->generateNewSqlTableAlias($matches[2])).$matches[3];
-                continue;
-            }
-
-            if (!str_contains($part, '.')) {
-                continue;
-            }
-
-            preg_match_all("/[a-zA-Z0-9_]+\.[a-z0-9_]+/i", $part, $m);
-
-            foreach ($m[0] as $match) {
-                $e = explode('.', $match);
-
-                // Rebuild the original part without the newly generate alias and with quoting reapplied
-                $e2 = [];
-                foreach ($e as $k2 => $v2) {
-                  $e2[$k2] = $this->_conn->quoteIdentifier($v2);
-                }
-                $match = implode('.', $e2);
-
-                // Generate new table alias
-                $e[0] = $this->generateNewSqlTableAlias($e[0]);
-
-                // Requote the part with the newly generated alias
-                foreach ($e as $k2 => $v2) {
-                  $e[$k2] = $this->_conn->quoteIdentifier($v2);
-                }
-
-                $replace = implode('.' , $e);
-
-                // Replace the original part with the new part with new sql table alias
-                $parts[$k] = str_replace($match, $replace, $parts[$k]);
-            }
-        }
-
-        if ($driverName == 'mysql' || $driverName == 'pgsql') {
-            foreach ($parts as $k => $part) {
-                if (str_contains($part, "'")) {
-                    continue;
-                }
-                if (strpos($part, '__') == false) {
-                    continue;
-                }
-
-                preg_match_all("/[a-zA-Z0-9_]+\_\_[a-z0-9_]+/i", $part, $m);
-
-                foreach ($m[0] as $match) {
-                    $e = explode('__', $match);
-                    $e[0] = $this->generateNewSqlTableAlias($e[0]);
-
-                    $parts[$k] = str_replace($match, implode('__', $e), $parts[$k]);
-                }
-            }
-        }
-
-        $subquery = implode(' ', $parts);
-        return $subquery;
-    }
-
-    /**
-     * Checks whether the query has an ORDER BY on a column of a joined table.
-     * This information is needed in special scenarios like the limit-offset when its
-     * used with an Oracle database.
-     *
-     * @return boolean  TRUE if the query is ordered by a joined column, FALSE otherwise.
-     */
-    private function _isOrderedByJoinedColumn() {
-        if ( ! $this->_queryComponents) {
-            throw new Doctrine_Query_Exception("The query is in an invalid state for this "
-                    . "operation. It must have been fully parsed first.");
-        }
-        $componentAlias = key($this->_queryComponents);
-        $mainTableAlias = $this->getSqlTableAlias($componentAlias);
-        // [OV14] Remove identifier quoting if it exists
-        // [OV22] Replace deprecated create_function with an anonymous function
-        $callback = function($e) { return trim($e, '[]`"'); };
-        foreach ($this->_sqlParts['orderby'] as $part) {
-            $part = trim($part);
-            $e = $this->_tokenizer->bracketExplode($part, ' ');
-            $part = trim($e[0]);
-            if (!str_contains($part, '.')) {
-                continue;
-            }
-            [$tableAlias, $columnName] = explode('.', $part);
-            // [OV14] Remove identifier quoting if it exists
-            $tableAlias = $callback($tableAlias);
-            if ($tableAlias != $mainTableAlias) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * DQL PARSER
-     * parses a DQL query
-     * first splits the query in parts and then uses individual
-     * parsers for each part
-     *
-     * @param string $query                 DQL query
-     * @param boolean $clear                whether or not to clear the aliases
-     * @throws Doctrine_Query_Exception     if some generic parsing error occurs
-     * @return Doctrine_Query
-     */
-    public function parseDqlQuery($query, $clear = true)
-    {
-        if ($clear) {
-            $this->clear();
-        }
-
-        $query = trim($query);
-        $query = str_replace("\r", "\n", str_replace("\r\n", "\n", $query));
-        $query = str_replace("\n", ' ', $query);
-
-        $parts = $this->_tokenizer->tokenizeQuery($query);
-
-        foreach ($parts as $partName => $subParts) {
-            $subParts = trim($subParts);
-            $partName = strtolower($partName);
-            switch ($partName) {
-                case 'create':
-                    $this->_type = self::CREATE;
-                break;
-                case 'insert':
-                    $this->_type = self::INSERT;
-                break;
-                case 'delete':
-                    $this->_type = self::DELETE;
-                break;
-                case 'select':
-                    $this->_type = self::SELECT;
-                    $this->_addDqlQueryPart($partName, $subParts);
-                break;
-                case 'update':
-                    $this->_type = self::UPDATE;
-                    $partName = 'from';
-                case 'from':
-                    $this->_addDqlQueryPart($partName, $subParts);
-                break;
-                case 'set':
-                    $this->_addDqlQueryPart($partName, $subParts, true);
-                break;
-                case 'group':
-                case 'order':
-                    $partName .= 'by';
-                case 'where':
-                case 'having':
-                case 'limit':
-                case 'offset':
-                    $this->_addDqlQueryPart($partName, $subParts);
-                break;
-            }
-        }
-
-        return $this;
-    }
-
-    /**
-     * @todo Describe & refactor... too long and nested.
-     * @param string $path          component alias
-     * @param boolean $loadFields
-     */
-    public function load($path, $loadFields = true)
-    {
-        if (isset($this->_queryComponents[$path])) {
-            return $this->_queryComponents[$path];
-        }
-
-        $e = $this->_tokenizer->quoteExplode($path, ' INDEXBY ');
-
-        $mapWith = null;
-        if (count($e) > 1) {
-            $mapWith = trim($e[1]);
-
-            $path = $e[0];
-        }
-
-        // parse custom join conditions
-        $e = explode(' ON ', str_ireplace(' on ', ' ON ', $path));
-
-        $joinCondition = '';
-
-        if (count($e) > 1) {
-            $joinCondition = substr($path, strlen($e[0]) + 4, strlen($e[1]));
-            $path = substr($path, 0, strlen($e[0]));
-
-            $overrideJoin = true;
-        } else {
-            $e = explode(' WITH ', str_ireplace(' with ', ' WITH ', $path));
-
-            if (count($e) > 1) {
-                $joinCondition = substr($path, strlen($e[0]) + 6, strlen($e[1]));
-                $path = substr($path, 0, strlen($e[0]));
-            }
-
-            $overrideJoin = false;
-        }
-
-        $tmp            = explode(' ', $path);
-        $componentAlias = $originalAlias = (count($tmp) > 1) ? end($tmp) : null;
-
-        $e = preg_split("/[.:]/", $tmp[0], -1);
-
-        $fullPath = $tmp[0];
-        $prevPath = '';
-        $fullLength = strlen($fullPath);
-
-        if (isset($this->_queryComponents[$e[0]])) {
-            $table = $this->_queryComponents[$e[0]]['table'];
-            $componentAlias = $e[0];
-
-            $prevPath = $parent = array_shift($e);
-        }
-
-        foreach ($e as $key => $name) {
-            // get length of the previous path
-            $length = strlen($prevPath);
-
-            // build the current component path
-            $prevPath = ($prevPath) ? $prevPath . '.' . $name : $name;
-
-            $delimeter = substr($fullPath, $length, 1);
-
-            // if an alias is not given use the current path as an alias identifier
-            if (strlen($prevPath) === $fullLength && isset($originalAlias)) {
-                $componentAlias = $originalAlias;
-            } else {
-                $componentAlias = $prevPath;
-            }
-
-            // if the current alias already exists, skip it
-            if (isset($this->_queryComponents[$componentAlias])) {
-                throw new Doctrine_Query_Exception("Duplicate alias '$componentAlias' in query.");
-            }
-
-            if ( ! isset($table)) {
-                // process the root of the path
-
-                $table = $this->loadRoot($name, $componentAlias);
-            } else {
-                $join = ($delimeter == ':') ? 'INNER JOIN ' : 'LEFT JOIN ';
-
-                $relation = $table->getRelation($name);
-                $localTable = $table;
-
-                $table = $relation->getTable();
-                $this->_queryComponents[$componentAlias] = ['table' => $table,
-                                                                 'parent'   => $parent,
-                                                                 'relation' => $relation,
-                                                                 'map'      => null];
-                // Fix for http://www.doctrine-project.org/jira/browse/DC-701
-                if ( ! $relation->isOneToOne() && ! $this->disableLimitSubquery) {
-                    $this->_needsSubquery = true;
-                }
-
-                $localAlias   = $this->getSqlTableAlias($parent, $localTable->getTableName());
-                $foreignAlias = $this->getSqlTableAlias($componentAlias, $relation->getTable()->getTableName());
-
-                $foreignSql   = $this->_conn->quoteIdentifier($relation->getTable()->getTableName())
-                              . ' '
-                              . $this->_conn->quoteIdentifier($foreignAlias);
-
-                $map = $relation->getTable()->inheritanceMap;
-
-                if ( ! $loadFields || ! empty($map) || $joinCondition) {
-                    $this->_subqueryAliases[] = $foreignAlias;
-                }
-
-                if ($relation instanceof Doctrine_Relation_Association) {
-                    $asf = $relation->getAssociationTable();
-
-                    $assocTableName = $asf->getTableName();
-
-                    if ( ! $loadFields || ! empty($map) || $joinCondition) {
-                        $this->_subqueryAliases[] = $assocTableName;
-                    }
-
-                    // [OV17] changed the component name under which the association-refClass table will be aliased
-                    // because it will be stored in sqlParts, dependences, pendingJoinConditions
-                    // and with the old way e.g. a SoftDelete behavior, or anything which would add a pendingJoinCondition on the refModel
-                    // would result in an exception, because Doctrine_Query_JoinCondition would fail parsing it (trying to resolve $asf->getComponentName() as a column name)
-                    //$assocPath = $prevPath . '.' . $asf->getComponentName() . ' ' . $componentAlias;
-                    $assocPath = $componentAlias . '.' . $asf->getComponentName();
-
-                    $this->_queryComponents[$assocPath] = [
-                        'parent' => $prevPath,
-                        'relation' => $relation,
-                        'table' => $asf,
-                        'ref' => true];
-
-                    $assocAlias = $this->getSqlTableAlias($assocPath, $asf->getTableName());
-
-                    $queryPart = $join
-                            . $this->_conn->quoteIdentifier($assocTableName)
-                            . ' '
-                            . $this->_conn->quoteIdentifier($assocAlias);
-
-                    $queryPart .= ' ON (' . $this->_conn->quoteIdentifier($localAlias
-                                . '.'
-                                . $localTable->getColumnName($localTable->getIdentifier())) // what about composite keys?
-                                . ' = '
-                                . $this->_conn->quoteIdentifier($assocAlias . '.' . $relation->getLocalRefColumnName());
-
-                    if ($relation->isEqual()) {
-                        // equal nest relation needs additional condition
-                        $queryPart .= ' OR '
-                                    . $this->_conn->quoteIdentifier($localAlias
-                                    . '.'
-                                    . $table->getColumnName($table->getIdentifier()))
-                                    . ' = '
-                                    . $this->_conn->quoteIdentifier($assocAlias . '.' . $relation->getForeignRefColumnName());
-                    }
-
-                    $queryPart .= ')';
-
-                    // [OV17] store query part under the aliased key, like the other parts
-                    //$this->_sqlParts['from'][] = $queryPart;
-                    $this->_sqlParts['from'][$assocPath] = $queryPart;
-
-                    // [OV17] remember join dependences
-                    $this->addJoinDependency($assocPath, $localAlias);
-
-                    // fix for DC-815 (Model's default sorting breaks subqueries)
-                    $this->_fromAliases[] = $assocAlias;
-
-                    $queryPart = $join . $foreignSql;
-
-                    if ( ! $overrideJoin) {
-                        $queryPart .= $this->buildAssociativeRelationSql($relation, $assocAlias, $foreignAlias, $localAlias);
-
-                        // [OV17] remember join dependences
-                        $this->addJoinDependency($componentAlias, $assocAlias);
-                    }
-                } else {
-                    $queryPart = $this->buildSimpleRelationSql($relation, $foreignAlias, $localAlias, $overrideJoin, $join);
-
-                    // [OV17] remember join dependences
-                    if ( ! $overrideJoin) {
-                        $this->addJoinDependency($componentAlias, $localAlias);
-                    }
-                }
-
-                $queryPart .= $this->buildInheritanceJoinSql($table->getComponentName(), $componentAlias);
-                $this->_sqlParts['from'][$componentAlias] = $queryPart;
-                // fix for DC-815 (Model's default sorting breaks subqueries)
-                $this->_fromAliases[] = $foreignAlias;
-
-                if ( ! empty($joinCondition)) {
-                    $this->addPendingJoinCondition($componentAlias, $joinCondition);
-                }
-            }
-
-            if ($loadFields) {
-                $restoreState = false;
-
-                // load fields if necessary
-                if ($loadFields && empty($this->_dqlParts['select'])) {
-                    $this->_pendingFields[$componentAlias] = ['*'];
-                }
-            }
-
-            $parent = $prevPath;
-        }
-
-        $table = $this->_queryComponents[$componentAlias]['table'];
-
-        return $this->buildIndexBy($componentAlias, $mapWith);
-    }
-
-    protected function buildSimpleRelationSql(Doctrine_Relation $relation, $foreignAlias, $localAlias, $overrideJoin, $join)
-    {
-        $queryPart = $join . $this->_conn->quoteIdentifier($relation->getTable()->getTableName())
-                           . ' '
-                           . $this->_conn->quoteIdentifier($foreignAlias);
-
-        if ( ! $overrideJoin) {
-            $queryPart .= ' ON '
-                       . $this->_conn->quoteIdentifier($localAlias . '.' . $relation->getLocalColumnName())
-                       . ' = '
-                       . $this->_conn->quoteIdentifier($foreignAlias . '.' . $relation->getForeignColumnName());
-        }
-
-        return $queryPart;
-    }
-
-    protected function buildIndexBy($componentAlias, $mapWith = null)
-    {
-        $table = $this->_queryComponents[$componentAlias]['table'];
-
-        $indexBy = null;
-        $column = false;
-
-        if (isset($mapWith)) {
-            $terms = explode('.', $mapWith);
-
-            if (count($terms) == 1) {
-                $indexBy = $terms[0];
-            } elseif (count($terms) == 2) {
-                $column = true;
-                $indexBy = $terms[1];
-            }
-        } elseif ($table->getBoundQueryPart('indexBy') !== null) {
-            $indexBy = $table->getBoundQueryPart('indexBy');
-        }
-
-        if ($indexBy !== null) {
-            if ( $column && ! $table->hasColumn($table->getColumnName($indexBy))) {
-                throw new Doctrine_Query_Exception("Couldn't use key mapping. Column " . $indexBy . " does not exist.");
-            }
-
-            $this->_queryComponents[$componentAlias]['map'] = $indexBy;
-        }
-
-        return $this->_queryComponents[$componentAlias];
-    }
-
-
-    protected function buildAssociativeRelationSql(Doctrine_Relation $relation, $assocAlias, $foreignAlias, $localAlias)
-    {
-        $table = $relation->getTable();
-
-        $queryPart = ' ON ';
-
-        if ($relation->isEqual()) {
-            $queryPart .= '(';
-        }
-
-        $localIdentifier = $table->getColumnName($table->getIdentifier());
-
-        $queryPart .= $this->_conn->quoteIdentifier($foreignAlias . '.' . $localIdentifier)
-                    . ' = '
-                    . $this->_conn->quoteIdentifier($assocAlias . '.' . $relation->getForeignRefColumnName());
-
-        if ($relation->isEqual()) {
-            $queryPart .= ' OR '
-                        . $this->_conn->quoteIdentifier($foreignAlias . '.' . $localIdentifier)
-                        . ' = '
-                        . $this->_conn->quoteIdentifier($assocAlias . '.' . $relation->getLocalRefColumnName())
-                        . ') AND '
-                        . $this->_conn->quoteIdentifier($foreignAlias . '.' . $localIdentifier)
-                        . ' != '
-                        . $this->_conn->quoteIdentifier($localAlias . '.' . $localIdentifier);
-        }
-
-        return $queryPart;
-    }
-
-    /**
-     * loadRoot
-     *
-     * @param string $name
-     * @param string $componentAlias
-     * @return Doctrine_Table
-     * @todo DESCRIBE ME!
-     * @todo this method is called only in Doctrine_Query class. Shouldn't be private or protected?
-     */
-    public function loadRoot($name, $componentAlias)
-    {
-        // get the connection for the component
-        $manager = Doctrine_Manager::getInstance();
-        if ( ! $this->_passedConn && $manager->hasConnectionForComponent($name)) {
-            $this->_conn = $manager->getConnectionForComponent($name);
-        }
-
-        $table = $this->_conn->getTable($name);
-        $tableName = $table->getTableName();
-
-        // get the short alias for this table
-        $tableAlias = $this->getSqlTableAlias($componentAlias, $tableName);
-        // quote table name
-        $queryPart = $this->_conn->quoteIdentifier($tableName);
-
-        // [OV16] improved checks for whether table alias should be used
-        //if ($this->_type === self::SELECT) {
-        if ($this->shouldUseTableAlias()) {
-            $queryPart .= ' ' . $this->_conn->quoteIdentifier($tableAlias);
-        }
-
-        $this->_tableAliasMap[$tableAlias] = $componentAlias;
-
-        $queryPart .= $this->buildInheritanceJoinSql($name, $componentAlias);
-
-        $this->_sqlParts['from'][] = $queryPart;
-        // fix for DC-815 (Model's default sorting breaks subqueries)
-        $this->_fromAliases[] = $tableAlias;
-
-        $this->_queryComponents[$componentAlias] = ['table' => $table, 'map' => null];
-
-        return $table;
-    }
-
-    /**
-     * @todo DESCRIBE ME!
-     * @param string $name              component class name
-     * @param string $componentAlias    alias of the component in the dql
-     * @return string                   query part
-     */
-    public function buildInheritanceJoinSql($name, $componentAlias)
-    {
-        // get the connection for the component
-        $manager = Doctrine_Manager::getInstance();
-        if ( ! $this->_passedConn && $manager->hasConnectionForComponent($name)) {
-            $this->_conn = $manager->getConnectionForComponent($name);
-        }
-
-        $table = $this->_conn->getTable($name);
-        $tableName = $table->getTableName();
-
-        // get the short alias for this table
-        $tableAlias = $this->getSqlTableAlias($componentAlias, $tableName);
-
-        $queryPart = '';
-
-        foreach ($table->getOption('joinedParents') as $parent) {
-            $parentTable = $this->_conn->getTable($parent);
-
-            $parentAlias = $componentAlias . '.' . $parent;
-
-            // get the short alias for the parent table
-            $parentTableAlias = $this->getSqlTableAlias($parentAlias, $parentTable->getTableName());
-
-            $queryPart .= ' LEFT JOIN ' . $this->_conn->quoteIdentifier($parentTable->getTableName())
-                        . ' ' . $this->_conn->quoteIdentifier($parentTableAlias) . ' ON ';
-
-            //Doctrine_Core::dump($table->getIdentifier());
-            foreach ((array) $table->getIdentifier() as $identifier) {
-                $column = $table->getColumnName($identifier);
-
-                $queryPart .= $this->_conn->quoteIdentifier($tableAlias)
-                            . '.' . $this->_conn->quoteIdentifier($column)
-                            . ' = ' . $this->_conn->quoteIdentifier($parentTableAlias)
-                            . '.' . $this->_conn->quoteIdentifier($column);
-            }
-        }
-
-        return $queryPart;
-    }
-
-    /**
-     * Get count sql query for this Doctrine_Query instance.
-     *
-     * This method is used in Doctrine_Query::count() for returning an integer
-     * for the number of records which will be returned when executed.
-     *
-     * @param array $params params passed by reference [OV13]
-     * @return string $q
-     */
-    public function getCountSqlQuery(array &$params = [])
-    {
-        // triggers dql parsing/processing
-        $this->getSqlQuery([], false); // this is ugly
-
-        // initialize temporary variables
-        $where   = $this->_sqlParts['where'];
-        $having  = $this->_sqlParts['having'];
-        $groupby = $this->_sqlParts['groupby'];
-
-        $rootAlias = $this->getRootAlias();
-        $tableAlias = $this->getSqlTableAlias($rootAlias);
-
-        // Build the query base
-        $q = 'SELECT COUNT(*) AS ' . $this->_conn->quoteIdentifier('num_results') . ' FROM ';
-
-        // [OV18] optimize count query - strip out unnecesary joins
-        $dependences = $this->getDependencesMerged(['where', 'groupby', 'having']);
-
-        // Build the from clause
-        $from = $this->_buildSqlFromPart(true);
-
-        // Build the where clause
-        $where = ( ! empty($where)) ? ' WHERE ' . implode(' ', $where) : '';
-
-        // Build the group by clause
-        $groupby = ( ! empty($groupby)) ? ' GROUP BY ' . implode(', ', $groupby) : '';
-
-        // Build the having clause
-        $having = ( ! empty($having)) ? ' HAVING ' . implode(' AND ', $having) : '';
-
-        // Building the from clause and finishing query
-        if (count($this->_queryComponents) == 1 && empty($having)) {
-            $q .= $from . $where . $groupby . $having;
-        } else {
-            // Subselect fields will contain only the pk of root entity
-            $ta = $this->_conn->quoteIdentifier($tableAlias);
-
-            $map = $this->getRootDeclaration();
-            $idColumnNames = $map['table']->getIdentifierColumnNames();
-
-            $pkFields = $ta . '.' . implode(', ' . $ta . '.', $this->_conn->quoteMultipleIdentifier($idColumnNames));
-
-            // We need to do some magic in select fields if the query contain anything in having clause
-            $selectFields = $pkFields;
-            // [OV23] wrap count query with another query, if "having" is used not only on expressions,
-            // but on fields as well, and when there is no "group by" in the query
-            $wrap = false;
-
-            if ( ! empty($having)) {
-                // For each field defined in select clause
-                foreach ($this->_sqlParts['select'] as $field) {
-                    // We only include aggregate expressions to count query
-                    // This is needed because HAVING clause will use field aliases
-                    if (str_contains($field, '(')) {
-                        $selectFields .= ', ' . $field;
-                    }
-                }
-                // Add having fields that got stripped out of select
-                preg_match_all('/`[a-z0-9_]+`\.`[a-z0-9_]+`/i', $having, $matches, PREG_PATTERN_ORDER);
-                if (count($matches[0]) > 0) {
-                    $selectFields .= ', ' . implode(', ', array_unique($matches[0]));
-                    // [OV23]
-                    if (empty($groupby)) $wrap = true;
-                }
-            }
-
-            // If we do not have a custom group by, apply the default one
-            // if (empty($groupby)) {
-            // [OV23]
-            if (empty($groupby) && !$wrap) {
-                $groupby = ' GROUP BY ' . $pkFields;
-            }
-
-            // [OV23]
-            if ($wrap) {
-                $q .= '(SELECT DISTINCT ' . str_replace($ta, $this->_conn->quoteIdentifier('dctrn_count_query'), $pkFields) . ' FROM ';
-            }
-            $q .= '(SELECT ' . $selectFields . ' FROM ' . $from . $where . $groupby . $having . ') '
-                . $this->_conn->quoteIdentifier('dctrn_count_query');
-            // [OV23]
-            if ($wrap) {
-                $q .= ') ' . $this->_conn->quoteIdentifier('dctrn_count_query_wrap');
-            }
-        }
-
-        // [OV13]
-        $params = $this->getCountQueryParams($params);
-        $params = $this->_conn->convertBooleans($params);
-        $q = $this->_adjustWhereInSql($q, $params);
-
-        return $q;
-    }
-
-    /**
-     * Fetches the count of the query.
-     *
-     * This method executes the main query without all the
-     * selected fields, ORDER BY part, LIMIT part and OFFSET part.
-     *
-     * Example:
-     * Main query:
-     *      SELECT u.*, p.phonenumber FROM User u
-     *          LEFT JOIN u.Phonenumber p
-     *          WHERE p.phonenumber = '123 123' LIMIT 10
-     *
-     * The modified DQL query:
-     *      SELECT COUNT(DISTINCT u.id) FROM User u
-     *          LEFT JOIN u.Phonenumber p
-     *          WHERE p.phonenumber = '123 123'
-     *
-     * @param array $params        an array of prepared statement parameters
-     * @return integer             the count of this query
-     */
-    #[\ReturnTypeWillChange]
-    public function count($params = [])
-    {
-        $q = $this->getCountSqlQuery($params);
-        // [OV13] moved inside getCountSqlQuery
-        //$params = $this->getCountQueryParams($params);
-        //$params = $this->_conn->convertBooleans($params);
-
-        if ($this->_resultCache) {
-            $conn = $this->getConnection();
-            $cacheDriver = $this->getResultCacheDriver();
-            $hash = $this->getResultCacheHash($params).'_count';
-            $cached = ($this->_expireResultCache) ? false : $cacheDriver->fetch($hash);
-
-            if ($cached === false) {
-                // cache miss
-                $results = $this->getConnection()->fetchAll($q, $params);
-                $cacheDriver->save($hash, serialize($results), $this->getResultCacheLifeSpan());
-            } else {
-                $results = unserialize($cached);
-            }
-        } else {
-            $results = $this->getConnection()->fetchAll($q, $params);
-        }
-
-        if (count($results) > 1) {
-            $count = count($results);
-        } else {
-            if (isset($results[0])) {
-                $results[0] = array_change_key_case($results[0], CASE_LOWER);
-                $count = $results[0]['num_results'];
-            } else {
-                $count = 0;
-            }
-        }
-
-        return (int) $count;
-    }
-
-    /**
-     * Queries the database with DQL (Doctrine Query Language).
-     *
-     * This methods parses a Dql query and builds the query parts.
-     *
-     * @param string $query      Dql query
-     * @param array $params      prepared statement parameters
-     * @param int $hydrationMode Doctrine_Core::HYDRATE_ARRAY or Doctrine_Core::HYDRATE_RECORD
-     * @see Doctrine_Core::FETCH_* constants
-     * @return mixed
-     */
-    public function query($query, $params = [], $hydrationMode = null)
-    {
-        $this->parseDqlQuery($query);
-        return $this->execute($params, $hydrationMode);
-    }
-
-    // [OV17]
-    /**
-     * Add join dependency to a table alias for query component
-     *
-     * @param string $componentAlias
-     * @param array $tableAlias
-     * @return $this
-     */
-    public function addJoinDependency($componentAlias, $tableAlias)
-    {
-        $this->_queryComponents[$componentAlias]['dependences'][$tableAlias] = true;
-        return $this;
-    }
-
-    // [OV17]
-    /**
-     * Add multiple join dependences to a table alias for query component
-     *
-     * @param string $componentAlias
-     * @param array $tableAliases
-     * @return $this
-     */
-    public function addJoinDependences($componentAlias, array $tableAliases)
-    {
-        foreach($tableAliases as $tableAlias) {
-            $this->addJoinDependency($componentAlias, $tableAlias);
-        }
-        return $this;
-    }
-
-    // [OV17]
-    /**
-     * Get join dependences for a query component
-     *
-     * @param string $componentAlias
-     * @param bool $exceptRoot strip out dependences to root table
-     * @return array
-     */
-    public function getJoinDependences($componentAlias, $exceptRoot = true)
-    {
-        if ( ! $this->_queryComponents) {
-            // parse the query, if not parsed yet
-            $this->getSqlQuery([], false);
-        }
-
-        $dependences = !empty($this->_queryComponents[$componentAlias]['dependences']) ? $this->_queryComponents[$componentAlias]['dependences'] : [];
-        if($exceptRoot && $this->_rootAlias) {
-            $rootTableAlias = $this->getSqlTableAlias($this->_rootAlias);
-            unset($dependences[$rootTableAlias]);
-        }
-        return $dependences;
-    }
-
-    /**
-     * Get join dependences for all components used in the query
-     *
-     * @param bool $exceptRoot strip out dependences to root table
-     * @return array
-     */
-    public function getAllJoinDependences($exceptRoot = true)
-    {
-        if ( ! $this->_queryComponents) {
-            // parse the query, if not parsed yet
-            $this->getSqlQuery([], false);
-        }
-
-        $data = [];
-        foreach($this->_queryComponents as $alias => $map) {
-            if(isset($this->_parentQueryComponents[$alias])) {
-                // this must be a subquery, do not return dependences for components from parent query
-                continue;
-            }
-            if($dependences = $this->getJoinDependences($alias, $exceptRoot)) {
-                $data[$alias] = $dependences;
-            }
-        }
-
-        return $data;
-    }
-
-    /**
-     * Copies a Doctrine_Query object.
-     *
-     * @return Doctrine_Query|null  Copy of the Doctrine_Query instance.
-     */
-    public function copy($query = null)
-    {
-
-        if ( ! $query) {
-            $query = $this;
-        }
-
-        $new = clone $query;
-
-        return $new;
-    }
-
-    /**
-     * Magic method called after cloning process.
-     *
-     * @return void
-     */
-    public function __clone()
-    {
-        $this->_parsers = [];
-        $this->_hydrator = clone $this->_hydrator;
-
-        // Subqueries share some information from the parent so it can intermingle
-        // with the dql of the main query. So when a subquery is cloned we need to
-        // kill those references or it causes problems
-        if ($this->isSubquery()) {
-            $this->_killReference('_params');
-            $this->_killReference('_tableAliasMap');
-            $this->_killReference('_queryComponents');
-        }
-    }
-
-    /**
-     * Kill the reference for the passed class property.
-     * This method simply copies the value to a temporary variable and then unsets
-     * the reference and re-assigns the old value but not by reference
-     *
-     * @param string $key
-     */
-    protected function _killReference($key)
-    {
-        $tmp = $this->$key;
-        unset($this->$key);
-        $this->$key = $tmp;
-    }
-
-    /**
-     * Frees the resources used by the query object. It especially breaks a
-     * cyclic reference between the query object and it's parsers. This enables
-     * PHP's current GC to reclaim the memory.
-     * This method can therefore be used to reduce memory usage when creating
-     * a lot of query objects during a request.
-     *
-     * @return Doctrine_Query   this object
-     */
-    public function free()
-    {
-        $this->reset();
-        $this->_parsers = [];
-        $this->_dqlParts = [];
-    }
+	/**
+	 * @var array  The DQL keywords.
+	 */
+	protected static array $_keywords = [
+		'ALL', 'AND', 'ANY', 'AS', 'ASC', 'AVG', 'BETWEEN', 'BIT_LENGTH', 'BY',
+		'CHARACTER_LENGTH', 'CHAR_LENGTH', 'CURRENT_DATE', 'CURRENT_TIME',
+		'CURRENT_TIMESTAMP', 'DELETE', 'DESC', 'DISTINCT', 'EMPTY', 'EXISTS',
+		'FALSE', 'FETCH', 'FROM', 'GROUP', 'HAVING', 'IN', 'INDEXBY', 'INNER',
+		'IS', 'JOIN', 'LEFT', 'LIKE', 'LOWER', 'MEMBER', 'MOD', 'NEW', 'NOT',
+		'NULL', 'OBJECT', 'OF', 'OR', 'ORDER', 'OUTER', 'POSITION', 'SELECT',
+		'SOME', 'TRIM', 'TRUE', 'UNKNOWN', 'UPDATE', 'WHERE',
+	];
+	
+	/**
+	 * @var array
+	 */
+	protected array $_subqueryAliases = [];
+	
+	/**
+	 * @var array $_aggregateAliasMap       an array containing all aggregate aliases, keys as dql aliases
+	 *                                      and values as sql aliases
+	 */
+	protected array $_aggregateAliasMap      = [];
+	
+	// [OV17] property not used
+	/*
+	 * @var array
+	 */
+	// protected $_pendingAggregates = array();
+	
+	/**
+	 * @param boolean $needsSubquery
+	 */
+	protected bool $_needsSubquery = false;
+	
+	/**
+	 * @param boolean $isSubquery           whether or not this query object is a subquery of another
+	 *                                      query object
+	 */
+	protected $_isSubquery;
+	
+	/**
+	 * @var array $_neededTables            an array containing the needed table aliases
+	 */
+	protected array $_neededTables = [];
+	
+	/**
+	 * @var array $_fromAliases             an array containing table aliases used in FROM part
+	 *                                      - fix for DC-815 (Model's default sorting breaks subqueries)
+	 */
+	protected array $_fromAliases = [];
+	
+	// [OV17] property not used
+	/*
+	 * @var array $pendingSubqueries        SELECT part subqueries, these are called pending subqueries since
+	 *                                      they cannot be parsed directly (some queries might be correlated)
+	 */
+	// protected $_pendingSubqueries = array();
+	
+	/**
+	 * @var array $_pendingFields           an array of pending fields (fields waiting to be parsed)
+	 */
+	protected array $_pendingFields = [];
+	
+	/**
+	 * @var array $_parsers                 an array of parser objects, each DQL query part has its own parser
+	 */
+	protected array $_parsers = [];
+	
+	/**
+	 * @var array
+	 */
+	protected array $_expressionMap = [];
+	
+	/**
+	 * @var string $_sql            cached SQL query
+	 */
+	protected $_sql;
+	
+	/**
+	 * create
+	 * returns a new Doctrine_Query object
+	 *
+	 * @param Doctrine_Connection $conn  optional connection parameter
+	 * @param string $class              Query class to instantiate
+	 * @return Doctrine_Query
+	 */
+	public static function create($conn = null, $class = null)
+	{
+		if ( ! $class) {
+			$class = Doctrine_Manager::getInstance()
+				->getAttribute(Doctrine_Core::ATTR_QUERY_CLASS);
+		}
+		return new $class($conn);
+	}
+	
+	/**
+	 * Clears all the sql parts.
+	 */
+	protected function clear()
+	{
+		$this->_preQueried = false;
+		$this->_pendingJoinConditions = [];
+		$this->_state = self::STATE_DIRTY;
+	}
+	
+	/**
+	 * Resets the query to the state just after it has been instantiated.
+	 */
+	public function reset()
+	{
+		$this->_subqueryAliases = [];
+		$this->_aggregateAliasMap = [];
+		// [OV17] properties not used
+		//$this->_pendingAggregates = array();
+		//$this->_pendingSubqueries = array();
+		$this->_pendingFields = [];
+		$this->_neededTables = [];
+		$this->_expressionMap = [];
+		$this->_subqueryAliases = [];
+		$this->_needsSubquery = false;
+		$this->_isLimitSubqueryUsed = false;
+		$this->_limitSubquerySql = null; // [OV8]
+		// [OV17] clear dependency map
+		$this->_dependences = [];
+		$this->_currentDependencyPart = null;
+	}
+	
+	/**
+	 * createSubquery
+	 * creates a subquery
+	 *
+	 * @return Doctrine_Hydrate
+	 */
+	public function createSubquery()
+	{
+		$class = get_class($this);
+		$obj   = new $class();
+		
+		// copy the aliases to the subquery
+		$obj->copySubqueryInfo($this);
+		
+		// this prevents the 'id' being selected, re ticket #307
+		$obj->isSubquery(true);
+		
+		return $obj;
+	}
+	
+	/**
+	 * addPendingJoinCondition
+	 *
+	 * @param string $componentAlias    component alias
+	 * @param string $joinCondition     dql join condition
+	 * @return Doctrine_Query           this object
+	 */
+	public function addPendingJoinCondition($componentAlias, $joinCondition)
+	{
+		if ( ! isset($this->_pendingJoinConditions[$componentAlias])) {
+			$this->_pendingJoinConditions[$componentAlias] = [];
+		}
+		
+		$this->_pendingJoinConditions[$componentAlias][] = $joinCondition;
+	}
+	
+	/**
+	 * fetchArray
+	 * Convenience method to execute using array fetching as hydration mode.
+	 *
+	 * @param string $params
+	 * @return array
+	 */
+	public function fetchArray($params = [])
+	{
+		return $this->execute($params, Doctrine_Core::HYDRATE_ARRAY);
+	}
+	
+	/**
+	 * fetchOne
+	 * Convenience method to execute the query and return the first item
+	 * of the collection.
+	 *
+	 * @param string $params        Query parameters
+	 * @param int $hydrationMode    Hydration mode: see Doctrine_Core::HYDRATE_* constants
+	 * @return mixed                Array or Doctrine_Collection, depending on hydration mode. False if no result.
+	 */
+	public function fetchOne($params = [], $hydrationMode = null)
+	{
+		$collection = $this->execute($params, $hydrationMode);
+		
+		if (is_scalar($collection)) {
+			return $collection;
+		}
+		
+		if (count($collection) === 0) {
+			return false;
+		}
+		
+		if ($collection instanceof Doctrine_Collection) {
+			return $collection->getFirst();
+		} elseif (is_array($collection)) {
+			return array_shift($collection);
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * isSubquery
+	 * if $bool parameter is set this method sets the value of
+	 * Doctrine_Query::$isSubquery. If this value is set to true
+	 * the query object will not load the primary key fields of the selected
+	 * components.
+	 *
+	 * If null is given as the first parameter this method retrieves the current
+	 * value of Doctrine_Query::$isSubquery.
+	 *
+	 * @param boolean $bool     whether or not this query acts as a subquery
+	 * @return Doctrine_Query|bool
+	 */
+	public function isSubquery($bool = null)
+	{
+		if ($bool === null) {
+			return $this->_isSubquery;
+		}
+		
+		$this->_isSubquery = (bool) $bool;
+		return $this;
+	}
+	
+	/**
+	 * getSqlAggregateAlias
+	 *
+	 * @param string $dqlAlias      the dql alias of an aggregate value
+	 * @return string
+	 */
+	public function getSqlAggregateAlias($dqlAlias)
+	{
+		if (isset($this->_aggregateAliasMap[$dqlAlias])) {
+			// mark the expression as used
+			$this->_expressionMap[$dqlAlias][1] = true;
+			
+			return $this->_aggregateAliasMap[$dqlAlias];
+		} /*elseif ( ! empty($this->_pendingAggregates)) { // [OV17] _pendingAggregates are not used
+			$this->processPendingAggregates();
+			
+			return $this->getSqlAggregateAlias($dqlAlias);
+		} */elseif( ! ($this->_conn->getAttribute(Doctrine_Core::ATTR_PORTABILITY) & Doctrine_Core::PORTABILITY_EXPR)){
+			return $dqlAlias;
+		} else {
+			throw new Doctrine_Query_Exception('Unknown aggregate alias: ' . $dqlAlias);
+		}
+	}
+	
+	/**
+	 * Check if a dql alias has a sql aggregate alias
+	 *
+	 * @param string $dqlAlias
+	 * @return boolean
+	 */
+	public function hasSqlAggregateAlias($dqlAlias)
+	{
+		try {
+			$this->getSqlAggregateAlias($dqlAlias);
+			return true;
+		} catch (Exception $e) {
+			return false;
+		}
+	}
+	
+	/**
+	 * Adjust the processed param index for "foo.bar IN ?" support
+	 *
+	 */
+	public function adjustProcessedParam($index)
+	{
+		// [OV13] method logic moved to parent class
+		$this->_execParams = $this->_adjustProcessedParam($this->_execParams, $index);
+		
+		/*// Retrieve all params
+		$params = $this->getInternalParams();
+		
+		// Retrieve already processed values
+		$first = array_slice($params, 0, $index);
+		$last = array_slice($params, $index, count($params) - $index);
+		
+		// Include array as values splicing the params array
+		array_splice($last, 0, 1, $last[0]);
+		
+		// Put all param values into a single index
+		$this->_execParams = array_merge($first, $last);*/
+	}
+	
+	/**
+	 * Retrieves a specific DQL query part.
+	 *
+	 * @see Doctrine_Query_Abstract::$_dqlParts
+	 * <code>
+	 * var_dump($q->getDqlPart('where'));
+	 * // array(2) { [0] => string(8) 'name = ?' [1] => string(8) 'date > ?' }
+	 * </code>
+	 * @param string $queryPart     the name of the query part; can be:
+	 *     array from, containing strings;
+	 *     array select, containg string;
+	 *     boolean forUpdate;
+	 *     array set;
+	 *     array join;
+	 *     array where;
+	 *     array groupby;
+	 *     array having;
+	 *     array orderby, containing strings such as 'id ASC';
+	 *     array limit, containing numerics;
+	 *     array offset, containing numerics;
+	 * @return array
+	 */
+	public function getDqlPart($queryPart)
+	{
+		if ( ! isset($this->_dqlParts[$queryPart])) {
+			throw new Doctrine_Query_Exception('Unknown query part ' . $queryPart);
+		}
+		
+		return $this->_dqlParts[$queryPart];
+	}
+	
+	/**
+	 * contains
+	 *
+	 * Method to check if a arbitrary piece of dql exists
+	 *
+	 * @param string $dql Arbitrary piece of dql to check for
+	 * @return boolean
+	 */
+	public function contains($dql)
+	{
+		return stripos($this->getDql(), $dql) === false ? false : true;
+	}
+	
+	/**
+	 * processPendingFields
+	 * the fields in SELECT clause cannot be parsed until the components
+	 * in FROM clause are parsed, hence this method is called everytime a
+	 * specific component is being parsed. For instance, the wildcard '*'
+	 * is expanded in the list of columns.
+	 *
+	 * @throws Doctrine_Query_Exception     if unknown component alias has been given
+	 * @param string $componentAlias        the alias of the component
+	 * @return string SQL code
+	 * @todo Description: What is a 'pending field' (and are there non-pending fields, too)?
+	 *       What is 'processed'? (Meaning: What information is gathered & stored away)
+	 */
+	public function processPendingFields($componentAlias)
+	{
+		$tableAlias = $this->getSqlTableAlias($componentAlias);
+		$table = $this->_queryComponents[$componentAlias]['table'];
+		
+		if ( ! isset($this->_pendingFields[$componentAlias])) {
+			if ($this->_hydrator->getHydrationMode() !== Doctrine_Core::HYDRATE_NONE) {
+				if ( ! $this->_isSubquery && $componentAlias === $this->getRootAlias()) {
+					throw new Doctrine_Query_Exception("The root class of the query (alias $componentAlias) "
+							. " must have at least one field selected.");
+				}
+			}
+			return;
+		}
+		
+		// At this point we know the component is FETCHED (either it's the base class of
+		// the query (FROM xyz) or its a "fetch join").
+		
+		// Check that the parent join (if there is one), is a "fetch join", too.
+		if ( ! $this->isSubquery() && isset($this->_queryComponents[$componentAlias]['parent'])) {
+			$parentAlias = $this->_queryComponents[$componentAlias]['parent'];
+			if (is_string($parentAlias) && ! isset($this->_pendingFields[$parentAlias])
+					&& $this->_hydrator->getHydrationMode() !== Doctrine_Core::HYDRATE_NONE
+					&& $this->_hydrator->getHydrationMode() !== Doctrine_Core::HYDRATE_SCALAR
+					&& $this->_hydrator->getHydrationMode() !== Doctrine_Core::HYDRATE_SINGLE_SCALAR) {
+				throw new Doctrine_Query_Exception("The left side of the join between "
+						. "the aliases '$parentAlias' and '$componentAlias' must have at least"
+						. " the primary key field(s) selected.");
+			}
+		}
+		
+		$fields = $this->_pendingFields[$componentAlias];
+		
+		// check for wildcards
+		if (in_array('*', $fields, true)) {
+			$fields = $table->getFieldNames();
+		} else {
+			$driverClassName = $this->_hydrator->getHydratorDriverClassName();
+			// only auto-add the primary key fields if this query object is not
+			// a subquery of another query object or we're using a child of the Object Graph
+			// hydrator
+			if ( ! $this->_isSubquery && is_subclass_of($driverClassName, 'Doctrine_Hydrator_Graph')) {
+				// [OV15] do not auto-add primary key fields when group by is used (on other columns)
+				// (conform with mysql 5.7 default settings - all non-aggregated columns must be also in group by clause)
+				$identifier = [];
+				$groupBy = implode(', ', $this->_sqlParts['groupby']);
+				foreach((array)$table->getIdentifier() as $idColumn) {
+					if(empty($groupBy) || preg_match('/(?:^|\s)'.preg_quote($tableAlias . '.' . $idColumn) .'(?:,|\s|$)/', $groupBy)) {
+						// add primary column only if group by is not used or if it is contained in group by clause
+						$identifier[] = $idColumn;
+					}
+				}
+				
+				if($identifier) {
+					$fields = array_unique(array_merge($identifier, $fields));
+				}
+			}
+		}
+		
+		$sql = [];
+		foreach ($fields as $fieldAlias => $fieldName) {
+			$columnName = $table->getColumnName($fieldName);
+			if (($owner = $table->getColumnOwner($columnName)) !== null &&
+					$owner !== $table->getComponentName()) {
+				
+				$parent = $this->_conn->getTable($owner);
+				$columnName = $parent->getColumnName($fieldName);
+				$parentAlias = $this->getSqlTableAlias($componentAlias . '.' . $parent->getComponentName());
+				$sql[] = $this->_conn->quoteIdentifier($parentAlias) . '.' . $this->_conn->quoteIdentifier($columnName)
+						. ' AS '
+						. $this->_conn->quoteIdentifier($tableAlias . '__' . $columnName);
+				
+				// [OV17] remember sql dependences
+				$this->addDependency('select', $parentAlias);
+			} else {
+				// Fix for http://www.doctrine-project.org/jira/browse/DC-585
+				// Take the field alias if available
+				if (isset($this->_aggregateAliasMap[$fieldAlias])) {
+					$aliasSql = $this->_aggregateAliasMap[$fieldAlias];
+				} else {
+					$columnName = $table->getColumnName($fieldName);
+					$aliasSql = $this->_conn->quoteIdentifier($tableAlias . '__' . $columnName);
+				}
+				$sql[] = $this->_conn->quoteIdentifier($tableAlias) . '.' . $this->_conn->quoteIdentifier($columnName)
+						. ' AS '
+						. $aliasSql;
+			}
+		}
+		
+		$this->_neededTables[] = $tableAlias;
+		
+		// [OV17] remember sql dependences
+		$this->addDependency('select', $tableAlias);
+		
+		return implode(', ', $sql);
+	}
+	
+	/**
+	 * Parses a nested field
+	 * <code>
+	 * $q->parseSelectField('u.Phonenumber.value');
+	 * </code>
+	 *
+	 * @param string $field
+	 * @throws Doctrine_Query_Exception     if unknown component alias has been given
+	 * @return string   SQL fragment
+	 * @todo Description: Explain what this method does. Is there a relation to parseSelect()?
+	 *       This method is not used from any class or testcase in the Doctrine package.
+	 *
+	 */
+	public function parseSelectField($field)
+	{
+		$terms = explode('.', $field);
+		
+		if (isset($terms[1])) {
+			$componentAlias = $terms[0];
+			$field = $terms[1];
+		} else {
+			reset($this->_queryComponents);
+			$componentAlias = key($this->_queryComponents);
+			$fields = $terms[0];
+		}
+		
+		$tableAlias = $this->getSqlTableAlias($componentAlias);
+		$table      = $this->_queryComponents[$componentAlias]['table'];
+		
+		
+		// check for wildcards
+		if ($field === '*') {
+			$sql = [];
+			
+			foreach ($table->getColumnNames() as $field) {
+				$sql[] = $this->parseSelectField($componentAlias . '.' . $field);
+			}
+			
+			return implode(', ', $sql);
+		} else {
+			$name = $table->getColumnName($field);
+			
+			$this->_neededTables[] = $tableAlias;
+			
+			return $this->_conn->quoteIdentifier($tableAlias . '.' . $name)
+					. ' AS '
+					. $this->_conn->quoteIdentifier($tableAlias . '__' . $name);
+		}
+	}
+	
+	/**
+	 * getExpressionOwner
+	 * returns the component alias for owner of given expression
+	 *
+	 * @param string $expr      expression from which to get to owner from
+	 * @return string           the component alias
+	 * @todo Description: What does it mean if a component is an 'owner' of an expression?
+	 *       What kind of 'expression' are we talking about here?
+	 */
+	public function getExpressionOwner($expr)
+	{
+		if (strtoupper(substr(trim($expr, '( '), 0, 6)) !== 'SELECT') {
+			// Fix for http://www.doctrine-project.org/jira/browse/DC-754
+			$expr = preg_replace('/([\'\"])[^\1]*\1/', '', $expr);
+			preg_match_all("/[a-z_][a-z0-9_]*\.[a-z_][a-z0-9_]*[\.[a-z0-9]+]*/i", $expr, $matches);
+			
+			$match = current($matches);
+			
+			if (isset($match[0])) {
+				$terms = explode('.', $match[0]);
+				
+				return $terms[0];
+			}
+		}
+		return $this->getRootAlias();
+	
+	}
+	
+	/**
+	 * parseSelect
+	 * parses the query select part and
+	 * adds selected fields to pendingFields array
+	 *
+	 * @param string $dql
+	 * @todo Description: What information is extracted (and then stored)?
+	 */
+	public function parseSelect($dql)
+	{
+		$refs = $this->_tokenizer->sqlExplode($dql, ',');
+		
+		$pos   = strpos(trim($refs[0]), ' ');
+		$first = substr($refs[0], 0, $pos);
+		
+		// check for DISTINCT keyword
+		if ($first === 'DISTINCT') {
+			$this->_sqlParts['distinct'] = true;
+			
+			$refs[0] = substr($refs[0], ++$pos);
+		}
+		
+		$parsedComponents = [];
+		
+		foreach ($refs as $reference) {
+			$reference = trim($reference);
+			
+			if (empty($reference)) {
+				continue;
+			}
+			
+			$terms = $this->_tokenizer->sqlExplode($reference, ' ');
+			$pos   = strpos($terms[0], '(');
+			
+			if (count($terms) > 1 || $pos !== false) {
+				$expression = array_shift($terms);
+				$alias = array_pop($terms);
+				
+				if ( ! $alias) {
+					$alias = substr($expression, 0, $pos);
+				}
+				
+				// Fix for http://www.doctrine-project.org/jira/browse/DC-706
+				if ($pos !== false && !str_starts_with($expression, "'") && substr($expression, 0, $pos) === '') {
+					$_queryComponents = $this->_queryComponents;
+					reset($_queryComponents);
+					$componentAlias = key($_queryComponents);
+				} else {
+					$componentAlias = $this->getExpressionOwner($expression);
+				}
+				
+				$expression = $this->parseClause($expression);
+				
+				$tableAlias = $this->getSqlTableAlias($componentAlias);
+				
+				$index    = count($this->_aggregateAliasMap);
+				
+				$sqlAlias = $this->_conn->quoteIdentifier($tableAlias . '__' . $index);
+				
+				$this->_sqlParts['select'][] = $expression . ' AS ' . $sqlAlias;
+				
+				$this->_aggregateAliasMap[$alias] = $sqlAlias;
+				$this->_expressionMap[$alias][0] = $expression;
+				
+				$this->_queryComponents[$componentAlias]['agg'][$index] = $alias;
+				
+				$this->_neededTables[] = $tableAlias;
+				
+				// Fix for http://www.doctrine-project.org/jira/browse/DC-585
+				// Add selected columns to pending fields
+				// [OV-24] fix these quote-matching regexps again
+				if (preg_match('/^([^\(]+)\.[\'`]?(.*?)[\'`]?$/', $expression, $field)) {
+					$this->_pendingFields[$componentAlias][$alias] = $field[2];
+				}
+				
+				// [OV17] remember sql dependences
+				$this->addDependency('select', $tableAlias);
+			} else {
+				$e = explode('.', $terms[0]);
+				
+				if (isset($e[1])) {
+					$componentAlias = $e[0];
+					$field = $e[1];
+				} else {
+					reset($this->_queryComponents);
+					$componentAlias = key($this->_queryComponents);
+					$field = $e[0];
+				}
+				
+				$this->_pendingFields[$componentAlias][] = $field;
+			}
+		}
+	}
+	
+	/**
+	 * parseClause
+	 * parses given DQL clause
+	 *
+	 * this method handles five tasks:
+	 *
+	 * 1. Converts all DQL functions to their native SQL equivalents
+	 * 2. Converts all component references to their table alias equivalents
+	 * 3. Converts all field names to actual column names
+	 * 4. Quotes all identifiers
+	 * 5. Parses nested clauses and subqueries recursively
+	 *
+	 * @return string   SQL string
+	 * @todo Description: What is a 'dql clause' (and what not)?
+	 *       Refactor: Too long & nesting level
+	 */
+	public function parseClause($clause)
+	{
+		$clause = $this->_conn->dataDict->parseBoolean(trim($clause));
+		
+		if (is_numeric($clause)) {
+			return $clause;
+		}
+		
+		$terms = $this->_tokenizer->clauseExplode($clause, [' ', '+', '-', '*', '/', '<', '>', '=', '>=', '<=', '&', '|']);
+		$str = '';
+		
+		foreach ($terms as $term) {
+			$pos = strpos($term[0], '(');
+			
+			if ($pos !== false && !str_starts_with($term[0], "'")) {
+				$name = substr($term[0], 0, $pos);
+				
+				$term[0] = $this->parseFunctionExpression($term[0]);
+			} else {
+				if (!str_starts_with($term[0], "'") && !str_ends_with($term[0], "'")) {
+					if (str_contains($term[0], '.')) {
+						if ( ! is_numeric($term[0])) {
+							$e = explode('.', $term[0]);
+							
+							$field = array_pop($e);
+							
+							// [OV16] improved checks for whether table alias should be used
+							//if ($this->getType() === Doctrine_Query::SELECT) {
+							if ($this->shouldUseTableAlias($e)) {
+								$componentAlias = implode('.', $e);
+								
+								if (empty($componentAlias)) {
+									$componentAlias = $this->getRootAlias();
+								}
+								
+								$this->load($componentAlias);
+								
+								// check the existence of the component alias
+								if ( ! isset($this->_queryComponents[$componentAlias])) {
+									throw new Doctrine_Query_Exception('Unknown component alias ' . $componentAlias);
+								}
+								
+								$table = $this->_queryComponents[$componentAlias]['table'];
+								
+								$def = $table->getDefinitionOf($field);
+								
+								// get the actual field name from alias
+								$field = $table->getColumnName($field);
+								
+								// check column existence
+								if ( ! $def) {
+									throw new Doctrine_Query_Exception('Unknown column ' . $field);
+								}
+								
+								if (isset($def['owner'])) {
+									$componentAlias = $componentAlias . '.' . $def['owner'];
+								}
+								
+								$tableAlias = $this->getSqlTableAlias($componentAlias);
+								
+								// build sql expression
+								$term[0] = $this->_conn->quoteIdentifier($tableAlias)
+											. '.'
+											. $this->_conn->quoteIdentifier($field);
+								
+								// [OV17] remember sql dependences
+								$this->addDependency(null, $tableAlias);
+							} else {
+								// build sql expression
+								$field = $this->getRoot()->getColumnName($field);
+								$term[0] = $this->_conn->quoteIdentifier($field);
+								
+								// [OV17] remember sql dependences
+								$this->addDependency();
+							}
+						}
+					} else {
+						if ( ! empty($term[0]) && ! in_array(strtoupper($term[0]), self::$_keywords, true) &&
+								! is_numeric($term[0]) && $term[0] !== '?' && !str_starts_with($term[0], ':')) {
+							
+							$componentAlias = $this->getRootAlias();
+							
+							$found = false;
+							
+							if ($componentAlias !== false && $componentAlias !== null) {
+								$table = $this->_queryComponents[$componentAlias]['table'];
+								
+								// check column existence
+								if ($table->hasField($term[0])) {
+									$found = true;
+									
+									$def = $table->getDefinitionOf($term[0]);
+									
+									// get the actual column name from field name
+									$term[0] = $table->getColumnName($term[0]);
+									
+									
+									if (isset($def['owner'])) {
+										$componentAlias = $componentAlias . '.' . $def['owner'];
+									}
+									
+									$tableAlias = $this->getSqlTableAlias($componentAlias);
+									
+									// [OV16] improved checks for whether table alias should be used
+									//if ($this->getType() === Doctrine_Query::SELECT) {
+									if ($this->shouldUseTableAlias($componentAlias)) {
+										// build sql expression
+										$term[0] = $this->_conn->quoteIdentifier($tableAlias)
+													. '.'
+													. $this->_conn->quoteIdentifier($term[0]);
+									} else {
+										// build sql expression
+										$term[0] = $this->_conn->quoteIdentifier($term[0]);
+									}
+									
+									// [OV17] remember sql dependences
+									$this->addDependency(null, $tableAlias);
+								} else {
+									$found = false;
+								}
+							}
+							
+							if ( ! $found) {
+								$term[0] = $this->getSqlAggregateAlias($term[0]);
+							}
+						}
+					}
+				}
+			}
+			
+			$str .= $term[0] . $term[1];
+		}
+		return $str;
+	}
+	
+	public function parseIdentifierReference($expr)
+	{
+	
+	}
+	
+	public function parseFunctionExpression($expr, $parseCallback = null)
+	{
+		$pos = strpos($expr, '(');
+		$name = substr($expr, 0, $pos);
+		
+		if ($name === '') {
+			return $this->parseSubquery($expr);
+		}
+		
+		// [OV20] let the parser be forgivable if a closing bracket is omitted
+		$argStr = substr($expr, ($pos + 1));
+		if(str_ends_with($argStr, ')')) {
+			$argStr = substr($argStr, 0, -1);
+		}
+		$args   = [];
+		// parse args
+		
+		foreach ($this->_tokenizer->sqlExplode($argStr, ',') as $arg) {
+			$args[] = $parseCallback ? $parseCallback($arg) : $this->parseClause($arg);
+		}
+		
+		// convert DQL function to its RDBMS specific equivalent
+		try {
+			$expr = $this->_conn->expression->$name(...$args);
+		} catch (Doctrine_Expression_Exception $e) {
+			throw new Doctrine_Query_Exception('Unknown function ' . $name . '.');
+		}
+		
+		return $expr;
+	}
+	
+	
+	public function parseSubquery($subquery)
+	{
+		$trimmed = trim($this->_tokenizer->bracketTrim($subquery));
+		
+		// check for possible subqueries
+		if (str_starts_with($trimmed, 'FROM') || str_starts_with($trimmed, 'SELECT')) {
+			// parse subquery
+			$q = $this->createSubquery()->parseDqlQuery($trimmed);
+			$trimmed = $q->getSqlQuery();
+			
+			// [OV17] copy dependences to this query's tables from the subquery
+			$dependences = array_intersect(array_keys($this->getTableAliasMap()), $q->getDependencesMerged());
+			$this->addDependences(null, $dependences);
+			
+			$q->free();
+		} elseif (str_starts_with($trimmed, 'SQL:')) {
+			$trimmed = substr($trimmed, 4);
+		} else {
+			$e = $this->_tokenizer->sqlExplode($trimmed, ',');
+			
+			$value = [];
+			$index = false;
+			
+			foreach ($e as $part) {
+				$value[] = $this->parseClause($part);
+			}
+			
+			$trimmed = implode(', ', $value);
+		}
+		
+		return '(' . $trimmed . ')';
+	}
+	
+	
+	// [OV17] method not used
+	/*
+	 * processPendingSubqueries
+	 * processes pending subqueries
+	 *
+	 * subqueries can only be processed when the query is fully constructed
+	 * since some subqueries may be correlated
+	 *
+	 * @return void
+	 * @todo Better description. i.e. What is a 'pending subquery'? What does 'processed' mean?
+	 *       (parsed? sql is constructed? some information is gathered?)
+	 */
+	/*public function processPendingSubqueries()
+	{
+		foreach ($this->_pendingSubqueries as $value) {
+			[$dql, $alias] = $value;
+			
+			$subquery = $this->createSubquery();
+			
+			$sql = $subquery->parseDqlQuery($dql, false)->getQuery();
+			$subquery->free();
+			
+			reset($this->_queryComponents);
+			$componentAlias = key($this->_queryComponents);
+			$tableAlias = $this->getSqlTableAlias($componentAlias);
+			
+			$sqlAlias = $tableAlias . '__' . count($this->_aggregateAliasMap);
+			
+			$this->_sqlParts['select'][] = '(' . $sql . ') AS ' . $this->_conn->quoteIdentifier($sqlAlias);
+			
+			$this->_aggregateAliasMap[$alias] = $sqlAlias;
+			$this->_queryComponents[$componentAlias]['agg'][] = $alias;
+		}
+		$this->_pendingSubqueries = array();
+	}*/
+	
+	// [OV17] method not used
+	/*
+	 * processPendingAggregates
+	 * processes pending aggregate values for given component alias
+	 *
+	 * @return void
+	 * @todo Better description. i.e. What is a 'pending aggregate'? What does 'processed' mean?
+	 */
+	/*public function processPendingAggregates()
+	{
+		// iterate trhough all aggregates
+		foreach ($this->_pendingAggregates as $aggregate) {
+			[$expression, $components, $alias] = $aggregate;
+			
+			$tableAliases = array();
+			
+			// iterate through the component references within the aggregate function
+			if ( ! empty ($components)) {
+				foreach ($components as $component) {
+				
+					if (is_numeric($component)) {
+						continue;
+					}
+					
+					$e = explode('.', $component);
+					
+					$field = array_pop($e);
+					$componentAlias = implode('.', $e);
+					
+					// check the existence of the component alias
+					if ( ! isset($this->_queryComponents[$componentAlias])) {
+						throw new Doctrine_Query_Exception('Unknown component alias ' . $componentAlias);
+					}
+					
+					$table = $this->_queryComponents[$componentAlias]['table'];
+					
+					$field = $table->getColumnName($field);
+					
+					// check column existence
+					if ( ! $table->hasColumn($field)) {
+						throw new Doctrine_Query_Exception('Unknown column ' . $field);
+					}
+					
+					$sqlTableAlias = $this->getSqlTableAlias($componentAlias);
+					
+					$tableAliases[$sqlTableAlias] = true;
+					
+					// build sql expression
+					
+					$identifier = $this->_conn->quoteIdentifier($sqlTableAlias . '.' . $field);
+					$expression = str_replace($component, $identifier, $expression);
+				}
+			}
+			
+			if (count($tableAliases) !== 1) {
+				$componentAlias = reset($this->_tableAliasMap);
+				$tableAlias = key($this->_tableAliasMap);
+			}
+			
+			$index    = count($this->_aggregateAliasMap);
+			$sqlAlias = $this->_conn->quoteIdentifier($tableAlias . '__' . $index);
+			
+			$this->_sqlParts['select'][] = $expression . ' AS ' . $sqlAlias;
+			
+			$this->_aggregateAliasMap[$alias] = $sqlAlias;
+			$this->_expressionMap[$alias][0] = $expression;
+			
+			$this->_queryComponents[$componentAlias]['agg'][$index] = $alias;
+			
+			$this->_neededTables[] = $tableAlias;
+		}
+		// reset the state
+		$this->_pendingAggregates = array();
+	}*/
+	
+	/**
+	 * _buildSqlQueryBase
+	 * returns the base of the generated sql query
+	 * On mysql driver special strategy has to be used for DELETE statements
+	 * (where is this special strategy??)
+	 *
+	 * @return string       the base of the generated sql query
+	 */
+	protected function _buildSqlQueryBase()
+	{
+		switch ($this->_type) {
+			case self::DELETE:
+				$q = 'DELETE FROM ';
+			break;
+			case self::UPDATE:
+				$q = 'UPDATE ';
+			break;
+			case self::SELECT:
+				$distinct = ($this->_sqlParts['distinct']) ? 'DISTINCT ' : '';
+				$q = 'SELECT ' . $distinct . implode(', ', $this->_sqlParts['select']) . ' FROM ';
+			break;
+		}
+		return $q;
+	}
+	
+	/**
+	 * _buildSqlFromPart
+	 * builds the from part of the query and returns it
+	 *
+	 * @return string   the query sql from part
+	 */
+	protected function _buildSqlFromPart($ignorePending = false)
+	{
+		$q = '';
+		
+		foreach ($this->_sqlParts['from'] as $k => $part) {
+			$e = explode(' ', $part);
+			
+			if ($k === 0) {
+				// [OV16] improved checks for whether table alias should be used
+				//if ( ! $ignorePending && $this->_type === self::SELECT) {
+				if ( ! $ignorePending && $this->shouldUseTableAlias()) {
+					// We may still have pending conditions
+					$alias = count($e) > 1
+						? $this->getComponentAlias($e[1])
+						: null;
+					
+					// [OV17] set current sql part for dependences
+					$this->setCurrentDependencyPart('where');
+					
+					$where = $this->_processPendingJoinConditions($alias);
+					
+					// [OV17] clear current sql part for dependences
+					$this->setCurrentDependencyPart(null);
+					
+					// apply inheritance to WHERE part
+					if ( ! empty($where)) {
+						if (count($this->_sqlParts['where']) > 0) {
+							$this->_sqlParts['where'][] = 'AND';
+						}
+						
+						if (str_starts_with($where, '(') && str_ends_with($where, ')')) {
+							$this->_sqlParts['where'][] = $where;
+						} else {
+							$this->_sqlParts['where'][] = '(' . $where . ')';
+						}
+					}
+				}
+				
+				$q .= $part;
+				
+				continue;
+			}
+			
+			// preserve LEFT JOINs only if needed
+			// Check if it's JOIN, if not add a comma separator instead of space
+			if ( ! preg_match('/\bJOIN\b/i', $part) && ! isset($this->_pendingJoinConditions[$k])) {
+				$q .= ', ' . $part;
+			} else {
+				if (str_starts_with($part, 'LEFT JOIN')) {
+					$aliases = array_merge($this->_subqueryAliases,
+					// WTF? by mh - shouldn't it be just array values? $this->_neededTable is like array('c', 'm', 'm2', 'm4')
+					// otherwise the following condition does not make sense - it checks in_array of table alias in array of integers (from array_keys)
+								//array_keys($this->_neededTables));
+								$this->_neededTables);
+					
+					// well, the condition also fails if ATTR_QUOTE_IDENTIFIERS is used. $e[3] might be "`m`" and in $aliases there is just "m"
+					// so let's quote aliases
+					$aliases = array_map([$this->_conn, 'quoteIdentifier'], $aliases);
+					
+					if ( ! in_array($e[3], $aliases, true) && ! in_array($e[2], $aliases, true) && ! empty($this->_pendingFields)) {
+						continue;
+					}
+				
+				}
+				
+				if ( ! $ignorePending && isset($this->_pendingJoinConditions[$k])) {
+					if (str_contains($part, ' ON ')) {
+						$part .= ' AND ';
+					} else {
+						$part .= ' ON ';
+					}
+					
+					// [OV17] set current sql part for dependences
+					$this->setCurrentDependencyPart('join');
+					
+					$part .= $this->_processPendingJoinConditions($k);
+					
+					// [OV17]
+					if($dependences = $this->getDependences('join', false)) {
+						$this->addJoinDependences($k, $dependences);
+						$this->clearDependences('join');
+					}
+					
+					// [OV17] clear current sql part for dependences
+					$this->setCurrentDependencyPart(null);
+				}
+				
+				$componentAlias = $this->getComponentAlias($e[3]);
+				$string = $this->getInheritanceCondition($componentAlias);
+				
+				if ($string) {
+					$part = $part . ' AND ' . $string;
+				}
+				$q .= ' ' . $part;
+			}
+			
+			$this->_sqlParts['from'][$k] = $part;
+		}
+		return $q;
+	}
+	
+	/**
+	 * Processes the pending join conditions, used for dynamically add conditions
+	 * to root component/joined components without interfering in the main dql
+	 * handling.
+	 *
+	 * @param string $alias Component Alias
+	 * @return Processed pending conditions
+	 */
+	protected function _processPendingJoinConditions($alias)
+	{
+		$parts = [];
+		
+		if ($alias !== null && isset($this->_pendingJoinConditions[$alias])) {
+			$parser = new Doctrine_Query_JoinCondition($this, $this->_tokenizer);
+			
+			foreach ($this->_pendingJoinConditions[$alias] as $joinCondition) {
+				$parts[] = $parser->parse($joinCondition);
+			}
+			
+			// FIX #1860 and #1876: Cannot unset them, otherwise query cannot be reused later
+			//unset($this->_pendingJoinConditions[$alias]);
+		}
+		
+		return (count($parts) > 0 ? '(' . implode(') AND (', $parts) . ')' : '');
+	}
+	
+	/**
+	 * builds the sql query from the given parameters and applies things such as
+	 * column aggregation inheritance and limit subqueries if needed
+	 *
+	 * @param array $params             an array of prepared statement params (needed only in mysql driver
+	 *                                  when limit subquery algorithm is used)
+	 * @param bool $limitSubquery Whether or not to try and apply the limit subquery algorithm
+	 * @return string                   the built sql query
+	 */
+	public function getSqlQuery($params = [], $limitSubquery = true)
+	{
+		// Assign building/execution specific params
+		$this->_params['exec'] = $params;
+		
+		// [OV8] always prequery the query to call dql callbacks before any sql is generated, not only on execute()
+		// so that cache hash is always calculated properly, and that this method always returns actual end-query incl.
+		// any modifications from dql callbacks.
+		$this->_preQuery();
+		
+		// Initialize prepared parameters array
+		$this->_execParams = $this->getFlattenedParams();
+		
+		if ($this->_state !== self::STATE_DIRTY) {
+			$this->fixArrayParameterValues($this->getInternalParams());
+			
+			// Return compiled SQL
+			return $this->_sql;
+		}
+		
+		// [OV8] queryCache modifications - hook it in getSqlQuery method instead of execute method only
+		$cached = false;
+		if ($this->isQueryCacheEnabled()) {
+			$queryCacheDriver = $this->getQueryCacheDriver();
+			$hash = $this->calculateQueryCacheHash($limitSubquery);
+			$cached = $queryCacheDriver->fetch($hash);
+		}
+		
+		// If we have a cached query...
+		if ($cached) {
+			// Rebuild query from cache
+			$query = $this->_constructQueryFromCache($cached);
+		}
+		else
+		{
+			$query = $this->buildSqlQuery($limitSubquery);
+			
+			// Check again because getSqlQuery() above could have flipped the _queryCache flag
+			// if this query contains the limit sub query algorithm we don't need to cache it
+			if ($this->isQueryCacheEnabled()) {
+				// Convert query into a serialized form
+				$serializedQuery = $this->getCachedForm($query);
+				
+				// Save cached query
+				$queryCacheDriver->save($hash, $serializedQuery, $this->getQueryCacheLifeSpan());
+			}
+		}
+		
+		// [OV9] cache without limit and offset, attach now
+		if($this->isQueryCacheEnabled() && $this->_conn->getAttribute(Doctrine_Core::ATTR_QUERY_CACHE_NO_OFFSET_LIMIT))
+		{
+			$this->_processDqlQueryPart('offset', $this->_dqlParts['offset']);
+			$this->_processDqlQueryPart('limit', $this->_dqlParts['limit']);
+			
+			if($this->_limitSubquerySql !== null && $this->_limitSubquerySql !== '')
+			{
+				// add offset and limit to subquery and replace the subquery in main query
+				$subquery = $this->_limitSubquerySql;
+				$map = reset($this->_queryComponents);
+				$table = $map['table'];
+				$subquery = $this->_conn->modifyLimitSubquery($table, $subquery, $this->_sqlParts['limit'], $this->_sqlParts['offset']);
+				
+				if($subquery !== $this->_limitSubquerySql)
+				{
+					$query = str_replace($this->_limitSubquerySql, $subquery, $query);
+				}
+			}
+			else
+			{
+				// add offset and limit to main query
+				$query = $this->_conn->modifyLimitQuery($query, $this->_sqlParts['limit'], $this->_sqlParts['offset'], false, false, $this);
+			}
+		}
+		
+		// [OV13] moved subquery logic from Doctrine_Query_Abstract::_execute
+		// [OV7] mysql should also use limit subquery in the same format as pgsql
+		if ($this->isLimitSubqueryUsed()/* &&
+				$this->_conn->getAttribute(Doctrine_Core::ATTR_DRIVER_NAME) !== 'mysql'*/) {
+			
+			// [OV13]
+			$params = $this->_execParams;
+			
+			// [OV10] params duplicates for subquery should be inserted in correct place in params array.
+			// count occurrences of '?' character before subquery (which are not in quotes nor double quotes)
+			$queryBeforeSubquery = $this->_limitSubquerySql ?
+				substr($query, 0, strpos($query, $this->_limitSubquerySql))
+				: $query;
+			// remove quoted or double-quoted parts
+			$queryBeforeSubquery = preg_replace('/\"[^"]*\"|\'[^\']*\'/', '', $queryBeforeSubquery);
+			$count = substr_count($queryBeforeSubquery, '?');
+			if($count > 0) {
+				array_splice($params, $count, 0, $params);
+			} else {
+				// no question marks, we could have named params then. do it "the original" way
+				$params = array_merge((array) $params, (array) $params);
+			}
+			
+			// [OV13]
+			$this->_execParams = $params;
+		}
+		
+		// [OV13] adjust WHERE IN array param here, after query cache is saved / restored = cache query with single "?"
+		$query = $this->_adjustWhereInSql($query, $this->_execParams);
+		
+		return $query;
+	}
+	
+	/**
+	 * Build the SQL query from the DQL
+	 *
+	 * @param bool $limitSubquery Whether or not to try and apply the limit subquery algorithm
+	 * @return string $sql The generated SQL string
+	 */
+	public function buildSqlQuery($limitSubquery = true)
+	{
+		// reset the state
+		if ( ! $this->isSubquery()) {
+			$this->_queryComponents = [];
+			// [OV17] property not used
+			//$this->_pendingAggregates = array();
+			$this->_aggregateAliasMap = [];
+		}
+		
+		$this->reset();
+		
+		// invoke the preQuery hook
+		$this->_preQuery();
+		
+		// process the DQL parts => generate the SQL parts.
+		// this will also populate the $_queryComponents.
+		foreach ($this->_dqlParts as $queryPartName => $queryParts) {
+			// If we are parsing FROM clause, we'll need to diff the queryComponents later
+			if ($queryPartName === 'from') {
+				// Pick queryComponents before processing
+				$queryComponentsBefore = $this->getQueryComponents();
+			}
+
+			// FIX #1667: _sqlParts are cleaned inside _processDqlQueryPart.
+			if ($queryPartName !== 'forUpdate') {
+				$this->_processDqlQueryPart($queryPartName, $queryParts);
+			}
+
+			// We need to define the root alias
+			if ($queryPartName === 'from') {
+				// Pick queryComponents aftr processing
+				$queryComponentsAfter = $this->getQueryComponents();
+				
+				// Root alias is the key of difference of query components
+				$diffQueryComponents = array_diff_key($queryComponentsAfter, $queryComponentsBefore);
+				$this->_rootAlias = key($diffQueryComponents);
+			}
+		}
+		$this->_state = self::STATE_CLEAN;
+		
+		// Proceed with the generated SQL
+		if (empty($this->_sqlParts['from'])) {
+			return false;
+		}
+		
+		$needsSubQuery = false;
+		$subquery = '';
+		$map = $this->getRootDeclaration();
+		$table = $map['table'];
+		$rootAlias = $this->getRootAlias();
+		// [OV13] reset flag
+		$this->_isLimitSubqueryUsed = false;
+		
+		if ( ! empty($this->_sqlParts['limit']) && $this->_needsSubquery &&
+				$table->getAttribute(Doctrine_Core::ATTR_QUERY_LIMIT) === Doctrine_Core::LIMIT_RECORDS) {
+			// We do not need a limit-subquery if DISTINCT is used
+			// and the selected fields are either from the root component or from a localKey relation (hasOne)
+			// (i.e. DQL: SELECT DISTINCT u.id FROM User u LEFT JOIN u.phonenumbers LIMIT 5).
+			if(!$this->_sqlParts['distinct']) {
+				$this->_isLimitSubqueryUsed = true;
+				$needsSubQuery = true;
+			} else {
+				foreach( array_keys($this->_pendingFields) as $alias){
+					//no subquery for root fields
+					if($alias === $this->getRootAlias()){
+						continue;
+					}
+					
+					//no subquery for ONE relations
+					if(isset($this->_queryComponents[$alias]['relation']) &&
+						$this->_queryComponents[$alias]['relation']->getType() === Doctrine_Relation::ONE){
+						continue;
+					}
+					
+					$this->_isLimitSubqueryUsed = true;
+					$needsSubQuery = true;
+				}
+			}
+		}
+		
+		$sql = [];
+		
+		if ( ! empty($this->_pendingFields)) {
+			foreach ($this->_queryComponents as $alias => $map) {
+				$fieldSql = $this->processPendingFields($alias);
+				if ( ! empty($fieldSql)) {
+					$sql[] = $fieldSql;
+				}
+			}
+		}
+		
+		if ( ! empty($sql)) {
+			array_unshift($this->_sqlParts['select'], implode(', ', $sql));
+		}
+		
+		$this->_pendingFields = [];
+		
+		// build the basic query
+		$q  = $this->_buildSqlQueryBase();
+		$q .= $this->_buildSqlFromPart();
+		
+		if ( ! empty($this->_sqlParts['set'])) {
+			$q .= ' SET ' . implode(', ', $this->_sqlParts['set']);
+		}
+		
+		$string = $this->getInheritanceCondition($this->getRootAlias());
+		
+		// apply inheritance to WHERE part
+		if ( ! empty($string)) {
+			if (count($this->_sqlParts['where']) > 0) {
+				$this->_sqlParts['where'][] = 'AND';
+			}
+			
+			if (str_starts_with($string, '(') && str_ends_with($string, ')')) {
+				$this->_sqlParts['where'][] = $string;
+			} else {
+				$this->_sqlParts['where'][] = '(' . $string . ')';
+			}
+			
+			// [OV17] remember sql dependences
+			$this->addDependency('where');
+		}
+		
+		
+		// [OV1] moved this block before limit subquery - for easier checks in subquery
+		// Fix the orderbys so we only have one orderby per value
+		// [OV1] modified to convert also multiline orderby definitions + do not split by commas inside parentheses
+		$def = [];
+		foreach ($this->_sqlParts['orderby'] as $k => $orderBy) {
+			if(str_contains($orderBy, '(')) {
+				// https://regex101.com/r/yW4aZ3/277
+				// http://stackoverflow.com/questions/24534782/how-do-skip-or-f-work-on-regex
+				// split by commas, which are not in any (nested) parentheses
+				$e = preg_split('/[^(),]*(\((?:[^()]|(?1))*\))[^(),]*(*SKIP)(*F)|,/', $orderBy);
+			} else {
+				$e = explode(',', $orderBy);
+			}
+			foreach ($e as $v) {
+				$def[] = trim($v);
+			}
+		}
+		$this->_sqlParts['orderby'] = $def;
+		// end modified
+		
+		// [OV1] split adding default orderby to add it separately for root alias before limit subquery and relations after
+		// Only do this for SELECT queries
+		if ($this->_type === self::SELECT) {
+			$this->_addDefaultOrderBy($rootAlias);
+		}
+		
+		$modifyLimit = true;
+		$limitSubquerySql = '';
+		
+		if ( ( ! empty($this->_sqlParts['limit']) || ! empty($this->_sqlParts['offset'])) && $needsSubQuery && $limitSubquery) {
+			// [OV8] remember current limit subquery, for storing in query cache
+			$this->_limitSubquerySql = $subquery = $this->getLimitSubquery();
+			
+			// what about composite keys?
+			$idColumnName = $table->getColumnName($table->getIdentifier());
+			
+			switch (strtolower($this->_conn->getDriverName())) {
+				/*case 'mysql':
+					$this->useQueryCache(false);
+					
+					// mysql doesn't support LIMIT in subqueries
+					$list = $this->_conn->execute($subquery, $this->_execParams)->fetchAll(Doctrine_Core::FETCH_COLUMN);
+					$subquery = implode(', ', array_map(array($this->_conn, 'quote'), $list));
+					
+					break;
+				*/
+				
+				// [OV7] mysql should also use limit subquery in the same format as pgsql
+				case 'mysql':
+				case 'pgsql':
+					// [OV14] changed alias - added _wrap_ to avoid conflicts with limit subquery ordered by joined column
+					$subqueryAlias = $this->_conn->quoteIdentifier('doctrine_subquery_wrap_alias');
+					
+					// pgsql needs special nested LIMIT subquery
+					$subquery = 'SELECT ' . $subqueryAlias . '.' . $this->_conn->quoteIdentifier($idColumnName)
+							. ' FROM (' . $subquery . ') AS ' . $subqueryAlias;
+					
+					break;
+			}
+			
+			$field = $this->getSqlTableAlias($rootAlias) . '.' . $idColumnName;
+			
+			// FIX #1868: If not ID under MySQL is found to be restricted, restrict pk column for null
+			//            (which will lead to a return of 0 items)
+			$limitSubquerySql = $this->_conn->quoteIdentifier($field)
+								. (( ! empty($subquery)) ? ' IN (' . $subquery . ')' : ' IS NULL')
+								. ((count($this->_sqlParts['where']) > 0) ? ' AND ' : '');
+			
+			$modifyLimit = false;
+		}
+		
+		// FIX #DC-26: Include limitSubquerySql as major relevance in conditions
+		$emptyWhere = empty($this->_sqlParts['where']);
+		
+		if ( ! ($emptyWhere && $limitSubquerySql === '')) {
+			$where = implode(' ', $this->_sqlParts['where']);
+			$where = ($where === '' || (str_starts_with($where, '(') && str_ends_with($where, ')')))
+				? $where : '(' . $where . ')';
+			
+			$q .= ' WHERE ' . $limitSubquerySql . $where;
+			//   .  (($limitSubquerySql == '' && count($this->_sqlParts['where']) == 1) ? substr($where, 1, -1) : $where);
+		}
+		
+		
+		// [OV1] Add default orderBy for relationships
+		// Only do this for SELECT queries
+		if ($this->_type === self::SELECT) {
+			foreach (array_keys($this->_queryComponents) as $alias) {
+				if($alias === $rootAlias) continue;
+				$this->_addDefaultOrderBy($alias);
+			}
+		}
+		
+		$q .= ( ! empty($this->_sqlParts['groupby'])) ? ' GROUP BY ' . implode(', ', $this->_sqlParts['groupby'])  : '';
+		$q .= ( ! empty($this->_sqlParts['having'])) ?  ' HAVING '   . implode(' AND ', $this->_sqlParts['having']): '';
+		$q .= ( ! empty($this->_sqlParts['orderby'])) ? ' ORDER BY ' . implode(', ', $this->_sqlParts['orderby'])  : '';
+		
+		// [OV9] cache without limit and offset
+		if ($modifyLimit
+			&& !($this->isQueryCacheEnabled()
+				&& $this->_conn->getAttribute(Doctrine_Core::ATTR_QUERY_CACHE_NO_OFFSET_LIMIT))) {
+			$q = $this->_conn->modifyLimitQuery($q, $this->_sqlParts['limit'], $this->_sqlParts['offset'], false, false, $this);
+		}
+		
+		$q .= $this->_sqlParts['forUpdate'] === true ? ' FOR UPDATE ' : '';
+		
+		$this->_sql = $q;
+		
+		$this->clear();
+		
+		return $q;
+	}
+	
+	/**
+	 * Add default orderBy statements defined in the relationships and table classes
+	 *
+	 * @param string $componentAlias
+	 */
+	// [OV1] refactored into separate method
+	protected function _addDefaultOrderBy($componentAlias)
+	{
+		$sqlAlias = $this->getSqlTableAlias($componentAlias);
+		
+		// added by mh
+		// fix for DC-815 (Model's default sorting breaks subqueries)
+		if (!in_array($sqlAlias, $this->_fromAliases, true)) {
+			// this component is not from this query scope
+			// e.g. this is subquery and alias is from outer query or vice versa
+			return;
+		}
+		
+		$map = $this->_queryComponents[$componentAlias];
+		if (isset($map['relation'])) {
+			if (isset($map['ref'])) {
+				// fix for DC-651 already applied (Doctrine_Record::option('orderBy', ...) of join's right side being applied to refTable in m2m relationship)
+				// modified by mh [WARNING BC BREAK] for ordering m2m relations by columns in refClass use refOrderBy!
+				// fix for OV1
+				if(!empty($map['relation']['refOrderBy'])) {
+					$orderBy = $map['relation']['refTable']->processOrderBy($sqlAlias, $map['relation']['refOrderBy'], true);
+					if ($orderBy === $map['relation']['refOrderBy']) {
+						$orderBy = null;
+					}
+				} else {
+					$orderBy = $map['relation']['refTable']->getOrderByStatement($sqlAlias, true);
+				}
+			} else {
+				$orderBy = $map['relation']->getOrderByStatement($sqlAlias, true);
+				if ($orderBy === $map['relation']['orderBy']) {
+					$orderBy = null;
+				}
+			}
+		} else {
+			$orderBy = $map['table']->getOrderByStatement($sqlAlias, true);
+		}
+		
+		if ($orderBy) {
+			$e = explode(',', $orderBy);
+			$e = array_map('trim', $e);
+			foreach ($e as $v) {
+				// [OV1]
+				// added by mh - handle quoteIdentifier
+				$e2 = array_map('trim', explode(' ', $v));
+				$v = $this->_conn->quoteIdentifier($e2[0]);
+				if (isset($e2[1])) { // asc or desc
+					$v .= ' ' . $e2[1];
+				}
+				// end added
+				// modified by mh - include check for non-specified "ASC" order
+				$check = preg_replace('/\s+(ASC|DESC)/i', '', $v);
+				$found = false;
+				foreach($this->_sqlParts['orderby'] as $o) {
+					if($o === $v || preg_match('/'.preg_quote($check).'\s+(ASC|DESC)/', $o)) {
+						$found = true;
+						break;
+					}
+				}
+				if(!$found) {
+					// [OV17] remember sql dependences
+					if (strpos($e2[0], '.')) {
+						$tmp = explode('.', $e2[0]);
+						$tableAlias = $tmp[0];
+						$this->addDependency('orderby', $tableAlias);
+					}
+					
+					$this->_sqlParts['orderby'][] = $v;
+				}
+				//if ( ! in_array($v, $this->_sqlParts['orderby'])) {
+				//    $this->_sqlParts['orderby'][] = $v;
+				//}
+				// end modified
+			}
+		}
+	}
+	
+	/**
+	 * getLimitSubquery
+	 * this is method is used by the record limit algorithm
+	 *
+	 * when fetching one-to-many, many-to-many associated data with LIMIT clause
+	 * an additional subquery is needed for limiting the number of returned records instead
+	 * of limiting the number of sql result set rows
+	 *
+	 * @return string       the limit subquery
+	 * @todo A little refactor to make the method easier to understand & maybe shorter?
+	 */
+	public function getLimitSubquery()
+	{
+		$map = reset($this->_queryComponents);
+		$table = $map['table'];
+		$componentAlias = key($this->_queryComponents);
+		
+		// get short alias
+		$alias = $this->getSqlTableAlias($componentAlias);
+		// what about composite keys?
+		$primaryKey = $alias . '.' . $table->getColumnName($table->getIdentifier());
+		
+		$driverName = $this->_conn->getAttribute(Doctrine_Core::ATTR_DRIVER_NAME);
+		
+		// [OV14] distinct with join and order by on joined column is not determinate, it must be wrapped with another subquery
+		$isOrderedByJoinedColumn = $this->_isOrderedByJoinedColumn();
+		// initialize the base of the subquery
+		if ($isOrderedByJoinedColumn) {
+			$subquery = 'SELECT ';
+		} else {
+			$subquery = 'SELECT DISTINCT ';
+		}
+		$subquery .= $this->_conn->quoteIdentifier($primaryKey);
+		
+		// pgsql needs the order by fields to be preserved in select clause
+		// [OV14] added mysql since it needs it since 5.7 (with ONLY_FULL_GROUP_BY enabled by default in sql-mode)
+		if (($driverName === 'mysql' && !$isOrderedByJoinedColumn) || $driverName === 'pgsql') {
+			// [OV14] remember added columns to avoid duplicates + little refactor for optimization
+			// Remove identifier quoting if it exists
+			// [OV22] Replace deprecated create_function with an anonymous function
+			$callback = function($e) { return trim($e, '[]`"'); };
+			$added = [];
+			
+			foreach ($this->_sqlParts['orderby'] as $part) {
+				$e = $this->_tokenizer->bracketExplode($part, ' ');
+				foreach ($e as $i => $f) { // modified, added $i - before it was checking $f...
+					if ($i === 0 || $i % 2 === 0) { // modified, added $i - before it was checking $f...
+					// if ($f == 0 || $f % 2 == 0) {
+						if (!str_contains($f, '.')) {
+							continue;
+						}
+						
+						// don't add functions
+						if (str_contains($f, '(')) {
+							continue;
+						}
+						
+						$partOriginal = str_replace(',', '', trim($f));
+						$part = trim(implode('.', array_map($callback, explode('.', $partOriginal))));
+						
+						// don't add primarykey column (its already in the select clause)
+						// [OV14] watch out for duplicate column names (e.g. ORDER BY col IS NULL, col DESC)
+						if ($part !== $primaryKey && !isset($added[$partOriginal])) {
+							$added[$partOriginal] = true;
+							
+							// [OV14] add aliases to selected columns to avoid duplicate column error
+							$aliasSql = str_replace('.', '__', $part);
+							$partOriginal .= ' AS ' . $this->_conn->quoteIdentifier($aliasSql);
+							
+							$subquery .= ', ' . $partOriginal;
+						}
+					}
+				}
+			}
+			
+			unset($added);
+		}
+		
+		$orderby = $this->_sqlParts['orderby'];
+		$having = $this->_sqlParts['having'];
+		if ($driverName === 'mysql' || $driverName === 'pgsql') {
+			foreach ($this->_expressionMap as $dqlAlias => $expr) {
+				if (isset($expr[1])) {
+					$subquery .= ', ' . $expr[0] . ' AS ' . $this->_aggregateAliasMap[$dqlAlias];
+				}
+			}
+		} else {
+			foreach ($this->_expressionMap as $dqlAlias => $expr) {
+				if (isset($expr[1])) {
+					foreach ($having as $k => $v) {
+						$having[$k] = str_replace($this->_aggregateAliasMap[$dqlAlias], $expr[0], $v);
+					}
+					foreach ($orderby as $k => $v) {
+						$e = explode(' ', $v);
+						if ($e[0] === $this->_aggregateAliasMap[$dqlAlias]) {
+							$orderby[$k] = $expr[0];
+						}
+					}
+				}
+			}
+		}
+		
+		// Add having fields that got stripped out of select
+		preg_match_all('/`[a-z0-9_]+`\.`[a-z0-9_]+`/i', implode(' ', $having), $matches, PREG_PATTERN_ORDER);
+		if (count($matches[0]) > 0) {
+			$subquery .= ', ' . implode(', ', array_unique($matches[0]));
+		}
+		
+		$subquery .= ' FROM';
+		
+		// [OV25] Smart LEFT JOIN pruning: use dependency tracking to skip JOINs
+		// not referenced in WHERE, ORDER BY, HAVING, or GROUP BY
+		$pruneLeftJoins = [];
+		if (!empty($this->_dependences)
+			&& empty($this->_sqlParts['groupby'])
+			&& empty($this->_sqlParts['having'])
+			&& empty($this->_expressionMap)
+			&& empty($this->_params['join'])
+		) {
+			// Collect SQL table aliases needed by WHERE, ORDER BY, etc.
+			$neededAliases = [];
+			foreach (['where', 'orderby', 'having', 'groupby'] as $depPart) {
+				if (isset($this->_dependences[$depPart])) {
+					foreach ($this->_dependences[$depPart] as $depAlias => $v) {
+						if ($depAlias !== '') {
+							$neededAliases[$depAlias] = true;
+						}
+					}
+				}
+			}
+			
+			// Transitively add join dependencies (e.g., if JOIN c depends on JOIN b)
+			$changed = true;
+			while ($changed) {
+				$changed = false;
+				foreach ($this->_queryComponents as $compAlias => $comp) {
+					$sqlAlias = $this->_reverseTableAliasMap[$compAlias] ?? null;
+					if ($sqlAlias !== null && isset($neededAliases[$sqlAlias]) && !empty($comp['dependences'])) {
+						foreach ($comp['dependences'] as $depAlias => $v) {
+							if (!isset($neededAliases[$depAlias])) {
+								$neededAliases[$depAlias] = true;
+								$changed = true;
+							}
+						}
+					}
+				}
+			}
+			
+			// Identify LEFT JOINs whose aliases are NOT needed
+			foreach ($this->_sqlParts['from'] as $fromKey => $fromPart) {
+				if (is_string($fromKey) && str_starts_with($fromPart, 'LEFT JOIN')) {
+					$sqlAlias = $this->_reverseTableAliasMap[$fromKey] ?? null;
+					if ($sqlAlias !== null && !isset($neededAliases[$sqlAlias])) {
+						$pruneLeftJoins[$fromKey] = true;
+					}
+				}
+			}
+		}
+		
+		foreach ($this->_sqlParts['from'] as $key => $part) {
+			// preserve LEFT JOINs only if needed
+			if (str_starts_with($part, 'LEFT JOIN')) {
+				if (!empty($pruneLeftJoins)) {
+					// Smart pruning: skip only specifically identified unneeded JOINs
+					if (isset($pruneLeftJoins[$key])) {
+						continue;
+					}
+				} else {
+					// Fix for DC-706 / DC-594: skip ALL LEFT JOINs if no conditions at all
+					if (empty($this->_sqlParts['orderby']) && empty($this->_sqlParts['where'])
+						&& empty($this->_sqlParts['having']) && empty($this->_sqlParts['groupby'])) {
+						continue;
+					}
+				}
+			}
+			
+			$subquery .= ' ' . $part;
+		}
+		
+		// all conditions must be preserved in subquery
+		$subquery .= ( ! empty($this->_sqlParts['where']))?   ' WHERE '    . implode(' ', $this->_sqlParts['where'])  : '';
+		$subquery .= ( ! empty($this->_sqlParts['groupby']))? ' GROUP BY ' . implode(', ', $this->_sqlParts['groupby'])   : '';
+		$subquery .= ( ! empty($having))?  ' HAVING '   . implode(' AND ', $having) : '';
+		$subquery .= ( ! empty($orderby))? ' ORDER BY ' . implode(', ', $orderby)  : '';
+		
+		// [OV14] changed the condition, other databases also need it when query is ordered by joined column
+		if ($isOrderedByJoinedColumn) {
+			// When using "ORDER BY x.foo" where x.foo is a column of a joined table,
+			// we may get duplicate primary keys because all columns in ORDER BY must appear
+			// in the SELECT list when using DISTINCT. Hence we need to filter out the
+			// primary keys with an additional DISTINCT subquery.
+			// #1038
+			$quotedIdentifierColumnName = $this->_conn->quoteIdentifier($table->getColumnName($table->getIdentifier()));
+			// [OV14] ids returned by the subquery are ordered. The order must be kept while filtering duplicates out in mysql.
+			// otherwise limit would be executed after ids are reordered by distinct / group by, and that order cannot be determined.
+			if ($driverName === 'mysql') {
+				// [OV25] MySQL 8.0+: use ROW_NUMBER() window function instead of deprecated @rownum user variables
+				$rnAlias = $this->_conn->quoteIdentifier('row_number');
+				$subquery = 'SELECT doctrine_subquery_rownum_alias.' . $quotedIdentifierColumnName
+					. ', ROW_NUMBER() OVER() AS ' . $rnAlias
+					. ' FROM (' . $subquery . ') doctrine_subquery_rownum_alias';
+
+				// return unique ids and keep order by using assigned row_number
+				$subquery = 'SELECT doctrine_subquery_alias.' . $quotedIdentifierColumnName . ', MIN(doctrine_subquery_alias.' . $rnAlias . ')'
+					. ' FROM (' . $subquery . ') doctrine_subquery_alias'
+					. ' GROUP BY doctrine_subquery_alias.' . $quotedIdentifierColumnName
+					. ' ORDER BY MIN(doctrine_subquery_alias.' . $rnAlias . ')';
+			} else {
+				$subquery = 'SELECT DISTINCT doctrine_subquery_alias.' . $quotedIdentifierColumnName
+					. ' FROM (' . $subquery . ') doctrine_subquery_alias';
+			}
+		}
+		
+		// [OV9] cache without limit and offset
+		if (!($this->isQueryCacheEnabled()
+				&& $this->_conn->getAttribute(Doctrine_Core::ATTR_QUERY_CACHE_NO_OFFSET_LIMIT))) {
+			// add driver specific limit clause
+			$subquery = $this->_conn->modifyLimitSubquery($table, $subquery, $this->_sqlParts['limit'], $this->_sqlParts['offset']);
+		}
+		
+		$parts = $this->_tokenizer->quoteExplode($subquery, ' ', "'", "'");
+		
+		foreach ($parts as $k => $part) {
+			if (str_contains($part, ' ')) {
+				continue;
+			}
+			
+			$part = str_replace(['"', "'", '`'], "", $part);
+			
+			// Fix DC-645, Table aliases ending with ')' where not replaced properly
+			preg_match('/^(\(?)(.*?)(\)?)$/', $part, $matches);
+			if ($this->hasSqlTableAlias($matches[2])) {
+				$parts[$k] = $matches[1].$this->_conn->quoteIdentifier($this->generateNewSqlTableAlias($matches[2])).$matches[3];
+				continue;
+			}
+			
+			if (!str_contains($part, '.')) {
+				continue;
+			}
+			
+			preg_match_all("/[a-zA-Z0-9_]+\.[a-z0-9_]+/i", $part, $m);
+			
+			foreach ($m[0] as $match) {
+				$e = explode('.', $match);
+				
+				// Rebuild the original part without the newly generate alias and with quoting reapplied
+				$e2 = [];
+				foreach ($e as $k2 => $v2) {
+					$e2[$k2] = $this->_conn->quoteIdentifier($v2);
+				}
+				$match = implode('.', $e2);
+				
+				// Generate new table alias
+				$e[0] = $this->generateNewSqlTableAlias($e[0]);
+				
+				// Requote the part with the newly generated alias
+				foreach ($e as $k2 => $v2) {
+					$e[$k2] = $this->_conn->quoteIdentifier($v2);
+				}
+				
+				$replace = implode('.' , $e);
+				
+				// Replace the original part with the new part with new sql table alias
+				$parts[$k] = str_replace($match, $replace, $parts[$k]);
+			}
+		}
+		
+		if ($driverName === 'mysql' || $driverName === 'pgsql') {
+			foreach ($parts as $k => $part) {
+				if (str_contains($part, "'")) {
+					continue;
+				}
+				if (strpos($part, '__') === false) {
+					continue;
+				}
+				
+				preg_match_all("/[a-zA-Z0-9_]+\_\_[a-z0-9_]+/i", $part, $m);
+				
+				foreach ($m[0] as $match) {
+					$e = explode('__', $match);
+					$e[0] = $this->generateNewSqlTableAlias($e[0]);
+					
+					$parts[$k] = str_replace($match, implode('__', $e), $parts[$k]);
+				}
+			}
+		}
+		
+		$subquery = implode(' ', $parts);
+		return $subquery;
+	}
+	
+	/**
+	 * Checks whether the query has an ORDER BY on a column of a joined table.
+	 * This information is needed in special scenarios like the limit-offset when its
+	 * used with certain databases.
+	 *
+	 * @return boolean  TRUE if the query is ordered by a joined column, FALSE otherwise.
+	 */
+	private function _isOrderedByJoinedColumn() {
+		if ( ! $this->_queryComponents) {
+			throw new Doctrine_Query_Exception("The query is in an invalid state for this "
+					. "operation. It must have been fully parsed first.");
+		}
+		$componentAlias = key($this->_queryComponents);
+		$mainTableAlias = $this->getSqlTableAlias($componentAlias);
+		// [OV14] Remove identifier quoting if it exists
+		// [OV22] Replace deprecated create_function with an anonymous function
+		$callback = function($e) { return trim($e, '[]`"'); };
+		foreach ($this->_sqlParts['orderby'] as $part) {
+			$part = trim($part);
+			$e = $this->_tokenizer->bracketExplode($part, ' ');
+			$part = trim($e[0]);
+			if (!str_contains($part, '.')) {
+				continue;
+			}
+			[$tableAlias, $columnName] = explode('.', $part);
+			// [OV14] Remove identifier quoting if it exists
+			$tableAlias = $callback($tableAlias);
+			if ($tableAlias !== $mainTableAlias) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * DQL PARSER
+	 * parses a DQL query
+	 * first splits the query in parts and then uses individual
+	 * parsers for each part
+	 *
+	 * @param string $query                 DQL query
+	 * @param boolean $clear                whether or not to clear the aliases
+	 * @throws Doctrine_Query_Exception     if some generic parsing error occurs
+	 * @return Doctrine_Query
+	 */
+	public function parseDqlQuery($query, $clear = true)
+	{
+		if ($clear) {
+			$this->clear();
+		}
+		
+		$query = trim($query);
+		$query = str_replace("\r", "\n", str_replace("\r\n", "\n", $query));
+		$query = str_replace("\n", ' ', $query);
+		
+		$parts = $this->_tokenizer->tokenizeQuery($query);
+		
+		foreach ($parts as $partName => $subParts) {
+			$subParts = trim($subParts);
+			$partName = strtolower($partName);
+			switch ($partName) {
+				case 'create':
+					$this->_type = self::CREATE;
+				break;
+				case 'insert':
+					$this->_type = self::INSERT;
+				break;
+				case 'delete':
+					$this->_type = self::DELETE;
+				break;
+				case 'select':
+					$this->_type = self::SELECT;
+					$this->_addDqlQueryPart($partName, $subParts);
+				break;
+				case 'update':
+					$this->_type = self::UPDATE;
+					$partName = 'from';
+				case 'from':
+					$this->_addDqlQueryPart($partName, $subParts);
+				break;
+				case 'set':
+					$this->_addDqlQueryPart($partName, $subParts, true);
+				break;
+				case 'group':
+				case 'order':
+					$partName .= 'by';
+				case 'where':
+				case 'having':
+				case 'limit':
+				case 'offset':
+					$this->_addDqlQueryPart($partName, $subParts);
+				break;
+			}
+		}
+		
+		return $this;
+	}
+	
+	/**
+	 * @todo Describe & refactor... too long and nested.
+	 * @param string $path          component alias
+	 * @param boolean $loadFields
+	 */
+	public function load($path, $loadFields = true)
+	{
+		if (isset($this->_queryComponents[$path])) {
+			return $this->_queryComponents[$path];
+		}
+		
+		$e = $this->_tokenizer->quoteExplode($path, ' INDEXBY ');
+		
+		$mapWith = null;
+		if (count($e) > 1) {
+			$mapWith = trim($e[1]);
+			
+			$path = $e[0];
+		}
+		
+		// parse custom join conditions
+		$e = explode(' ON ', str_ireplace(' on ', ' ON ', $path));
+		
+		$joinCondition = '';
+		
+		if (count($e) > 1) {
+			$joinCondition = substr($path, strlen($e[0]) + 4, strlen($e[1]));
+			$path = substr($path, 0, strlen($e[0]));
+			
+			$overrideJoin = true;
+		} else {
+			$e = explode(' WITH ', str_ireplace(' with ', ' WITH ', $path));
+			
+			if (count($e) > 1) {
+				$joinCondition = substr($path, strlen($e[0]) + 6, strlen($e[1]));
+				$path = substr($path, 0, strlen($e[0]));
+			}
+			
+			$overrideJoin = false;
+		}
+		
+		$tmp            = explode(' ', $path);
+		$componentAlias = $originalAlias = (count($tmp) > 1) ? end($tmp) : null;
+		
+		$e = preg_split("/[.:]/", $tmp[0], -1);
+		
+		$fullPath = $tmp[0];
+		$prevPath = '';
+		$fullLength = strlen($fullPath);
+		
+		if (isset($this->_queryComponents[$e[0]])) {
+			$table = $this->_queryComponents[$e[0]]['table'];
+			$componentAlias = $e[0];
+			
+			$prevPath = $parent = array_shift($e);
+		}
+		
+		foreach ($e as $key => $name) {
+			// get length of the previous path
+			$length = strlen($prevPath);
+			
+			// build the current component path
+			$prevPath = ($prevPath) ? $prevPath . '.' . $name : $name;
+			
+			$delimeter = substr($fullPath, $length, 1);
+			
+			// if an alias is not given use the current path as an alias identifier
+			if (strlen($prevPath) === $fullLength && isset($originalAlias)) {
+				$componentAlias = $originalAlias;
+			} else {
+				$componentAlias = $prevPath;
+			}
+			
+			// if the current alias already exists, skip it
+			if (isset($this->_queryComponents[$componentAlias])) {
+				throw new Doctrine_Query_Exception("Duplicate alias '$componentAlias' in query.");
+			}
+			
+			if ( ! isset($table)) {
+				// process the root of the path
+				
+				$table = $this->loadRoot($name, $componentAlias);
+			} else {
+				$join = ($delimeter === ':') ? 'INNER JOIN ' : 'LEFT JOIN ';
+				
+				$relation = $table->getRelation($name);
+				$localTable = $table;
+				
+				$table = $relation->getTable();
+				$this->_queryComponents[$componentAlias] = ['table' => $table,
+																	'parent'   => $parent,
+																	'relation' => $relation,
+																	'map'      => null];
+				// Fix for http://www.doctrine-project.org/jira/browse/DC-701
+				if ( ! $relation->isOneToOne() && ! $this->disableLimitSubquery) {
+					$this->_needsSubquery = true;
+				}
+				
+				$localAlias   = $this->getSqlTableAlias($parent, $localTable->getTableName());
+				$foreignAlias = $this->getSqlTableAlias($componentAlias, $relation->getTable()->getTableName());
+				
+				$foreignSql   = $this->_conn->quoteIdentifier($relation->getTable()->getTableName())
+								. ' '
+								. $this->_conn->quoteIdentifier($foreignAlias);
+				
+				$map = $relation->getTable()->inheritanceMap;
+				
+				if ( ! $loadFields || ! empty($map) || $joinCondition) {
+					$this->_subqueryAliases[] = $foreignAlias;
+				}
+				
+				if ($relation instanceof Doctrine_Relation_Association) {
+					$asf = $relation->getAssociationTable();
+					
+					$assocTableName = $asf->getTableName();
+					
+					if ( ! $loadFields || ! empty($map) || $joinCondition) {
+						$this->_subqueryAliases[] = $assocTableName;
+					}
+					
+					// [OV17] changed the component name under which the association-refClass table will be aliased
+					// because it will be stored in sqlParts, dependences, pendingJoinConditions
+					// and with the old way e.g. a SoftDelete behavior, or anything which would add a pendingJoinCondition on the refModel
+					// would result in an exception, because Doctrine_Query_JoinCondition would fail parsing it (trying to resolve $asf->getComponentName() as a column name)
+					//$assocPath = $prevPath . '.' . $asf->getComponentName() . ' ' . $componentAlias;
+					$assocPath = $componentAlias . '.' . $asf->getComponentName();
+					
+					$this->_queryComponents[$assocPath] = [
+						'parent' => $prevPath,
+						'relation' => $relation,
+						'table' => $asf,
+						'ref' => true];
+					
+					$assocAlias = $this->getSqlTableAlias($assocPath, $asf->getTableName());
+					
+					$queryPart = $join
+							. $this->_conn->quoteIdentifier($assocTableName)
+							. ' '
+							. $this->_conn->quoteIdentifier($assocAlias);
+					
+					$queryPart .= ' ON (' . $this->_conn->quoteIdentifier($localAlias
+								. '.'
+								. $localTable->getColumnName($localTable->getIdentifier())) // what about composite keys?
+								. ' = '
+								. $this->_conn->quoteIdentifier($assocAlias . '.' . $relation->getLocalRefColumnName());
+					
+					if ($relation->isEqual()) {
+						// equal nest relation needs additional condition
+						$queryPart .= ' OR '
+									. $this->_conn->quoteIdentifier($localAlias
+									. '.'
+									. $table->getColumnName($table->getIdentifier()))
+									. ' = '
+									. $this->_conn->quoteIdentifier($assocAlias . '.' . $relation->getForeignRefColumnName());
+					}
+					
+					$queryPart .= ')';
+					
+					// [OV17] store query part under the aliased key, like the other parts
+					//$this->_sqlParts['from'][] = $queryPart;
+					$this->_sqlParts['from'][$assocPath] = $queryPart;
+					
+					// [OV17] remember join dependences
+					$this->addJoinDependency($assocPath, $localAlias);
+					
+					// fix for DC-815 (Model's default sorting breaks subqueries)
+					$this->_fromAliases[] = $assocAlias;
+					
+					$queryPart = $join . $foreignSql;
+					
+					if ( ! $overrideJoin) {
+						$queryPart .= $this->buildAssociativeRelationSql($relation, $assocAlias, $foreignAlias, $localAlias);
+						
+						// [OV17] remember join dependences
+						$this->addJoinDependency($componentAlias, $assocAlias);
+					}
+				} else {
+					$queryPart = $this->buildSimpleRelationSql($relation, $foreignAlias, $localAlias, $overrideJoin, $join);
+					
+					// [OV17] remember join dependences
+					if ( ! $overrideJoin) {
+						$this->addJoinDependency($componentAlias, $localAlias);
+					}
+				}
+				
+				$queryPart .= $this->buildInheritanceJoinSql($table->getComponentName(), $componentAlias);
+				$this->_sqlParts['from'][$componentAlias] = $queryPart;
+				// fix for DC-815 (Model's default sorting breaks subqueries)
+				$this->_fromAliases[] = $foreignAlias;
+				
+				if ( ! empty($joinCondition)) {
+					$this->addPendingJoinCondition($componentAlias, $joinCondition);
+				}
+			}
+			
+			if ($loadFields) {
+				$restoreState = false;
+				
+				// load fields if necessary
+				if ($loadFields && empty($this->_dqlParts['select'])) {
+					$this->_pendingFields[$componentAlias] = ['*'];
+				}
+			}
+			
+			$parent = $prevPath;
+		}
+		
+		$table = $this->_queryComponents[$componentAlias]['table'];
+		
+		return $this->buildIndexBy($componentAlias, $mapWith);
+	}
+	
+	protected function buildSimpleRelationSql(Doctrine_Relation $relation, $foreignAlias, $localAlias, $overrideJoin, $join)
+	{
+		$queryPart = $join . $this->_conn->quoteIdentifier($relation->getTable()->getTableName())
+							. ' '
+							. $this->_conn->quoteIdentifier($foreignAlias);
+		
+		if ( ! $overrideJoin) {
+			$queryPart .= ' ON '
+						. $this->_conn->quoteIdentifier($localAlias . '.' . $relation->getLocalColumnName())
+						. ' = '
+						. $this->_conn->quoteIdentifier($foreignAlias . '.' . $relation->getForeignColumnName());
+		}
+		
+		return $queryPart;
+	}
+	
+	protected function buildIndexBy($componentAlias, $mapWith = null)
+	{
+		$table = $this->_queryComponents[$componentAlias]['table'];
+		
+		$indexBy = null;
+		$column = false;
+		
+		if (isset($mapWith)) {
+			$terms = explode('.', $mapWith);
+			
+			if (count($terms) === 1) {
+				$indexBy = $terms[0];
+			} elseif (count($terms) === 2) {
+				$column = true;
+				$indexBy = $terms[1];
+			}
+		} elseif ($table->getBoundQueryPart('indexBy') !== null) {
+			$indexBy = $table->getBoundQueryPart('indexBy');
+		}
+		
+		if ($indexBy !== null) {
+			if ( $column && ! $table->hasColumn($table->getColumnName($indexBy))) {
+				throw new Doctrine_Query_Exception("Couldn't use key mapping. Column " . $indexBy . " does not exist.");
+			}
+			
+			$this->_queryComponents[$componentAlias]['map'] = $indexBy;
+		}
+		
+		return $this->_queryComponents[$componentAlias];
+	}
+	
+	
+	protected function buildAssociativeRelationSql(Doctrine_Relation $relation, $assocAlias, $foreignAlias, $localAlias)
+	{
+		$table = $relation->getTable();
+		
+		$queryPart = ' ON ';
+		
+		if ($relation->isEqual()) {
+			$queryPart .= '(';
+		}
+		
+		$localIdentifier = $table->getColumnName($table->getIdentifier());
+		
+		$queryPart .= $this->_conn->quoteIdentifier($foreignAlias . '.' . $localIdentifier)
+					. ' = '
+					. $this->_conn->quoteIdentifier($assocAlias . '.' . $relation->getForeignRefColumnName());
+		
+		if ($relation->isEqual()) {
+			$queryPart .= ' OR '
+						. $this->_conn->quoteIdentifier($foreignAlias . '.' . $localIdentifier)
+						. ' = '
+						. $this->_conn->quoteIdentifier($assocAlias . '.' . $relation->getLocalRefColumnName())
+						. ') AND '
+						. $this->_conn->quoteIdentifier($foreignAlias . '.' . $localIdentifier)
+						. ' != '
+						. $this->_conn->quoteIdentifier($localAlias . '.' . $localIdentifier);
+		}
+		
+		return $queryPart;
+	}
+	
+	/**
+	 * loadRoot
+	 *
+	 * @param string $name
+	 * @param string $componentAlias
+	 * @return Doctrine_Table
+	 * @todo DESCRIBE ME!
+	 * @todo this method is called only in Doctrine_Query class. Shouldn't be private or protected?
+	 */
+	public function loadRoot($name, $componentAlias)
+	{
+		// get the connection for the component
+		$manager = Doctrine_Manager::getInstance();
+		if ( ! $this->_passedConn && $manager->hasConnectionForComponent($name)) {
+			$this->_conn = $manager->getConnectionForComponent($name);
+		}
+		
+		$table = $this->_conn->getTable($name);
+		$tableName = $table->getTableName();
+		
+		// get the short alias for this table
+		$tableAlias = $this->getSqlTableAlias($componentAlias, $tableName);
+		// quote table name
+		$queryPart = $this->_conn->quoteIdentifier($tableName);
+		
+		// [OV16] improved checks for whether table alias should be used
+		//if ($this->_type === self::SELECT) {
+		if ($this->shouldUseTableAlias()) {
+			$queryPart .= ' ' . $this->_conn->quoteIdentifier($tableAlias);
+		}
+		
+		$this->_tableAliasMap[$tableAlias] = $componentAlias;
+		
+		$queryPart .= $this->buildInheritanceJoinSql($name, $componentAlias);
+		
+		$this->_sqlParts['from'][] = $queryPart;
+		// fix for DC-815 (Model's default sorting breaks subqueries)
+		$this->_fromAliases[] = $tableAlias;
+		
+		$this->_queryComponents[$componentAlias] = ['table' => $table, 'map' => null];
+		
+		return $table;
+	}
+	
+	/**
+	 * @todo DESCRIBE ME!
+	 * @param string $name              component class name
+	 * @param string $componentAlias    alias of the component in the dql
+	 * @return string                   query part
+	 */
+	public function buildInheritanceJoinSql($name, $componentAlias)
+	{
+		// get the connection for the component
+		$manager = Doctrine_Manager::getInstance();
+		if ( ! $this->_passedConn && $manager->hasConnectionForComponent($name)) {
+			$this->_conn = $manager->getConnectionForComponent($name);
+		}
+		
+		$table = $this->_conn->getTable($name);
+		$tableName = $table->getTableName();
+		
+		// get the short alias for this table
+		$tableAlias = $this->getSqlTableAlias($componentAlias, $tableName);
+		
+		$queryPart = '';
+		
+		foreach ($table->getOption('joinedParents') as $parent) {
+			$parentTable = $this->_conn->getTable($parent);
+			
+			$parentAlias = $componentAlias . '.' . $parent;
+			
+			// get the short alias for the parent table
+			$parentTableAlias = $this->getSqlTableAlias($parentAlias, $parentTable->getTableName());
+			
+			$queryPart .= ' LEFT JOIN ' . $this->_conn->quoteIdentifier($parentTable->getTableName())
+						. ' ' . $this->_conn->quoteIdentifier($parentTableAlias) . ' ON ';
+			
+			//Doctrine_Core::dump($table->getIdentifier());
+			foreach ((array) $table->getIdentifier() as $identifier) {
+				$column = $table->getColumnName($identifier);
+				
+				$queryPart .= $this->_conn->quoteIdentifier($tableAlias)
+							. '.' . $this->_conn->quoteIdentifier($column)
+							. ' = ' . $this->_conn->quoteIdentifier($parentTableAlias)
+							. '.' . $this->_conn->quoteIdentifier($column);
+			}
+		}
+		
+		return $queryPart;
+	}
+	
+	/**
+	 * Get count sql query for this Doctrine_Query instance.
+	 *
+	 * This method is used in Doctrine_Query::count() for returning an integer
+	 * for the number of records which will be returned when executed.
+	 *
+	 * @param array $params params passed by reference [OV13]
+	 * @return string $q
+	 */
+	public function getCountSqlQuery(array &$params = [])
+	{
+		// triggers dql parsing/processing
+		$this->getSqlQuery([], false); // this is ugly
+		
+		// initialize temporary variables
+		$where   = $this->_sqlParts['where'];
+		$having  = $this->_sqlParts['having'];
+		$groupby = $this->_sqlParts['groupby'];
+		
+		$rootAlias = $this->getRootAlias();
+		$tableAlias = $this->getSqlTableAlias($rootAlias);
+		
+		// Build the query base
+		$q = 'SELECT COUNT(*) AS ' . $this->_conn->quoteIdentifier('num_results') . ' FROM ';
+		
+		// [OV18] optimize count query - strip out unnecesary joins
+		$dependences = $this->getDependencesMerged(['where', 'groupby', 'having']);
+		
+		// Build the from clause
+		$from = $this->_buildSqlFromPart(true);
+		
+		// Build the where clause
+		$where = ( ! empty($where)) ? ' WHERE ' . implode(' ', $where) : '';
+		
+		// Build the group by clause
+		$groupby = ( ! empty($groupby)) ? ' GROUP BY ' . implode(', ', $groupby) : '';
+		
+		// Build the having clause
+		$having = ( ! empty($having)) ? ' HAVING ' . implode(' AND ', $having) : '';
+		
+		// Building the from clause and finishing query
+		if (count($this->_queryComponents) === 1 && empty($having)) {
+			$q .= $from . $where . $groupby . $having;
+		} else {
+			// Subselect fields will contain only the pk of root entity
+			$ta = $this->_conn->quoteIdentifier($tableAlias);
+			
+			$map = $this->getRootDeclaration();
+			$idColumnNames = $map['table']->getIdentifierColumnNames();
+			
+			$pkFields = $ta . '.' . implode(', ' . $ta . '.', $this->_conn->quoteMultipleIdentifier($idColumnNames));
+			
+			// We need to do some magic in select fields if the query contain anything in having clause
+			$selectFields = $pkFields;
+			// [OV23] wrap count query with another query, if "having" is used not only on expressions,
+			// but on fields as well, and when there is no "group by" in the query
+			$wrap = false;
+			
+			if ( ! empty($having)) {
+				// For each field defined in select clause
+				foreach ($this->_sqlParts['select'] as $field) {
+					// We only include aggregate expressions to count query
+					// This is needed because HAVING clause will use field aliases
+					if (str_contains($field, '(')) {
+						$selectFields .= ', ' . $field;
+					}
+				}
+				// Add having fields that got stripped out of select
+				preg_match_all('/`[a-z0-9_]+`\.`[a-z0-9_]+`/i', $having, $matches, PREG_PATTERN_ORDER);
+				if (count($matches[0]) > 0) {
+					$selectFields .= ', ' . implode(', ', array_unique($matches[0]));
+					// [OV23]
+					if (empty($groupby)) $wrap = true;
+				}
+			}
+			
+			// If we do not have a custom group by, apply the default one
+			// if (empty($groupby)) {
+			// [OV23]
+			if (empty($groupby) && !$wrap) {
+				$groupby = ' GROUP BY ' . $pkFields;
+			}
+			
+			// [OV23]
+			if ($wrap) {
+				$q .= '(SELECT DISTINCT ' . str_replace($ta, $this->_conn->quoteIdentifier('dctrn_count_query'), $pkFields) . ' FROM ';
+			}
+			$q .= '(SELECT ' . $selectFields . ' FROM ' . $from . $where . $groupby . $having . ') '
+				. $this->_conn->quoteIdentifier('dctrn_count_query');
+			// [OV23]
+			if ($wrap) {
+				$q .= ') ' . $this->_conn->quoteIdentifier('dctrn_count_query_wrap');
+			}
+		}
+		
+		// [OV13]
+		$params = $this->getCountQueryParams($params);
+		$params = $this->_conn->convertBooleans($params);
+		$q = $this->_adjustWhereInSql($q, $params);
+		
+		return $q;
+	}
+	
+	/**
+	 * Fetches the count of the query.
+	 *
+	 * This method executes the main query without all the
+	 * selected fields, ORDER BY part, LIMIT part and OFFSET part.
+	 *
+	 * Example:
+	 * Main query:
+	 *      SELECT u.*, p.phonenumber FROM User u
+	 *          LEFT JOIN u.Phonenumber p
+	 *          WHERE p.phonenumber = '123 123' LIMIT 10
+	 *
+	 * The modified DQL query:
+	 *      SELECT COUNT(DISTINCT u.id) FROM User u
+	 *          LEFT JOIN u.Phonenumber p
+	 *          WHERE p.phonenumber = '123 123'
+	 *
+	 * @param array $params        an array of prepared statement parameters
+	 * @return integer             the count of this query
+	 */
+	public function count($params = []): int
+	{
+		$q = $this->getCountSqlQuery($params);
+		// [OV13] moved inside getCountSqlQuery
+		//$params = $this->getCountQueryParams($params);
+		//$params = $this->_conn->convertBooleans($params);
+		
+		if ($this->_resultCache) {
+			$conn = $this->getConnection();
+			$cacheDriver = $this->getResultCacheDriver();
+			$hash = $this->getResultCacheHash($params).'_count';
+			$cached = ($this->_expireResultCache) ? false : $cacheDriver->fetch($hash);
+			
+			if ($cached === false) {
+				// cache miss
+				$results = $this->getConnection()->fetchAll($q, $params);
+				$cacheDriver->save($hash, serialize($results), $this->getResultCacheLifeSpan());
+			} else {
+				$results = unserialize($cached);
+			}
+		} else {
+			$results = $this->getConnection()->fetchAll($q, $params);
+		}
+		
+		if (count($results) > 1) {
+			$count = count($results);
+		} else {
+			if (isset($results[0])) {
+				$results[0] = array_change_key_case($results[0], CASE_LOWER);
+				$count = $results[0]['num_results'];
+			} else {
+				$count = 0;
+			}
+		}
+		
+		return (int) $count;
+	}
+	
+	/**
+	 * Queries the database with DQL (Doctrine Query Language).
+	 *
+	 * This methods parses a Dql query and builds the query parts.
+	 *
+	 * @param string $query      Dql query
+	 * @param array $params      prepared statement parameters
+	 * @param int $hydrationMode Doctrine_Core::HYDRATE_ARRAY or Doctrine_Core::HYDRATE_RECORD
+	 * @see Doctrine_Core::FETCH_* constants
+	 * @return mixed
+	 */
+	public function query($query, $params = [], $hydrationMode = null)
+	{
+		$this->parseDqlQuery($query);
+		return $this->execute($params, $hydrationMode);
+	}
+	
+	// [OV17]
+	/**
+	 * Add join dependency to a table alias for query component
+	 *
+	 * @param string $componentAlias
+	 * @param array $tableAlias
+	 * @return $this
+	 */
+	public function addJoinDependency($componentAlias, $tableAlias)
+	{
+		$this->_queryComponents[$componentAlias]['dependences'][$tableAlias] = true;
+		return $this;
+	}
+	
+	// [OV17]
+	/**
+	 * Add multiple join dependences to a table alias for query component
+	 *
+	 * @param string $componentAlias
+	 * @param array $tableAliases
+	 * @return $this
+	 */
+	public function addJoinDependences($componentAlias, array $tableAliases)
+	{
+		foreach($tableAliases as $tableAlias) {
+			$this->addJoinDependency($componentAlias, $tableAlias);
+		}
+		return $this;
+	}
+	
+	// [OV17]
+	/**
+	 * Get join dependences for a query component
+	 *
+	 * @param string $componentAlias
+	 * @param bool $exceptRoot strip out dependences to root table
+	 * @return array
+	 */
+	public function getJoinDependences($componentAlias, $exceptRoot = true)
+	{
+		if ( ! $this->_queryComponents) {
+			// parse the query, if not parsed yet
+			$this->getSqlQuery([], false);
+		}
+		
+		$dependences = !empty($this->_queryComponents[$componentAlias]['dependences']) ? $this->_queryComponents[$componentAlias]['dependences'] : [];
+		if($exceptRoot && $this->_rootAlias) {
+			$rootTableAlias = $this->getSqlTableAlias($this->_rootAlias);
+			unset($dependences[$rootTableAlias]);
+		}
+		return $dependences;
+	}
+	
+	/**
+	 * Get join dependences for all components used in the query
+	 *
+	 * @param bool $exceptRoot strip out dependences to root table
+	 * @return array
+	 */
+	public function getAllJoinDependences($exceptRoot = true)
+	{
+		if ( ! $this->_queryComponents) {
+			// parse the query, if not parsed yet
+			$this->getSqlQuery([], false);
+		}
+		
+		$data = [];
+		foreach($this->_queryComponents as $alias => $map) {
+			if(isset($this->_parentQueryComponents[$alias])) {
+				// this must be a subquery, do not return dependences for components from parent query
+				continue;
+			}
+			if($dependences = $this->getJoinDependences($alias, $exceptRoot)) {
+				$data[$alias] = $dependences;
+			}
+		}
+		
+		return $data;
+	}
+	
+	/**
+	 * Copies a Doctrine_Query object.
+	 *
+	 * @return Doctrine_Query|null  Copy of the Doctrine_Query instance.
+	 */
+	public function copy($query = null)
+	{
+	
+		if ( ! $query) {
+			$query = $this;
+		}
+		
+		$new = clone $query;
+		
+		return $new;
+	}
+	
+	/**
+	 * Magic method called after cloning process.
+	 *
+	 * @return void
+	 */
+	public function __clone()
+	{
+		$this->_parsers = [];
+		$this->_hydrator = clone $this->_hydrator;
+		
+		// Subqueries share some information from the parent so it can intermingle
+		// with the dql of the main query. So when a subquery is cloned we need to
+		// kill those references or it causes problems
+		if ($this->isSubquery()) {
+			$this->_killReference('_params');
+			$this->_killReference('_tableAliasMap');
+			$this->_killReference('_queryComponents');
+		}
+	}
+	
+	/**
+	 * Kill the reference for the passed class property.
+	 * This method simply copies the value to a temporary variable and then unsets
+	 * the reference and re-assigns the old value but not by reference
+	 *
+	 * @param string $key
+	 */
+	protected function _killReference($key)
+	{
+		$tmp = $this->$key;
+		unset($this->$key);
+		$this->$key = $tmp;
+	}
+	
+	/**
+	 * Frees the resources used by the query object. It especially breaks a
+	 * cyclic reference between the query object and it's parsers. This enables
+	 * PHP's current GC to reclaim the memory.
+	 * This method can therefore be used to reduce memory usage when creating
+	 * a lot of query objects during a request.
+	 *
+	 * @return Doctrine_Query   this object
+	 */
+	public function free()
+	{
+		$this->reset();
+		$this->_parsers = [];
+		$this->_dqlParts = [];
+		$this->_sql = null;
+		$this->_execParams = [];
+		$this->_resultCache = null;
+		$this->_resultCacheHash = null;
+		$this->_queryCache = null;
+		$this->_tableAliasSeeds = [];
+		$this->_fromAliases = [];
+		$this->_pendingJoinConditions = [];
+		
+		// Break references shared via copySubqueryInfo() before clearing
+		unset($this->_parentQueryComponents);
+		$this->_parentQueryComponents = [];
+		unset($this->_params);
+		$this->_params = ['exec' => [], 'join' => [], 'where' => [], 'set' => [], 'having' => []];
+		unset($this->_tableAliasMap);
+		$this->_tableAliasMap = [];
+		unset($this->_reverseTableAliasMap);
+		$this->_reverseTableAliasMap = [];
+		
+		$this->_sqlParts = [
+			'select'    => [],
+			'distinct'  => false,
+			'forUpdate' => false,
+			'from'      => [],
+			'set'       => [],
+			'where'     => [],
+			'groupby'   => [],
+			'having'    => [],
+			'orderby'   => [],
+			'limit'     => false,
+			'offset'    => false,
+		];
+	}
 }

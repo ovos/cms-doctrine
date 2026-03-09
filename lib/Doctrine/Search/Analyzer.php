@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id$
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,15 +30,15 @@
  */
 class Doctrine_Search_Analyzer implements Doctrine_Search_Analyzer_Interface
 {
-    protected $_options = [];
-
-    public function __construct($options = [])
-    {
-        $this->_options = $options;
-    }
-
-    public function analyze($text, $encoding = null)
-    {
-        return $text;
-    }
+	protected array $_options = [];
+	
+	public function __construct($options = [])
+	{
+		$this->_options = $options;
+	}
+	
+	public function analyze($text, $encoding = null)
+	{
+		return $text;
+	}
 }

@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Expression.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -35,124 +33,124 @@
  */
 class Doctrine_Expression
 {
-    protected $_expression;
-    protected $_conn;
-    protected $_tokenizer;
-
-    /**
-     * Creates an expression.
-     *
-     * The constructor needs the dql fragment that contains one or more dbms 
-     * functions.
-     * <code>
-     * $e = new Doctrine_Expression("CONCAT('some', 'one')");
-     * </code>
-     * 
-     * @param string $expr                  sql fragment
-     * @param Doctrine_Connection $conn     the connection (optional)
-     */
-    public function __construct($expr, $conn = null)
-    {
-        if ($conn !== null) {
-            $this->_conn = $conn;
-        }
-        $this->_tokenizer = new Doctrine_Query_Tokenizer();
-        $this->setExpression($expr);
-    }
-
-    /**
-     * Retrieves the connection associated to this expression at creation,
-     * or the current connection used if it was not specified. 
-     * 
-     * @return Doctrine_Connection The connection
-     */
-    public function getConnection()
-    {
-        if ( ! isset($this->_conn)) {
-            return Doctrine_Manager::connection();
-        }
-
-        return $this->_conn;
-    }
-
-    /**
-     * Sets the contained expression assuring that it is parsed.
-     * <code>
-     * $e->setExpression("CONCAT('some', 'one')");
-     * </code>
-     * 
-     * @param string $clause The expression to set
-     * @return void
-     */
-    public function setExpression($clause)
-    {
-        $this->_expression = $this->parseClause($clause);
-    }
-
-    /**
-     * Parses a single expressions and substitutes dql abstract functions 
-     * with their concrete sql counterparts for the given connection.
-     *
-     * @param string $expr The expression to parse
-     * @return string
-     */
-    public function parseExpression($expr)
-    {
-        $pos  = strpos($expr, '(');
-        $quoted = (str_starts_with($expr, "'") && str_ends_with($expr, "'"));
-        if ($pos === false || $quoted) {
-            return $expr;
-        }
-
-        // get the name of the function
-        $name   = substr($expr, 0, $pos);
-        $argStr = substr($expr, ($pos + 1), -1);
-
-        // parse args
-        foreach ($this->_tokenizer->bracketExplode($argStr, ',') as $arg) {
-           $args[] = $this->parseClause($arg);
-        }
-
-        return $this->getConnection()->expression->$name(...$args);
-    }
-
-    /**
-     * Parses a set of expressions at once. 
-     * @see parseExpression()
-     * 
-     * @param string $clause    The clause. Can be complex and parenthesised.
-     * @return string           The parsed clause.
-     */
-    public function parseClause($clause)
-    {
-        $e = $this->_tokenizer->bracketExplode($clause, ' ');
-
-        foreach ($e as $k => $expr) {
-            $e[$k] = $this->parseExpression($expr);
-        }
-        
-        return implode(' ', $e);
-    }
-
-    /**
-     * Gets the sql fragment represented.
-     * 
-     * @return string
-     */
-    public function getSql()
-    {
-        return $this->_expression;
-    }
-
-    /**
-     * Magic method.
-     * 
-     * Returns a string representation of this object. Proxies to @see getSql().
-     * 
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->getSql();
-    }
+	protected $_expression;
+	protected $_conn;
+	protected $_tokenizer;
+	
+	/**
+	 * Creates an expression.
+	 *
+	 * The constructor needs the dql fragment that contains one or more dbms 
+	 * functions.
+	 * <code>
+	 * $e = new Doctrine_Expression("CONCAT('some', 'one')");
+	 * </code>
+	 * 
+	 * @param string $expr                  sql fragment
+	 * @param Doctrine_Connection $conn     the connection (optional)
+	 */
+	public function __construct($expr, $conn = null)
+	{
+		if ($conn !== null) {
+			$this->_conn = $conn;
+		}
+		$this->_tokenizer = new Doctrine_Query_Tokenizer();
+		$this->setExpression($expr);
+	}
+	
+	/**
+	 * Retrieves the connection associated to this expression at creation,
+	 * or the current connection used if it was not specified. 
+	 * 
+	 * @return Doctrine_Connection The connection
+	 */
+	public function getConnection()
+	{
+		if ( ! isset($this->_conn)) {
+			return Doctrine_Manager::connection();
+		}
+		
+		return $this->_conn;
+	}
+	
+	/**
+	 * Sets the contained expression assuring that it is parsed.
+	 * <code>
+	 * $e->setExpression("CONCAT('some', 'one')");
+	 * </code>
+	 * 
+	 * @param string $clause The expression to set
+	 * @return void
+	 */
+	public function setExpression($clause)
+	{
+		$this->_expression = $this->parseClause($clause);
+	}
+	
+	/**
+	 * Parses a single expressions and substitutes dql abstract functions 
+	 * with their concrete sql counterparts for the given connection.
+	 *
+	 * @param string $expr The expression to parse
+	 * @return string
+	 */
+	public function parseExpression($expr)
+	{
+		$pos  = strpos($expr, '(');
+		$quoted = (str_starts_with($expr, "'") && str_ends_with($expr, "'"));
+		if ($pos === false || $quoted) {
+			return $expr;
+		}
+		
+		// get the name of the function
+		$name   = substr($expr, 0, $pos);
+		$argStr = substr($expr, ($pos + 1), -1);
+		
+		// parse args
+		foreach ($this->_tokenizer->bracketExplode($argStr, ',') as $arg) {
+			$args[] = $this->parseClause($arg);
+		}
+		
+		return $this->getConnection()->expression->$name(...$args);
+	}
+	
+	/**
+	 * Parses a set of expressions at once. 
+	 * @see parseExpression()
+	 * 
+	 * @param string $clause    The clause. Can be complex and parenthesised.
+	 * @return string           The parsed clause.
+	 */
+	public function parseClause($clause)
+	{
+		$e = $this->_tokenizer->bracketExplode($clause, ' ');
+		
+		foreach ($e as $k => $expr) {
+			$e[$k] = $this->parseExpression($expr);
+		}
+		
+		return implode(' ', $e);
+	}
+	
+	/**
+	 * Gets the sql fragment represented.
+	 * 
+	 * @return string
+	 */
+	public function getSql()
+	{
+		return $this->_expression;
+	}
+	
+	/**
+	 * Magic method.
+	 * 
+	 * Returns a string representation of this object. Proxies to @see getSql().
+	 * 
+	 * @return string
+	 */
+	public function __toString()
+	{
+		return $this->getSql();
+	}
 }

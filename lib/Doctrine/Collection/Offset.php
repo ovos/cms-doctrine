@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Offset.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -33,33 +31,33 @@
  */
 class Doctrine_Collection_Offset extends Doctrine_Collection
 {
-    /**
-     * @var integer $limit
-     */
-    private $limit;
-
-    /**
-     * @param Doctrine_Table $table
-     */
-    public function __construct(Doctrine_Table $table)
-    {
-        parent::__construct($table);
-        $this->limit = $table->getAttribute(Doctrine_Core::ATTR_COLL_LIMIT);
-    }
-
-    /**
-     * @return integer
-     */
-    public function getLimit()
-    {
-        return $this->limit;
-    }
-
-    /**
-     * @return Doctrine_Collection_Iterator_Expandable
-     */
-    public function getIterator()
-    {
-        return new Doctrine_Collection_Iterator_Expandable($this);
-    }
+	/**
+	 * @var integer $limit
+	 */
+	private $limit;
+	
+	/**
+	 * @param Doctrine_Table $table
+	 */
+	public function __construct(Doctrine_Table $table)
+	{
+		parent::__construct($table);
+		$this->limit = $table->getAttribute(Doctrine_Core::ATTR_COLL_LIMIT);
+	}
+	
+	/**
+	 * @return integer
+	 */
+	public function getLimit()
+	{
+		return $this->limit;
+	}
+	
+	/**
+	 * @return Doctrine_Collection_Iterator_Expandable
+	 */
+	public function getIterator()
+	{
+		return new Doctrine_Collection_Iterator_Expandable($this);
+	}
 }

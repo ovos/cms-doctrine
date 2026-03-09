@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: GenerateMigrationsDb.php 2761 2007-10-07 23:42:29Z zYne $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,34 +30,34 @@
  */
 class Doctrine_Task_GenerateMigrationsDb extends Doctrine_Task
 {
-    public $description          =   'Generate migration classes for an existing database',
-           $requiredArguments    =   ['migrations_path' => 'Specify the complete path to your migration classes folder.'],
-           $optionalArguments    =   [];
-    
-    public function execute()
-    {
-        try {
-            $migrationsPath = $this->getArgument('migrations_path');
-            $yamlSchemaPath = $this->getArgument('yaml_schema_path');
-            $migration = new Doctrine_Migration($migrationsPath);
-            $result1 = false;
-            if ( ! count($migration->getMigrationClasses())) {
-                $result1 = Doctrine_Core::generateMigrationsFromDb($migrationsPath);
-            }
-            $connections = [];
-            foreach (Doctrine_Manager::getInstance() as $connection) {
-                $connections[] = $connection->getName();
-            }
-            $changes = Doctrine_Core::generateMigrationsFromDiff($migrationsPath, $connections, $yamlSchemaPath);
-            $numChanges = count($changes, true) - count($changes);
-            $result = ($result1 || $numChanges) ? true:false;
-        } catch (Exception $e) {
-            $result = false;
-        }
-        if ( ! $result) {
-            throw new Doctrine_Task_Exception('Could not generate migration classes from database');
-        } else {
-            $this->notify('Generated migration classes successfully from database');
-        }
-    }
+	public $description          =   'Generate migration classes for an existing database',
+			$requiredArguments    =   ['migrations_path' => 'Specify the complete path to your migration classes folder.'],
+			$optionalArguments    =   [];
+	
+	public function execute()
+	{
+		try {
+			$migrationsPath = $this->getArgument('migrations_path');
+			$yamlSchemaPath = $this->getArgument('yaml_schema_path');
+			$migration = new Doctrine_Migration($migrationsPath);
+			$result1 = false;
+			if ( ! count($migration->getMigrationClasses())) {
+				$result1 = Doctrine_Core::generateMigrationsFromDb($migrationsPath);
+			}
+			$connections = [];
+			foreach (Doctrine_Manager::getInstance() as $connection) {
+				$connections[] = $connection->getName();
+			}
+			$changes = Doctrine_Core::generateMigrationsFromDiff($migrationsPath, $connections, $yamlSchemaPath);
+			$numChanges = count($changes, true) - count($changes);
+			$result = ($result1 || $numChanges) ? true:false;
+		} catch (Exception $e) {
+			$result = false;
+		}
+		if ( ! $result) {
+			throw new Doctrine_Task_Exception('Could not generate migration classes from database');
+		} else {
+			$this->notify('Generated migration classes successfully from database');
+		}
+	}
 }

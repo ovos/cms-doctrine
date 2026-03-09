@@ -1,7 +1,5 @@
 <?php
 /**
- *  $Id$
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -35,115 +33,115 @@
  */
 class Doctrine_Locator_Injectable
 {
-    /**
-     * @var Doctrine_Locator      the locator object
-     */
-    protected $_locator;
-
-    /**
-     * @var array               an array of bound resources
-     */
-    protected $_resources = [];
-
-    /**
-     * @var Doctrine_Null $null     Doctrine_Null object, used for extremely fast null value checking
-     */
-    protected static $_null;
-
-    /**
-     * setLocator
-     * this method can be used for setting the locator object locally
-     *
-     * @param Doctrine_Locator                the locator object
-     * @return Doctrine_Locator_Injectable    this instance
-     */
-    public function setLocator(Doctrine_Locator $locator)
-    {
-        $this->_locator = $locator;
-        return $this;
-    }
-
-    /**
-     * getLocator
-     * returns the locator associated with this object
-     * 
-     * if there are no locator locally associated then
-     * this method tries to fetch the current global locator
-     *
-     * @return Doctrine_Locator
-     */
-    public function getLocator()
-    {
-        if ( ! isset($this->_locator)) {
-            $this->_locator = Doctrine_Locator::instance();
-
-        }
-        return $this->_locator;
-    }
-
-    /**
-     * locate
-     * locates a resource by given name and returns it
-     *
-     * if the resource cannot be found locally this method tries
-     * to use the global locator for finding the resource
-     *
-     * @see Doctrine_Locator::locate()
-     * @throws Doctrine_Locator_Exception     if the resource could not be found
-     * @param string $name                  the name of the resource
-     * @return mixed                        the located resource
-     */
-    public function locate($name)
-    {
-        if (isset($this->_resources[$name])) {
-            if (is_object($this->_resources[$name])) {
-                return $this->_resources[$name];
-            } else {
-                // get the name of the concrete implementation
-                $concreteImpl = $this->_resources[$name];
-                
-                return $this->getLocator()->locate($concreteImpl);
-            }
-        } else {
-            return $this->getLocator()->locate($name);
-        }
-    }
-
-    /**
-     * bind
-     * binds a resource to a name
-     *
-     * @param string $name      the name of the resource to bind
-     * @param mixed $value      the value of the resource
-     * @return Doctrine_Locator   this object
-     */
-    public function bind($name, $resource)
-    {
-        $this->_resources[$name] = $resource;
-        
-        return $this;    
-    }
-
-    /**
-     * initNullObject
-     * initializes the null object
-     *
-     * @param Doctrine_Null $null
-     * @return void
-     */
-    public static function initNullObject(Doctrine_Null $null)
-    {
-        self::$_null = $null;
-    }
-
-    /**
-     * getNullObject
-     * returns the null object associated with this object
-     *
-     * @return Doctrine_Null
-     */
-    public static function getNullObject()
-    {
-        return self::$_null;
-    }
+	/**
+	 * @var Doctrine_Locator      the locator object
+	 */
+	protected $_locator;
+	
+	/**
+	 * @var array               an array of bound resources
+	 */
+	protected array $_resources = [];
+	
+	/**
+	 * @var Doctrine_Null $null     Doctrine_Null object, used for extremely fast null value checking
+	 */
+	protected static $_null;
+	
+	/**
+	 * setLocator
+	 * this method can be used for setting the locator object locally
+	 *
+	 * @param Doctrine_Locator                the locator object
+	 * @return Doctrine_Locator_Injectable    this instance
+	 */
+	public function setLocator(Doctrine_Locator $locator)
+	{
+		$this->_locator = $locator;
+		return $this;
+	}
+	
+	/**
+	 * getLocator
+	 * returns the locator associated with this object
+	 * 
+	 * if there are no locator locally associated then
+	 * this method tries to fetch the current global locator
+	 *
+	 * @return Doctrine_Locator
+	 */
+	public function getLocator()
+	{
+		if ( ! isset($this->_locator)) {
+			$this->_locator = Doctrine_Locator::instance();
+		
+		}
+		return $this->_locator;
+	}
+	
+	/**
+	 * locate
+	 * locates a resource by given name and returns it
+	 *
+	 * if the resource cannot be found locally this method tries
+	 * to use the global locator for finding the resource
+	 *
+	 * @see Doctrine_Locator::locate()
+	 * @throws Doctrine_Locator_Exception     if the resource could not be found
+	 * @param string $name                  the name of the resource
+	 * @return mixed                        the located resource
+	 */
+	public function locate($name)
+	{
+		if (isset($this->_resources[$name])) {
+			if (is_object($this->_resources[$name])) {
+				return $this->_resources[$name];
+			} else {
+				// get the name of the concrete implementation
+				$concreteImpl = $this->_resources[$name];
+				
+				return $this->getLocator()->locate($concreteImpl);
+			}
+		} else {
+			return $this->getLocator()->locate($name);
+		}
+	}
+	
+	/**
+	 * bind
+	 * binds a resource to a name
+	 *
+	 * @param string $name      the name of the resource to bind
+	 * @param mixed $value      the value of the resource
+	 * @return Doctrine_Locator   this object
+	 */
+	public function bind($name, $resource)
+	{
+		$this->_resources[$name] = $resource;
+		
+		return $this;    
+	}
+	
+	/**
+	 * initNullObject
+	 * initializes the null object
+	 *
+	 * @param Doctrine_Null $null
+	 * @return void
+	 */
+	public static function initNullObject(Doctrine_Null $null)
+	{
+		self::$_null = $null;
+	}
+	
+	/**
+	 * getNullObject
+	 * returns the null object associated with this object
+	 *
+	 * @return Doctrine_Null
+	 */
+	public static function getNullObject()
+	{
+		return self::$_null;
+	}
 }

@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Regexp.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,34 +30,34 @@
  */
 class Doctrine_Validator_Regexp extends Doctrine_Validator_Driver
 {
-    /**
-     * checks if given value satisfies a regular expression
-     *
-     * @param mixed $value
-     * @param mixed $args
-     * @return boolean
-     */
-    public function validate($value)
-    {
-        if ($value === null) {
-            return true;
-        }
-        if ( ! isset($this->args)) {
-           return true;
-        }
-        if (is_array($this->args)) {
-            foreach ($this->args as $regexp) {
-                if ( ! preg_match($regexp, $value)) {
-                    return false;
-                }
-            }
-            return true;
-        } else {
-            if (preg_match($this->args, $value)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
+	/**
+	 * checks if given value satisfies a regular expression
+	 *
+	 * @param mixed $value
+	 * @param mixed $args
+	 * @return boolean
+	 */
+	public function validate($value)
+	{
+		if ($value === null) {
+			return true;
+		}
+		if ( ! isset($this->args)) {
+			return true;
+		}
+		if (is_array($this->args)) {
+			foreach ($this->args as $regexp) {
+				if ( ! preg_match($regexp, $value)) {
+					return false;
+				}
+			}
+			return true;
+		} else {
+			if (preg_match($this->args, $value)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 }

@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Record.php 1298 2007-05-01 19:26:03Z zYne $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -33,35 +31,35 @@
  */
 abstract class Doctrine_Record_Filter
 {
-    protected $_table;
-
-    public function setTable(Doctrine_Table $table)
-    {
-        $this->_table = $table;
-    }
-
-    public function getTable()
-    {
-        return $this->_table;
-    }
-
-    public function init()
-    {
-    }
-
-    /**
-     * filterSet
-     * defines an implementation for filtering the set() method of Doctrine_Record
-     *
-     * @param mixed $name                       name of the property or related component
-     */
-    abstract public function filterSet(Doctrine_Record $record, $name, $value);
-
-    /**
-     * filterGet
-     * defines an implementation for filtering the get() method of Doctrine_Record
-     *
-     * @param mixed $name                       name of the property or related component
-     */
-    abstract public function filterGet(Doctrine_Record $record, $name);
+	protected $_table;
+	
+	public function setTable(Doctrine_Table $table)
+	{
+		$this->_table = $table;
+	}
+	
+	public function getTable()
+	{
+		return $this->_table;
+	}
+	
+	public function init()
+	{
+	}
+	
+	/**
+	 * filterSet
+	 * defines an implementation for filtering the set() method of Doctrine_Record
+	 *
+	 * @param mixed $name                       name of the property or related component
+	 */
+	abstract public function filterSet(Doctrine_Record $record, $name, $value);
+	
+	/**
+	 * filterGet
+	 * defines an implementation for filtering the get() method of Doctrine_Record
+	 *
+	 * @param mixed $name                       name of the property or related component
+	 */
+	abstract public function filterGet(Doctrine_Record $record, $name);
 }

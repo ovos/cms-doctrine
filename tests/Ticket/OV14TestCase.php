@@ -25,7 +25,7 @@
  * - added order by fields to select clause also for mysql, since it needs it since 5.7 (with ONLY_FULL_GROUP_BY enabled by default in sql-mode)
  * - add aliases to selected columns to avoid duplicate column error
  * - remember added columns to avoid duplicates + little refactor for optimization
- * - distinct with join and order by on joined column is not determinate, it must be wrapped with another subquery (and not only in oracle)
+ * - distinct with join and order by on joined column is not determinate, it must be wrapped with another subquery
  * - changed alias - added _wrap_ to avoid conflicts with limit subquery ordered by joined column
  *
  * @package     Doctrine
@@ -64,9 +64,9 @@ class Doctrine_Ticket_OV14_TestCase extends Doctrine_UnitTestCase
                 // limit subquery
                 . 'SELECT doctrine_subquery_wrap_alias.id FROM ('
                     .'SELECT doctrine_subquery_alias.id, MIN(doctrine_subquery_alias.row_number) FROM ('
-                        .'SELECT @rownum:=@rownum + 1 as row_number, doctrine_subquery_rownum_alias.id FROM ('
+                        .'SELECT doctrine_subquery_rownum_alias.id, ROW_NUMBER() OVER() AS row_number FROM ('
                             .'SELECT e2.id FROM entity e2 LEFT JOIN phonenumber p2 ON e2.id = p2.entity_id WHERE (e2.type = 0) ORDER BY p2.phonenumber'
-                        .') doctrine_subquery_rownum_alias, (SELECT @rownum := 0) rownum_var'
+                        .') doctrine_subquery_rownum_alias'
                     .') doctrine_subquery_alias'
                     .' GROUP BY doctrine_subquery_alias.id'
                     .' ORDER BY MIN(doctrine_subquery_alias.row_number)'

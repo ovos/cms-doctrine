@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Interface.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -33,36 +31,36 @@
  */
 interface Doctrine_EventListener_Interface
 {
-    public function preTransactionCommit(Doctrine_Event $event);
-    public function postTransactionCommit(Doctrine_Event $event);
-
-    public function preTransactionRollback(Doctrine_Event $event);
-    public function postTransactionRollback(Doctrine_Event $event);
-
-    public function preTransactionBegin(Doctrine_Event $event);
-    public function postTransactionBegin(Doctrine_Event $event);
-
-    public function postConnect(Doctrine_Event $event);
-    public function preConnect(Doctrine_Event $event);
-
-    public function preQuery(Doctrine_Event $event);
-    public function postQuery(Doctrine_Event $event);
-
-    public function prePrepare(Doctrine_Event $event);
-    public function postPrepare(Doctrine_Event $event);
-
-    public function preExec(Doctrine_Event $event);
-    public function postExec(Doctrine_Event $event);
-
-    public function preError(Doctrine_Event $event);
-    public function postError(Doctrine_Event $event);
-
-    public function preFetch(Doctrine_Event $event);
-    public function postFetch(Doctrine_Event $event);
-
-    public function preFetchAll(Doctrine_Event $event);
-    public function postFetchAll(Doctrine_Event $event);
-
-    public function preStmtExecute(Doctrine_Event $event);
-    public function postStmtExecute(Doctrine_Event $event);
+	public function preTransactionCommit(Doctrine_Event $event): void;
+	public function postTransactionCommit(Doctrine_Event $event): void;
+	
+	public function preTransactionRollback(Doctrine_Event $event): void;
+	public function postTransactionRollback(Doctrine_Event $event): void;
+	
+	public function preTransactionBegin(Doctrine_Event $event): void;
+	public function postTransactionBegin(Doctrine_Event $event): void;
+	
+	public function postConnect(Doctrine_Event $event): void;
+	public function preConnect(Doctrine_Event $event): void;
+	
+	public function preQuery(Doctrine_Event $event): void;
+	public function postQuery(Doctrine_Event $event): void;
+	
+	public function prePrepare(Doctrine_Event $event): void;
+	public function postPrepare(Doctrine_Event $event): void;
+	
+	public function preExec(Doctrine_Event $event): void;
+	public function postExec(Doctrine_Event $event): void;
+	
+	public function preError(Doctrine_Event $event): void;
+	public function postError(Doctrine_Event $event): void;
+	
+	public function preFetch(Doctrine_Event $event): void;
+	public function postFetch(Doctrine_Event $event): void;
+	
+	public function preFetchAll(Doctrine_Event $event): void;
+	public function postFetchAll(Doctrine_Event $event): void;
+	
+	public function preStmtExecute(Doctrine_Event $event): void;
+	public function postStmtExecute(Doctrine_Event $event): void;
 }

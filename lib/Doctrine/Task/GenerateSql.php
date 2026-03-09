@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: GenerateSql.php 2761 2007-10-07 23:42:29Z zYne $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,25 +30,25 @@
  */
 class Doctrine_Task_GenerateSql extends Doctrine_Task
 {
-    public $description          =   'Generate sql for all existing database connections.',
-           $requiredArguments    =   ['models_path'    =>  'Specify complete path to your Doctrine_Record definitions.',
-                                           'sql_path'       =>  'Path to write the generated sql.'],
-           $optionalArguments    =   [];
-    
-    public function execute()
-    {
-        if (is_dir($this->getArgument('sql_path'))) {
-            $path = $this->getArgument('sql_path') . DIRECTORY_SEPARATOR . 'schema.sql';
-        } elseif (is_file($this->getArgument('sql_path'))) {
-            $path = $this->getArgument('sql_path');
-        } else {
-            throw new Doctrine_Task_Exception('Invalid sql path.');
-        }
-        
-        $sql = Doctrine_Core::generateSqlFromModels($this->getArgument('models_path'));
-        
-        file_put_contents($path, $sql);
-        
-        $this->notify('Generated SQL successfully for models');
-    }
+	public $description          =   'Generate sql for all existing database connections.',
+			$requiredArguments    =   ['models_path'    =>  'Specify complete path to your Doctrine_Record definitions.',
+											'sql_path'       =>  'Path to write the generated sql.'],
+			$optionalArguments    =   [];
+	
+	public function execute()
+	{
+		if (is_dir($this->getArgument('sql_path'))) {
+			$path = $this->getArgument('sql_path') . DIRECTORY_SEPARATOR . 'schema.sql';
+		} elseif (is_file($this->getArgument('sql_path'))) {
+			$path = $this->getArgument('sql_path');
+		} else {
+			throw new Doctrine_Task_Exception('Invalid sql path.');
+		}
+		
+		$sql = Doctrine_Core::generateSqlFromModels($this->getArgument('models_path'));
+		
+		file_put_contents($path, $sql);
+		
+		$this->notify('Generated SQL successfully for models');
+	}
 }

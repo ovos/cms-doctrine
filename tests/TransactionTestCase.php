@@ -283,70 +283,70 @@ class TransactionListener extends Doctrine_EventListener
 {
     protected $_messages = array();
 
-    public function preTransactionCommit(Doctrine_Event $event)
+    public function preTransactionCommit(Doctrine_Event $event): void
     {
         $this->_messages[] = __FUNCTION__;
 
         $event->skipOperation();
     }
-    public function postTransactionCommit(Doctrine_Event $event)
+    public function postTransactionCommit(Doctrine_Event $event): void
     {
         $this->_messages[] = __FUNCTION__;
     }
 
-    public function preTransactionRollback(Doctrine_Event $event)
-    {
-        $this->_messages[] = __FUNCTION__;
-
-        $event->skipOperation();
-    }
-    public function postTransactionRollback(Doctrine_Event $event)
-    {
-        $this->_messages[] = __FUNCTION__;
-    }
-
-    public function preTransactionBegin(Doctrine_Event $event)
+    public function preTransactionRollback(Doctrine_Event $event): void
     {
         $this->_messages[] = __FUNCTION__;
 
         $event->skipOperation();
     }
-    public function postTransactionBegin(Doctrine_Event $event)
+    public function postTransactionRollback(Doctrine_Event $event): void
+    {
+        $this->_messages[] = __FUNCTION__;
+    }
+
+    public function preTransactionBegin(Doctrine_Event $event): void
+    {
+        $this->_messages[] = __FUNCTION__;
+
+        $event->skipOperation();
+    }
+    public function postTransactionBegin(Doctrine_Event $event): void
     { 
         $this->_messages[] = __FUNCTION__;
     }
 
 
-    public function preSavepointCommit(Doctrine_Event $event)
+    public function preSavepointCommit(Doctrine_Event $event): void
     {           
         $this->_messages[] = __FUNCTION__;
 
         $event->skipOperation();
     }
-    public function postSavepointCommit(Doctrine_Event $event)
+    public function postSavepointCommit(Doctrine_Event $event): void
     { 
         $this->_messages[] = __FUNCTION__;
     }
 
-    public function preSavepointRollback(Doctrine_Event $event)
+    public function preSavepointRollback(Doctrine_Event $event): void
     {
         $this->_messages[] = __FUNCTION__;
 
         $event->skipOperation();
     }
-    public function postSavepointRollback(Doctrine_Event $event)
+    public function postSavepointRollback(Doctrine_Event $event): void
     { 
         $this->_messages[] = __FUNCTION__;
     }
 
-    public function preSavepointCreate(Doctrine_Event $event)
+    public function preSavepointCreate(Doctrine_Event $event): void
     { 
         $this->_messages[] = __FUNCTION__;
 
         $event->skipOperation();
     }
 
-    public function postSavepointCreate(Doctrine_Event $event)
+    public function postSavepointCreate(Doctrine_Event $event): void
     { 
         $this->_messages[] = __FUNCTION__;
     }

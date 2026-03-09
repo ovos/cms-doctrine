@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: ErrorStack.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -33,160 +31,158 @@
  */
 class Doctrine_Validator_ErrorStack extends Doctrine_Access implements Countable, IteratorAggregate
 {
-    /**
-     * The errors of the error stack.
-     *
-     * @var array
-     */
-    protected $_errors = [];
-
-    /**
-     * Array of validators that failed
-     *
-     * @var array
-     */
-    protected $_validators = [];
-
-    /**
-     * Get model class name for the error stack
-     *
-     * @var string
-     */
-    protected $_className;
-
-    /**
-     * Constructor
-     *
-     */
-    public function __construct($className)
-    {
-        $this->_className = $className;
-    }
-
-    /**
-     * Adds an error to the stack.
-     *
-     * @param string $invalidFieldName
-     * @param string $errorType
-     */
-    public function add($invalidFieldName, $errorCode = 'general')
-    {
-        if (is_object($errorCode)) {
-            if ( ! ($errorCode instanceof Doctrine_Validator_Driver)) {
-                throw new Doctrine_Exception('Validators must be an instance of Doctrine_Validator_Driver');
-            }
-            $validator = $errorCode;
-            $this->_validators[$invalidFieldName][] = $validator;
-            $errorCode = (string) $validator;
-        }
-
-        $this->_errors[$invalidFieldName][] = $errorCode;
-    }
-
-    /**
-     * Removes all existing errors for the specified field from the stack.
-     *
-     * @param string $fieldName
-     */
-    public function remove($fieldName)
-    {
-        if (isset($this->_errors[$fieldName])) {
-            unset($this->_errors[$fieldName]);
-            if (isset($this->_validators[$fieldName])) {
-                unset($this->_validators[$fieldName]);
-            }
-        }
-    }
-
-    /**
-     * Get errors for field
-     *
-     * @param string $fieldName
-     * @return mixed
-     */
-    public function get($fieldName)
-    {
-        return $this->_errors[$fieldName] ?? null;
-    }
-
-    /**
-     * Alias for add()
-     *
-     * @param string $fieldName
-     * @param string $errorCode
-     * @return void
-     */
-    public function set($fieldName, $errorCode)
-    {
-        $this->add($fieldName, $errorCode);
-    }
-
-    /**
-     * Check if a field has an error
-     *
-     * @param string $fieldName
-     * @return boolean
-     */
-    public function contains($fieldName)
-    {
-        return array_key_exists($fieldName, $this->_errors);
-    }
-
-    /**
-     * Removes all errors from the stack.
-     *
-     * @return void
-     */
-    public function clear()
-    {
-        $this->_errors = [];
-        $this->_validators = [];
-    }
-
-    /**
-     * Enter description here...
-     *
-     * @return unknown
-     */
-    #[\ReturnTypeWillChange]
-    public function getIterator()
-    {
-        return new ArrayIterator($this->_errors);
-    }
-
-    public function toArray()
-    {
-        return $this->_errors;
-    }
-
-    /**
-     * Count the number of errors
-     *
-     * @return integer
-     */
-    #[\ReturnTypeWillChange]
-    public function count()
-    {
-        return count($this->_errors);
-    }
-
-    /**
-     * Get the classname where the errors occured
-     *
-     * @return string
-     */
-    public function getClassname()
-    {
-        return $this->_className;
-    }
-
-    /**
-     * Get array of failed validators
-     *
-     * @return array
-     */
-    public function getValidators()
-    {
-        return $this->_validators;
-    }
+	/**
+	 * The errors of the error stack.
+	 *
+	 * @var array
+	 */
+	protected array $_errors = [];
+	
+	/**
+	 * Array of validators that failed
+	 *
+	 * @var array
+	 */
+	protected array $_validators = [];
+	
+	/**
+	 * Get model class name for the error stack
+	 *
+	 * @var string
+	 */
+	protected $_className;
+	
+	/**
+	 * Constructor
+	 *
+	 */
+	public function __construct($className)
+	{
+		$this->_className = $className;
+	}
+	
+	/**
+	 * Adds an error to the stack.
+	 *
+	 * @param string $invalidFieldName
+	 * @param string $errorType
+	 */
+	public function add($invalidFieldName, $errorCode = 'general')
+	{
+		if (is_object($errorCode)) {
+			if ( ! ($errorCode instanceof Doctrine_Validator_Driver)) {
+				throw new Doctrine_Exception('Validators must be an instance of Doctrine_Validator_Driver');
+			}
+			$validator = $errorCode;
+			$this->_validators[$invalidFieldName][] = $validator;
+			$errorCode = (string) $validator;
+		}
+		
+		$this->_errors[$invalidFieldName][] = $errorCode;
+	}
+	
+	/**
+	 * Removes all existing errors for the specified field from the stack.
+	 *
+	 * @param string $fieldName
+	 */
+	public function remove($fieldName)
+	{
+		if (isset($this->_errors[$fieldName])) {
+			unset($this->_errors[$fieldName]);
+			if (isset($this->_validators[$fieldName])) {
+				unset($this->_validators[$fieldName]);
+			}
+		}
+	}
+	
+	/**
+	 * Get errors for field
+	 *
+	 * @param string $fieldName
+	 * @return mixed
+	 */
+	public function get($fieldName)
+	{
+		return $this->_errors[$fieldName] ?? null;
+	}
+	
+	/**
+	 * Alias for add()
+	 *
+	 * @param string $fieldName
+	 * @param string $errorCode
+	 * @return void
+	 */
+	public function set($fieldName, $errorCode)
+	{
+		$this->add($fieldName, $errorCode);
+	}
+	
+	/**
+	 * Check if a field has an error
+	 *
+	 * @param string $fieldName
+	 * @return boolean
+	 */
+	public function contains($fieldName)
+	{
+		return array_key_exists($fieldName, $this->_errors);
+	}
+	
+	/**
+	 * Removes all errors from the stack.
+	 *
+	 * @return void
+	 */
+	public function clear()
+	{
+		$this->_errors = [];
+		$this->_validators = [];
+	}
+	
+	/**
+	 * Enter description here...
+	 *
+	 * @return unknown
+	 */
+	public function getIterator(): \Iterator
+	{
+		return new ArrayIterator($this->_errors);
+	}
+	
+	public function toArray()
+	{
+		return $this->_errors;
+	}
+	
+	/**
+	 * Count the number of errors
+	 *
+	 * @return integer
+	 */
+	public function count(): int
+	{
+		return count($this->_errors);
+	}
+	
+	/**
+	 * Get the classname where the errors occured
+	 *
+	 * @return string
+	 */
+	public function getClassname()
+	{
+		return $this->_className;
+	}
+	
+	/**
+	 * Get array of failed validators
+	 *
+	 * @return array
+	 */
+	public function getValidators()
+	{
+		return $this->_validators;
+	}
 }

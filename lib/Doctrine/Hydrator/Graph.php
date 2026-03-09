@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id$
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -35,413 +33,413 @@
  */
 abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
 {
-    protected $_tables = [];
-    protected $_rootAlias;
-
-    /**
-     * @var array  Cache for inheritance map data used in _getClassnameToReturn().
-     *             Keyed by component name, contains pre-resolved field names and table references.
-     */
-    protected $_inheritanceCache = [];
-
-    /**
-     * Gets the custom field used for indexing for the specified component alias.
-     *
-     * @return string  The field name of the field used for indexing or NULL
-     *                 if the component does not use any custom field indices.
-     */
-    protected function _getCustomIndexField($alias)
-    {
-        return $this->_queryComponents[$alias]['map'] ?? null;
-    }
-
-    protected function _rtrim($value)
-    {
-        return is_string($value) ? rtrim($value) : $value;
-    }
-
-    public function hydrateResultSet($stmt)
-    {
-        // Used variables during hydration
-        reset($this->_queryComponents);
-        $rootAlias = key($this->_queryComponents);
-        $this->_rootAlias = $rootAlias;
-        $rootComponentName = $this->_queryComponents[$rootAlias]['table']->getComponentName();
-        // if only one component is involved we can make our lives easier
-        $isSimpleQuery = count($this->_queryComponents) <= 1;
-        // Holds the resulting hydrated data structure
-        $result = [];
-        // Holds array of record instances so we can call hooks on it
-        $instances = [];
-        // Holds hydration listeners that get called during hydration
-        $listeners = [];
-        // Lookup map to quickly discover/lookup existing records in the result
-        $identifierMap = [];
-        // Holds for each component the last previously seen element in the result set
-        $prev = [];
-        // holds the values of the identifier/primary key fields of components,
-        // separated by a pipe '|' and grouped by component alias (r, u, i, ... whatever)
-        // the $idTemplate is a prepared template. $id is set to a fresh template when
-        // starting to process a row.
-        $id = [];
-        $idTemplate = [];
-
-        // Initialize 
-        foreach ($this->_queryComponents as $dqlAlias => $data) { 
-            $componentName = $data['table']->getComponentName(); 
-            $instances[$componentName] = $data['table']->getRecordInstance(); 
-            $listeners[$componentName] = $data['table']->getRecordListener(); 
-            $identifierMap[$dqlAlias] = []; 
-            $prev[$dqlAlias] = null; 
-            $idTemplate[$dqlAlias] = ''; 
-        } 
-        $cache = [];
-
-        $result = $this->getElementCollection($rootComponentName);
-        if ($result instanceof Doctrine_Collection && $indexField = $this->_getCustomIndexField($rootAlias)) {
-            $result->setKeyColumn($indexField);
-        }
-        if ($stmt === false || $stmt === 0) {
-            return $result;
-        }
-
-        // Process result set
-        $cache = [];
-
-        $event = new Doctrine_Event(null, Doctrine_Event::HYDRATE, null);
-
-        if ($this->_hydrationMode == Doctrine_Core::HYDRATE_ON_DEMAND) {
-            if ( $this->_priorRow !== null) {
-                $data = $this->_priorRow;
-                $this->_priorRow = null;
-            } else {
-                $data = $stmt->fetch(Doctrine_Core::FETCH_ASSOC);
-                if ( ! $data) {
-                    return $result;
-                }
-            }
-            $activeRootIdentifier = null;
-        } else { 
-            $data = $stmt->fetch(Doctrine_Core::FETCH_ASSOC); 
-            if ( ! $data) { 
-                return $result; 
-            }
-        }
-
-        do {
-            $table = $this->_queryComponents[$rootAlias]['table'];
-        
-            if ($table->getConnection()->getAttribute(Doctrine_Core::ATTR_PORTABILITY) & Doctrine_Core::PORTABILITY_RTRIM) {
-                array_map([$this, '_rtrim'], $data);
-            }
-        
-            $id = $idTemplate; // initialize the id-memory
-            $nonemptyComponents = [];
-            $rowData = $this->_gatherRowData($data, $cache, $id, $nonemptyComponents);
-
-            if ($this->_hydrationMode == Doctrine_Core::HYDRATE_ON_DEMAND)  { 
-                if ($activeRootIdentifier === null) { 
-                    // first row for this record 
-                    $activeRootIdentifier = $id[$rootAlias]; 
-                } elseif ($activeRootIdentifier != $id[$rootAlias]) { 
-                    // first row for the next record 
-                    $this->_priorRow = $data; 
-                    return $result; 
-                } 
-            }
-
-            //
-            // hydrate the data of the root component from the current row
-            //
-            $componentName = $table->getComponentName();
-            // Ticket #1115 (getInvoker() should return the component that has addEventListener)
-            $event->setInvoker($table);
-            $event->set('data', $rowData[$rootAlias]);
-            $listeners[$componentName]->preHydrate($event);
-            $instances[$componentName]->preHydrate($event);
-
-            $index = false;
-
-            // Check for an existing element
-            if ($isSimpleQuery || ! isset($identifierMap[$rootAlias][$id[$rootAlias]])) {
-                $element = $this->getElement($rowData[$rootAlias], $componentName);
-                $event->set('data', $element);
-                $listeners[$componentName]->postHydrate($event);
-                $instances[$componentName]->postHydrate($event);
-
-                // do we need to index by a custom field?
-                if ($field = $this->_getCustomIndexField($rootAlias)) {
-                    if ( ! isset($element[$field])) {
-                        throw new Doctrine_Hydrator_Exception("Couldn't hydrate. Found a non-existent key named '$field'.");
-                    } elseif (isset($result[$element[$field]])) {
-                        throw new Doctrine_Hydrator_Exception("Couldn't hydrate. Found non-unique key mapping named '{$element[$field]}' for the field named '$field'.");
-                    }
-                    $result[$element[$field]] = $element;
-                } else {
-                    $result[] = $element;
-                }
-
-                $identifierMap[$rootAlias][$id[$rootAlias]] = $this->getLastKey($result);
-            } else {
-                $index = $identifierMap[$rootAlias][$id[$rootAlias]];
-            }
-
-            $this->setLastElement($prev, $result, $index, $rootAlias, false);
-            unset($rowData[$rootAlias]);
-
-            // end hydrate data of the root component for the current row
-
-            // $prev[$rootAlias] now points to the last element in $result.
-            // now hydrate the rest of the data found in the current row, that belongs to other
-            // (related) components.
-            foreach ($rowData as $dqlAlias => $data) {
-                $index = false;
-                $map = $this->_queryComponents[$dqlAlias];
-                $table = $map['table'];
-                $componentName = $table->getComponentName();
-                $event->set('data', $data);
-                $event->setInvoker($table);
-                $listeners[$componentName]->preHydrate($event);
-                $instances[$componentName]->preHydrate($event);
-
-                // It would be nice if this could be moved to the query parser but I could not find a good place to implement it
-                if ( ! isset($map['parent'])) {
-                    throw new Doctrine_Hydrator_Exception(
-                        '"' . $componentName . '" with an alias of "' . $dqlAlias . '"' .
-                        ' in your query does not reference the parent component it is related to.'
-                    );
-                }
-
-                $parent = $map['parent'];
-                $relation = $map['relation'];
-                $relationAlias = $map['relation']->getAlias();
-
-                $path = $parent . '.' . $dqlAlias;
-
-                if ( ! isset($prev[$parent])) {
-                    unset($prev[$dqlAlias]); // Ticket #1228
-                    continue;
-                }
-
-                $indexField = $this->_getCustomIndexField($dqlAlias);
-
-                // check the type of the relation
-                if ( ! $relation->isOneToOne() && $this->initRelated($prev[$parent], $relationAlias, $indexField)) {
-                    $oneToOne = false;
-                    // append element
-                    if (isset($nonemptyComponents[$dqlAlias])) {
-                        $indexExists = isset($identifierMap[$path][$id[$parent]][$id[$dqlAlias]]);
-                        $index = $indexExists ? $identifierMap[$path][$id[$parent]][$id[$dqlAlias]] : false;
-                        $indexIsValid = $index !== false ? isset($prev[$parent][$relationAlias][$index]) : false;
-                        if ( ! $indexExists || ! $indexIsValid) {
-                            $element = $this->getElement($data, $componentName);
-                            $event->set('data', $element);
-                            $listeners[$componentName]->postHydrate($event);
-                            $instances[$componentName]->postHydrate($event);
-
-                            if ($field = $this->_getCustomIndexField($dqlAlias)) {
-                                if ( ! isset($element[$field])) {
-                                    throw new Doctrine_Hydrator_Exception("Couldn't hydrate. Found a non-existent key named '$field'.");
-                                } elseif (isset($prev[$parent][$relationAlias][$element[$field]])) {
-                                    throw new Doctrine_Hydrator_Exception("Couldn't hydrate. Found non-unique key mapping named '$field'.");
-                                }
-                                $prev[$parent][$relationAlias][$element[$field]] = $element;
-                            } else {
-                                $prev[$parent][$relationAlias][] = $element; 
-                            }
-                            $identifierMap[$path][$id[$parent]][$id[$dqlAlias]] = $this->getLastKey($prev[$parent][$relationAlias]);                            
-                        }
-                        $collection = $prev[$parent][$relationAlias];
-                        if ($collection instanceof Doctrine_Collection && $indexField) {
-                            $collection->setKeyColumn($indexField);
-                        }
-
-                        // register collection for later snapshots
-                        $this->registerCollection($collection);
-                    }
-                } else {
-                    // 1-1 relation
-                    $oneToOne = true;
-                    if ( ! isset($nonemptyComponents[$dqlAlias]) && ! isset($prev[$parent][$relationAlias])) {
-                        $prev[$parent][$relationAlias] = $this->getNullPointer();
-                    } elseif ( ! isset($prev[$parent][$relationAlias])) {
-                        $element = $this->getElement($data, $componentName);
-
+	protected ?array $_tables = [];
+	protected $_rootAlias;
+	
+	/**
+	 * @var array  Cache for inheritance map data used in _getClassnameToReturn().
+	 *             Keyed by component name, contains pre-resolved field names and table references.
+	 */
+	protected array $_inheritanceCache = [];
+	
+	/**
+	 * Gets the custom field used for indexing for the specified component alias.
+	 *
+	 * @return string  The field name of the field used for indexing or NULL
+	 *                 if the component does not use any custom field indices.
+	 */
+	protected function _getCustomIndexField($alias)
+	{
+		return $this->_queryComponents[$alias]['map'] ?? null;
+	}
+	
+	protected function _rtrim($value)
+	{
+		return is_string($value) ? rtrim($value) : $value;
+	}
+	
+	public function hydrateResultSet($stmt)
+	{
+		// Used variables during hydration
+		reset($this->_queryComponents);
+		$rootAlias = key($this->_queryComponents);
+		$this->_rootAlias = $rootAlias;
+		$rootComponentName = $this->_queryComponents[$rootAlias]['table']->getComponentName();
+		// if only one component is involved we can make our lives easier
+		$isSimpleQuery = count($this->_queryComponents) <= 1;
+		// Holds the resulting hydrated data structure
+		$result = [];
+		// Holds array of record instances so we can call hooks on it
+		$instances = [];
+		// Holds hydration listeners that get called during hydration
+		$listeners = [];
+		// Lookup map to quickly discover/lookup existing records in the result
+		$identifierMap = [];
+		// Holds for each component the last previously seen element in the result set
+		$prev = [];
+		// holds the values of the identifier/primary key fields of components,
+		// separated by a pipe '|' and grouped by component alias (r, u, i, ... whatever)
+		// the $idTemplate is a prepared template. $id is set to a fresh template when
+		// starting to process a row.
+		$id = [];
+		$idTemplate = [];
+		
+		// Initialize 
+		foreach ($this->_queryComponents as $dqlAlias => $data) { 
+			$componentName = $data['table']->getComponentName(); 
+			$instances[$componentName] = $data['table']->getRecordInstance(); 
+			$listeners[$componentName] = $data['table']->getRecordListener(); 
+			$identifierMap[$dqlAlias] = []; 
+			$prev[$dqlAlias] = null; 
+			$idTemplate[$dqlAlias] = ''; 
+		} 
+		$cache = [];
+		
+		$result = $this->getElementCollection($rootComponentName);
+		if ($result instanceof Doctrine_Collection && $indexField = $this->_getCustomIndexField($rootAlias)) {
+			$result->setKeyColumn($indexField);
+		}
+		if ($stmt === false || $stmt === 0) {
+			return $result;
+		}
+		
+		// Process result set
+		$cache = [];
+		
+		$event = new Doctrine_Event(null, Doctrine_Event::HYDRATE, null);
+		
+		if ($this->_hydrationMode === Doctrine_Core::HYDRATE_ON_DEMAND) {
+			if ( $this->_priorRow !== null) {
+				$data = $this->_priorRow;
+				$this->_priorRow = null;
+			} else {
+				$data = $stmt->fetch(Doctrine_Core::FETCH_ASSOC);
+				if ( ! $data) {
+					return $result;
+				}
+			}
+			$activeRootIdentifier = null;
+		} else { 
+			$data = $stmt->fetch(Doctrine_Core::FETCH_ASSOC); 
+			if ( ! $data) { 
+				return $result; 
+			}
+		}
+		
+		do {
+			$table = $this->_queryComponents[$rootAlias]['table'];
+			
+			if ($table->getConnection()->getAttribute(Doctrine_Core::ATTR_PORTABILITY) & Doctrine_Core::PORTABILITY_RTRIM) {
+				array_map([$this, '_rtrim'], $data);
+			}
+			
+			$id = $idTemplate; // initialize the id-memory
+			$nonemptyComponents = [];
+			$rowData = $this->_gatherRowData($data, $cache, $id, $nonemptyComponents);
+			
+			if ($this->_hydrationMode === Doctrine_Core::HYDRATE_ON_DEMAND)  { 
+				if ($activeRootIdentifier === null) { 
+					// first row for this record 
+					$activeRootIdentifier = $id[$rootAlias]; 
+				} elseif ($activeRootIdentifier !== $id[$rootAlias]) {
+					// first row for the next record 
+					$this->_priorRow = $data; 
+					return $result; 
+				} 
+			}
+			
+			//
+			// hydrate the data of the root component from the current row
+			//
+			$componentName = $table->getComponentName();
+			// Ticket #1115 (getInvoker() should return the component that has addEventListener)
+			$event->setInvoker($table);
+			$event->set('data', $rowData[$rootAlias]);
+			$listeners[$componentName]->preHydrate($event);
+			$instances[$componentName]->preHydrate($event);
+			
+			$index = false;
+			
+			// Check for an existing element
+			if ($isSimpleQuery || ! isset($identifierMap[$rootAlias][$id[$rootAlias]])) {
+				$element = $this->getElement($rowData[$rootAlias], $componentName);
+				$event->set('data', $element);
+				$listeners[$componentName]->postHydrate($event);
+				$instances[$componentName]->postHydrate($event);
+				
+				// do we need to index by a custom field?
+				if ($field = $this->_getCustomIndexField($rootAlias)) {
+					if ( ! isset($element[$field])) {
+						throw new Doctrine_Hydrator_Exception("Couldn't hydrate. Found a non-existent key named '$field'.");
+					} elseif (isset($result[$element[$field]])) {
+						throw new Doctrine_Hydrator_Exception("Couldn't hydrate. Found non-unique key mapping named '{$element[$field]}' for the field named '$field'.");
+					}
+					$result[$element[$field]] = $element;
+				} else {
+					$result[] = $element;
+				}
+				
+				$identifierMap[$rootAlias][$id[$rootAlias]] = $this->getLastKey($result);
+			} else {
+				$index = $identifierMap[$rootAlias][$id[$rootAlias]];
+			}
+			
+			$this->setLastElement($prev, $result, $index, $rootAlias, false);
+			unset($rowData[$rootAlias]);
+			
+			// end hydrate data of the root component for the current row
+			
+			// $prev[$rootAlias] now points to the last element in $result.
+			// now hydrate the rest of the data found in the current row, that belongs to other
+			// (related) components.
+			foreach ($rowData as $dqlAlias => $data) {
+				$index = false;
+				$map = $this->_queryComponents[$dqlAlias];
+				$table = $map['table'];
+				$componentName = $table->getComponentName();
+				$event->set('data', $data);
+				$event->setInvoker($table);
+				$listeners[$componentName]->preHydrate($event);
+				$instances[$componentName]->preHydrate($event);
+				
+				// It would be nice if this could be moved to the query parser but I could not find a good place to implement it
+				if ( ! isset($map['parent'])) {
+					throw new Doctrine_Hydrator_Exception(
+						'"' . $componentName . '" with an alias of "' . $dqlAlias . '"' .
+						' in your query does not reference the parent component it is related to.'
+					);
+				}
+				
+				$parent = $map['parent'];
+				$relation = $map['relation'];
+				$relationAlias = $map['relation']->getAlias();
+				
+				$path = $parent . '.' . $dqlAlias;
+				
+				if ( ! isset($prev[$parent])) {
+					unset($prev[$dqlAlias]); // Ticket #1228
+					continue;
+				}
+				
+				$indexField = $this->_getCustomIndexField($dqlAlias);
+				
+				// check the type of the relation
+				if ( ! $relation->isOneToOne() && $this->initRelated($prev[$parent], $relationAlias, $indexField)) {
+					$oneToOne = false;
+					// append element
+					if (isset($nonemptyComponents[$dqlAlias])) {
+						$indexExists = isset($identifierMap[$path][$id[$parent]][$id[$dqlAlias]]);
+						$index = $indexExists ? $identifierMap[$path][$id[$parent]][$id[$dqlAlias]] : false;
+						$indexIsValid = $index !== false ? isset($prev[$parent][$relationAlias][$index]) : false;
+						if ( ! $indexExists || ! $indexIsValid) {
+							$element = $this->getElement($data, $componentName);
+							$event->set('data', $element);
+							$listeners[$componentName]->postHydrate($event);
+							$instances[$componentName]->postHydrate($event);
+							
+							if ($field = $this->_getCustomIndexField($dqlAlias)) {
+								if ( ! isset($element[$field])) {
+									throw new Doctrine_Hydrator_Exception("Couldn't hydrate. Found a non-existent key named '$field'.");
+								} elseif (isset($prev[$parent][$relationAlias][$element[$field]])) {
+									throw new Doctrine_Hydrator_Exception("Couldn't hydrate. Found non-unique key mapping named '$field'.");
+								}
+								$prev[$parent][$relationAlias][$element[$field]] = $element;
+							} else {
+								$prev[$parent][$relationAlias][] = $element; 
+							}
+							$identifierMap[$path][$id[$parent]][$id[$dqlAlias]] = $this->getLastKey($prev[$parent][$relationAlias]);                            
+						}
+						$collection = $prev[$parent][$relationAlias];
+						if ($collection instanceof Doctrine_Collection && $indexField) {
+							$collection->setKeyColumn($indexField);
+						}
+						
+						// register collection for later snapshots
+						$this->registerCollection($collection);
+					}
+				} else {
+					// 1-1 relation
+					$oneToOne = true;
+					if ( ! isset($nonemptyComponents[$dqlAlias]) && ! isset($prev[$parent][$relationAlias])) {
+						$prev[$parent][$relationAlias] = $this->getNullPointer();
+					} elseif ( ! isset($prev[$parent][$relationAlias])) {
+						$element = $this->getElement($data, $componentName);
+						
 						// [FIX] Tickets #1205 and #1237
-                        $event->set('data', $element);
-                        $listeners[$componentName]->postHydrate($event);
-                        $instances[$componentName]->postHydrate($event);
-
-                        $prev[$parent][$relationAlias] = $element;
-                    }
-                }
-                if ($prev[$parent][$relationAlias] !== null) {
-                    $coll =& $prev[$parent][$relationAlias];
-                    $this->setLastElement($prev, $coll, $index, $dqlAlias, $oneToOne);
-                }
-            }
-        } while ($data = $stmt->fetch(Doctrine_Core::FETCH_ASSOC));
-
-        $stmt->closeCursor();
-        $this->flush();
-
-        return $result;
-    }
-
-    /**
-     * Puts the fields of a data row into a new array, grouped by the component
-     * they belong to. The column names in the result set are mapped to their
-     * field names during this procedure.
-     *
-     * @return array  An array with all the fields (name => value) of the data row,
-     *                grouped by their component (alias).
-     */
-    protected function _gatherRowData(&$data, &$cache, &$id, &$nonemptyComponents)
-    {
-        $rowData = [];
-
-        foreach ($data as $key => $value) {
-            // Parse each column name only once. Cache the results.
-            if ( ! isset($cache[$key])) {
-                // check ignored names. fastest solution for now. if we get more we'll start
-                // to introduce a list.
-                if ($this->_isIgnoredName($key)) {
-                    continue;
-                }
-
-                $e = explode('__', $key);
-                $last = strtolower(array_pop($e));
-                $dqlAlias = $this->_tableAliases[strtolower(implode('__', $e))];
-                $table = $this->_queryComponents[$dqlAlias]['table'];
-                $fieldName = $table->getFieldName($last);
-                $type = $table->getTypeOfColumn($last);
-
-                // Pre-compute aggregate field name to avoid per-row lookup
-                $aggFieldName = $this->_queryComponents[$dqlAlias]['agg'][$fieldName] ?? null;
-
-                $cache[$key] = [
-                    'dqlAlias' => $dqlAlias,
-                    'fieldName' => $fieldName,
-                    'isIdentifier' => $table->isIdentifier($fieldName),
-                    'isSimpleType' => ($type === 'integer' || $type === 'string'),
-                    'type' => $type,
-                    'table' => $table,
-                    'aggFieldName' => $aggFieldName,
-                ];
-            }
-
-            $c = $cache[$key];
-            $dqlAlias = $c['dqlAlias'];
-            $fieldName = $c['fieldName'];
-
-            if ($c['isIdentifier']) {
-                $id[$dqlAlias] .= '|' . $value;
-            }
-
-            $preparedValue = $c['isSimpleType']
-                ? $value
-                : $c['table']->prepareValue($fieldName, $value, $c['type']);
-
-            // Ticket #1380
-            // Hydrate aggregates in to the root component as well.
-            if ($c['aggFieldName'] !== null) {
-                $aggName = $c['aggFieldName'];
-                $rowData[$this->_rootAlias][$aggName] = $preparedValue;
-                if (isset($rowData[$dqlAlias])) {
-                    $rowData[$dqlAlias][$aggName] = $preparedValue;
-                }
-            } else {
-                $rowData[$dqlAlias][$fieldName] = $preparedValue;
-            }
-
-            if ( ! isset($nonemptyComponents[$dqlAlias]) && $value !== null) {
-                $nonemptyComponents[$dqlAlias] = true;
-            }
-        }
-
-        return $rowData;
-    }
-
-    abstract public function getElementCollection($component);
-
-    abstract public function registerCollection($coll);
- 
-    abstract public function initRelated(&$record, $name, $keyColumn = null);
- 
-    abstract public function getNullPointer();
- 
-    abstract public function getElement(array $data, $component);
-
-    abstract public function getLastKey(&$coll);
-
-    abstract public function setLastElement(&$prev, &$coll, $index, $dqlAlias, $oneToOne);
-
-    public function flush()
-    {
-
-    }
-
-    /**
-     * Get the classname to return. Most often this is just the options['name']
-     *
-     * Check the subclasses option and the inheritanceMap for each subclass to see
-     * if all the maps in a subclass is met. If this is the case return that
-     * subclass name. If no subclasses match or if there are no subclasses defined
-     * return the name of the class for this tables record.
-     *
-     * @todo this function could use reflection to check the first time it runs
-     * if the subclassing option is not set.
-     *
-     * @return string The name of the class to create
-     *
-     */
-    protected function _getClassnameToReturn(array &$data, $component)
-    {
-        if ( ! isset($this->_tables[$component])) {
-            $this->_tables[$component] = Doctrine_Core::getTable($component);
-        }
-
-        if ( ! ($subclasses = $this->_tables[$component]->getOption('subclasses'))) {
-            return $component;
-        }
-
-        // Build and cache the inheritance map with pre-resolved field names
-        if ( ! isset($this->_inheritanceCache[$component])) {
-            $cached = [];
-            $parentTable = $this->_tables[$component];
-            foreach ($subclasses as $subclass) {
-                $table = Doctrine_Core::getTable($subclass);
-                $inheritanceMap = $table->getOption('inheritanceMap');
-                $resolvedMap = [];
-                foreach ($inheritanceMap as $key => $value) {
-                    $resolvedMap[$parentTable->getFieldName($key)] = $value;
-                }
-                $cached[] = [
-                    'componentName' => $table->getComponentName(),
-                    'map' => $resolvedMap,
-                    'mapCount' => count($resolvedMap),
-                ];
-            }
-            $this->_inheritanceCache[$component] = $cached;
-        }
-
-        $matchedComponent = $component;
-        foreach ($this->_inheritanceCache[$component] as $entry) {
-            $needMatches = $entry['mapCount'];
-            foreach ($entry['map'] as $key => $value) {
-                if (isset($data[$key]) && $data[$key] == $value) {
-                    --$needMatches;
-                }
-            }
-            if ($needMatches === 0) {
-                $matchedComponent = $entry['componentName'];
-            }
-        }
-
-        if ( ! isset($this->_tables[$matchedComponent])) {
-            $this->_tables[$matchedComponent] = Doctrine_Core::getTable($matchedComponent);
-        }
-
-        return $matchedComponent;
-    }
+						$event->set('data', $element);
+						$listeners[$componentName]->postHydrate($event);
+						$instances[$componentName]->postHydrate($event);
+						
+						$prev[$parent][$relationAlias] = $element;
+					}
+				}
+				if ($prev[$parent][$relationAlias] !== null) {
+					$coll =& $prev[$parent][$relationAlias];
+					$this->setLastElement($prev, $coll, $index, $dqlAlias, $oneToOne);
+				}
+			}
+		} while ($data = $stmt->fetch(Doctrine_Core::FETCH_ASSOC));
+		
+		$stmt->closeCursor();
+		$this->flush();
+		
+		return $result;
+	}
+	
+	/**
+	 * Puts the fields of a data row into a new array, grouped by the component
+	 * they belong to. The column names in the result set are mapped to their
+	 * field names during this procedure.
+	 *
+	 * @return array  An array with all the fields (name => value) of the data row,
+	 *                grouped by their component (alias).
+	 */
+	protected function _gatherRowData(&$data, &$cache, &$id, &$nonemptyComponents)
+	{
+		$rowData = [];
+		
+		foreach ($data as $key => $value) {
+			// Parse each column name only once. Cache the results.
+			if ( ! isset($cache[$key])) {
+				// check ignored names. fastest solution for now. if we get more we'll start
+				// to introduce a list.
+				if ($this->_isIgnoredName($key)) {
+					continue;
+				}
+				
+				$e = explode('__', $key);
+				$last = strtolower(array_pop($e));
+				$dqlAlias = $this->_tableAliases[strtolower(implode('__', $e))];
+				$table = $this->_queryComponents[$dqlAlias]['table'];
+				$fieldName = $table->getFieldName($last);
+				$type = $table->getTypeOfColumn($last);
+				
+				// Pre-compute aggregate field name to avoid per-row lookup
+				$aggFieldName = $this->_queryComponents[$dqlAlias]['agg'][$fieldName] ?? null;
+				
+				$cache[$key] = [
+					'dqlAlias' => $dqlAlias,
+					'fieldName' => $fieldName,
+					'isIdentifier' => $table->isIdentifier($fieldName),
+					'isSimpleType' => ($type === 'integer' || $type === 'string'),
+					'type' => $type,
+					'table' => $table,
+					'aggFieldName' => $aggFieldName,
+				];
+			}
+			
+			$c = $cache[$key];
+			$dqlAlias = $c['dqlAlias'];
+			$fieldName = $c['fieldName'];
+			
+			if ($c['isIdentifier']) {
+				$id[$dqlAlias] .= '|' . $value;
+			}
+			
+			$preparedValue = $c['isSimpleType']
+				? $value
+				: $c['table']->prepareValue($fieldName, $value, $c['type']);
+			
+			// Ticket #1380
+			// Hydrate aggregates in to the root component as well.
+			if ($c['aggFieldName'] !== null) {
+				$aggName = $c['aggFieldName'];
+				$rowData[$this->_rootAlias][$aggName] = $preparedValue;
+				if (isset($rowData[$dqlAlias])) {
+					$rowData[$dqlAlias][$aggName] = $preparedValue;
+				}
+			} else {
+				$rowData[$dqlAlias][$fieldName] = $preparedValue;
+			}
+			
+			if ( ! isset($nonemptyComponents[$dqlAlias]) && $value !== null) {
+				$nonemptyComponents[$dqlAlias] = true;
+			}
+		}
+		
+		return $rowData;
+	}
+	
+	abstract public function getElementCollection($component);
+	
+	abstract public function registerCollection($coll);
+	
+	abstract public function initRelated(&$record, $name, $keyColumn = null);
+	
+	abstract public function getNullPointer();
+	
+	abstract public function getElement(array $data, $component);
+	
+	abstract public function getLastKey(&$coll);
+	
+	abstract public function setLastElement(&$prev, &$coll, $index, $dqlAlias, $oneToOne);
+	
+	public function flush()
+	{
+	
+	}
+	
+	/**
+	 * Get the classname to return. Most often this is just the options['name']
+	 *
+	 * Check the subclasses option and the inheritanceMap for each subclass to see
+	 * if all the maps in a subclass is met. If this is the case return that
+	 * subclass name. If no subclasses match or if there are no subclasses defined
+	 * return the name of the class for this tables record.
+	 *
+	 * @todo this function could use reflection to check the first time it runs
+	 * if the subclassing option is not set.
+	 *
+	 * @return string The name of the class to create
+	 *
+	 */
+	protected function _getClassnameToReturn(array &$data, $component)
+	{
+		if ( ! isset($this->_tables[$component])) {
+			$this->_tables[$component] = Doctrine_Core::getTable($component);
+		}
+		
+		if ( ! ($subclasses = $this->_tables[$component]->getOption('subclasses'))) {
+			return $component;
+		}
+		
+		// Build and cache the inheritance map with pre-resolved field names
+		if ( ! isset($this->_inheritanceCache[$component])) {
+			$cached = [];
+			$parentTable = $this->_tables[$component];
+			foreach ($subclasses as $subclass) {
+				$table = Doctrine_Core::getTable($subclass);
+				$inheritanceMap = $table->getOption('inheritanceMap');
+				$resolvedMap = [];
+				foreach ($inheritanceMap as $key => $value) {
+					$resolvedMap[$parentTable->getFieldName($key)] = $value;
+				}
+				$cached[] = [
+					'componentName' => $table->getComponentName(),
+					'map' => $resolvedMap,
+					'mapCount' => count($resolvedMap),
+				];
+			}
+			$this->_inheritanceCache[$component] = $cached;
+		}
+		
+		$matchedComponent = $component;
+		foreach ($this->_inheritanceCache[$component] as $entry) {
+			$needMatches = $entry['mapCount'];
+			foreach ($entry['map'] as $key => $value) {
+				if (isset($data[$key]) && $data[$key] == $value) {
+					--$needMatches;
+				}
+			}
+			if ($needMatches === 0) {
+				$matchedComponent = $entry['componentName'];
+			}
+		}
+		
+		if ( ! isset($this->_tables[$matchedComponent])) {
+			$this->_tables[$matchedComponent] = Doctrine_Core::getTable($matchedComponent);
+		}
+		
+		return $matchedComponent;
+	}
 }

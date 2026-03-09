@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Notnull.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,14 +30,14 @@
  */
 class Doctrine_Validator_Notnull extends Doctrine_Validator_Driver
 {
-    /**
-     * checks that given value isn't null
-     *
-     * @param mixed $value
-     * @return boolean
-     */
-    public function validate($value)
-    {
-        return ($value !== null);
-    }
+	/**
+	 * checks that given value isn't null
+	 *
+	 * @param mixed $value
+	 * @return boolean
+	 */
+	public function validate($value)
+	{
+		return ($value !== null);
+	}
 }

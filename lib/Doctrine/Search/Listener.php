@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id$
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,28 +30,28 @@
  */
 class Doctrine_Search_Listener extends Doctrine_Record_Listener 
 {
-    protected $_search;
-
-    public function __construct(Doctrine_Search $search)
-    {
-        $this->_search = $search;
-    }
-
-    public function preUpdate(Doctrine_Event $event)
-    {
-    }
-
-    public function postUpdate(Doctrine_Event $event)
-    {
-        $record = $event->getInvoker(); 
-
-        $this->_search->updateIndex($record->toArray()); 
-    }
-
-    public function postInsert(Doctrine_Event $event)
-    {
-        $record = $event->getInvoker();
-        
-        $this->_search->updateIndex($record->toArray());
-    }
+	protected $_search;
+	
+	public function __construct(Doctrine_Search $search)
+	{
+		$this->_search = $search;
+	}
+	
+	public function preUpdate(Doctrine_Event $event): void
+	{
+	}
+	
+	public function postUpdate(Doctrine_Event $event): void
+	{
+		$record = $event->getInvoker(); 
+		
+		$this->_search->updateIndex($record->toArray()); 
+	}
+	
+	public function postInsert(Doctrine_Event $event): void
+	{
+		$record = $event->getInvoker();
+		
+		$this->_search->updateIndex($record->toArray());
+	}
 }

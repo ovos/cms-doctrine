@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: CreateTables.php 2761 2007-10-07 23:42:29Z zYne $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,14 +30,14 @@
  */
 class Doctrine_Task_CreateTables extends Doctrine_Task
 {
-    public $description          =   'Create tables for all existing database connections. If table exists nothing happens.',
-           $requiredArguments    =   ['models_path' => 'Specify path to your models directory.'],
-           $optionalArguments    =   [];
-    
-    public function execute()
-    {
-        Doctrine_Core::createTablesFromModels($this->getArgument('models_path'));
-        
-        $this->notify('Created tables successfully');
-    }
+	public $description          =   'Create tables for all existing database connections. If table exists nothing happens.',
+			$requiredArguments    =   ['models_path' => 'Specify path to your models directory.'],
+			$optionalArguments    =   [];
+	
+	public function execute()
+	{
+		Doctrine_Core::createTablesFromModels($this->getArgument('models_path'));
+		
+		$this->notify('Created tables successfully');
+	}
 }

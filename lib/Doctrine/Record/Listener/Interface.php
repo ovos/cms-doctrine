@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id$
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,40 +30,40 @@
  */
 interface Doctrine_Record_Listener_Interface
 {
-    public function setOption($name, $value = null);
+	public function setOption($name, $value = null);
 
-    public function getOptions();
+	public function getOptions();
 
-    public function getOption($name);
+	public function getOption($name);
 
-    public function preSerialize(Doctrine_Event $event);
+	public function preSerialize(Doctrine_Event $event): void;
 
-    public function postSerialize(Doctrine_Event $event);
+	public function postSerialize(Doctrine_Event $event): void;
 
-    public function preUnserialize(Doctrine_Event $event);
+	public function preUnserialize(Doctrine_Event $event): void;
 
-    public function postUnserialize(Doctrine_Event $event);
+	public function postUnserialize(Doctrine_Event $event): void;
 
-    public function preSave(Doctrine_Event $event);
+	public function preSave(Doctrine_Event $event): void;
 
-    public function postSave(Doctrine_Event $event);
+	public function postSave(Doctrine_Event $event): void;
 
-    // [OV4] added
-    public function postRelatedSave(Doctrine_Event $event);
+	// [OV4] added
+	public function postRelatedSave(Doctrine_Event $event): void;
 
-    public function preDelete(Doctrine_Event $event);
+	public function preDelete(Doctrine_Event $event): void;
 
-    public function postDelete(Doctrine_Event $event);
+	public function postDelete(Doctrine_Event $event): void;
 
-    public function preUpdate(Doctrine_Event $event);
+	public function preUpdate(Doctrine_Event $event): void;
 
-    public function postUpdate(Doctrine_Event $event);
+	public function postUpdate(Doctrine_Event $event): void;
 
-    public function preInsert(Doctrine_Event $event);
+	public function preInsert(Doctrine_Event $event): void;
 
-    public function postInsert(Doctrine_Event $event);
-    
-    public function preHydrate(Doctrine_Event $event);
-    
-    public function postHydrate(Doctrine_Event $event);
+	public function postInsert(Doctrine_Event $event): void;
+
+	public function preHydrate(Doctrine_Event $event): void;
+
+	public function postHydrate(Doctrine_Event $event): void;
 }

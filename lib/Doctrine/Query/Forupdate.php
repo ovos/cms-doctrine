@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Where.php 1352 2007-05-15 10:07:05Z zYne $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,8 +30,8 @@
  */
 class Doctrine_Query_Forupdate extends Doctrine_Query_Part
 {
-    public function parse($forUpdate) 
-    {
-        return (bool) $forUpdate;
-    }
+	public function parse($forUpdate) 
+	{
+		return (bool) $forUpdate;
+	}
 }

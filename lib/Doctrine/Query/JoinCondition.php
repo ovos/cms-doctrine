@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: JoinCondition.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,152 +30,152 @@
  */
 class Doctrine_Query_JoinCondition extends Doctrine_Query_Condition
 {
-    public function load($condition)
-    {
-        $condition = trim($condition);
-        $e = $this->_tokenizer->sqlExplode($condition);
-
-        foreach ($e as $k => $v) {
-          if ( ! $v) {
-            unset($e[$k]);
-          }
-        }
-        $e = array_values($e);
-
-        if (($l = count($e)) > 2) {
-            $leftExpr = $this->query->parseClause($e[0]);
-            $operator  = $e[1];
-
-            if ($l == 4) {
-                // FIX: "field NOT IN (XXX)" issue
-                // Related to ticket #1329
-                $operator .= ' ' . $e[2]; // Glue "NOT" and "IN"
-                $e[2] = $e[3]; // Move "(XXX)" to previous index
-
-                unset($e[3]); // Remove unused index
-            } elseif ($l >= 5) {
-                // FIX: "field BETWEEN field2 AND field3" issue
-                // Related to ticket #1488
-                $e[2] .= ' ' . $e[3] . ' ' . $e[4];
-
-                unset($e[3], $e[4]); // Remove unused indexes
-            }
-
-            if (!str_starts_with(trim($e[2]), '(')) {
-                $expr = new Doctrine_Expression($e[2], $this->query->getConnection());
-                $e[2] = $expr->getSql();
-            }
-
-            // [OV17] refactored
-            $value = $e[2];
-            $pos = strpos($value, '(');
-            if(false !== $pos) {
-                $value = $this->query->parseFunctionExpression($value);
-            } else {
-                // Possible expression found (field1 AND field2)
-                // In relation to ticket #1488
-                $e     = $this->_tokenizer->bracketExplode($value, [' AND ', ' \&\& '], '(', ')');
-                $value = [];
-
-                foreach ($e as $part) {
-                    $value[] = $this->parseLiteralValue($part);
-                }
-
-                $value = implode(' AND ', $value);
-            }
-
-            $condition  = $leftExpr . ' ' . $operator . ' ' . $value;
-
-            return $condition;
-
-            /*
-            // We need to check for agg functions here
-            $rightMatches = array();
-            $hasRightAggExpression = $this->_processPossibleAggExpression($e[2], $rightMatches);
-
-            // Defining needed information
-            $value = $e[2];
-
-            if (str_starts_with($value, '(')) {
-                // trim brackets
-                $trimmed   = $this->_tokenizer->bracketTrim($value);
-                $trimmed_upper = strtoupper($trimmed);
-
-                if (str_starts_with($trimmed_upper, 'FROM') || str_starts_with($trimmed_upper, 'SELECT')) {
-                    // subquery found
-                    $q = $this->query->createSubquery()
-                        ->parseDqlQuery($trimmed, false);
-                    $value   = '(' . $q->getSqlQuery() . ')';
-                    $q->free();
-                } elseif (str_starts_with($trimmed_upper, 'SQL:')) {
-                    // Change due to bug "(" XXX ")"
-                    //$value = '(' . substr($trimmed, 4) . ')';
-                    $value = substr($trimmed, 4);
-                } else {
-                    // simple in expression found
-                    $e = $this->_tokenizer->sqlExplode($trimmed, ',');
-                    $value = array();
-
-                    foreach ($e as $part) {
-                        $value[] = $this->parseLiteralValue($part);
-                    }
-
-                    $value = '(' . implode(', ', $value) . ')';
-                }
-            } elseif ( ! $hasRightAggExpression) {
-                // Possible expression found (field1 AND field2)
-                // In relation to ticket #1488
-                $e     = $this->_tokenizer->bracketExplode($value, array(' AND ', ' \&\& '), '(', ')');
-                $value = array();
-
-                foreach ($e as $part) {
-                    $value[] = $this->parseLiteralValue($part);
-                }
-
-                $value = implode(' AND ', $value);
-            }
-
-            /*if ($hasRightAggExpression) {
-                $rightExpr = $rightMatches[1] . '(' . $value . ')' . $rightMatches[3];
-                $rightExpr = $this->query->parseClause($rightExpr);
-            } else {
-                $rightExpr = $value;
-            }
-
-            $condition  = $leftExpr . ' ' . $operator . ' ' . $rightExpr;
-
-            return $condition;*/
-        }
-
-        $parser = new Doctrine_Query_Where($this->query, $this->_tokenizer);
-
-        return $parser->parse($condition);
-    }
-
-
-    /*protected function _processPossibleAggExpression(& $expr, & $matches = array())
-    {
-        $hasAggExpr = preg_match('/(.*[^\s\(\=])\(([^\)]*)\)(.*)/', $expr, $matches);
-
-        if ($hasAggExpr) {
-            $expr = $matches[2];
-
-            // We need to process possible comma separated items
-            if (str_starts_with(trim($matches[3]), ',')) {
-                $xplod = $this->_tokenizer->sqlExplode(trim($matches[3], ' )'), ',');
-
-                $matches[3] = array();
-
-                foreach ($xplod as $part) {
-                    if ($part != '') {
-                        $matches[3][] = $this->parseLiteralValue($part);
-                    }
-                }
-
-                $matches[3] = '), ' . implode(', ', $matches[3]);
-            }
-        }
-
-        return $hasAggExpr;
-    }*/
+	public function load($condition)
+	{
+		$condition = trim($condition);
+		$e = $this->_tokenizer->sqlExplode($condition);
+		
+		foreach ($e as $k => $v) {
+			if ( ! $v) {
+			unset($e[$k]);
+			}
+		}
+		$e = array_values($e);
+		
+		if (($l = count($e)) > 2) {
+			$leftExpr = $this->query->parseClause($e[0]);
+			$operator  = $e[1];
+			
+			if ($l === 4) {
+				// FIX: "field NOT IN (XXX)" issue
+				// Related to ticket #1329
+				$operator .= ' ' . $e[2]; // Glue "NOT" and "IN"
+				$e[2] = $e[3]; // Move "(XXX)" to previous index
+				
+				unset($e[3]); // Remove unused index
+			} elseif ($l >= 5) {
+				// FIX: "field BETWEEN field2 AND field3" issue
+				// Related to ticket #1488
+				$e[2] .= ' ' . $e[3] . ' ' . $e[4];
+				
+				unset($e[3], $e[4]); // Remove unused indexes
+			}
+			
+			if (!str_starts_with(trim($e[2]), '(')) {
+				$expr = new Doctrine_Expression($e[2], $this->query->getConnection());
+				$e[2] = $expr->getSql();
+			}
+			
+			// [OV17] refactored
+			$value = $e[2];
+			$pos = strpos($value, '(');
+			if(false !== $pos) {
+				$value = $this->query->parseFunctionExpression($value);
+			} else {
+				// Possible expression found (field1 AND field2)
+				// In relation to ticket #1488
+				$e     = $this->_tokenizer->bracketExplode($value, [' AND ', ' \&\& '], '(', ')');
+				$value = [];
+				
+				foreach ($e as $part) {
+					$value[] = $this->parseLiteralValue($part);
+				}
+				
+				$value = implode(' AND ', $value);
+			}
+			
+			$condition  = $leftExpr . ' ' . $operator . ' ' . $value;
+			
+			return $condition;
+			
+			/*
+			// We need to check for agg functions here
+			$rightMatches = array();
+			$hasRightAggExpression = $this->_processPossibleAggExpression($e[2], $rightMatches);
+			
+			// Defining needed information
+			$value = $e[2];
+			
+			if (str_starts_with($value, '(')) {
+				// trim brackets
+				$trimmed   = $this->_tokenizer->bracketTrim($value);
+				$trimmed_upper = strtoupper($trimmed);
+				
+				if (str_starts_with($trimmed_upper, 'FROM') || str_starts_with($trimmed_upper, 'SELECT')) {
+					// subquery found
+					$q = $this->query->createSubquery()
+						->parseDqlQuery($trimmed, false);
+					$value   = '(' . $q->getSqlQuery() . ')';
+					$q->free();
+				} elseif (str_starts_with($trimmed_upper, 'SQL:')) {
+					// Change due to bug "(" XXX ")"
+					//$value = '(' . substr($trimmed, 4) . ')';
+					$value = substr($trimmed, 4);
+				} else {
+					// simple in expression found
+					$e = $this->_tokenizer->sqlExplode($trimmed, ',');
+					$value = array();
+					
+					foreach ($e as $part) {
+						$value[] = $this->parseLiteralValue($part);
+					}
+					
+					$value = '(' . implode(', ', $value) . ')';
+				}
+			} elseif ( ! $hasRightAggExpression) {
+				// Possible expression found (field1 AND field2)
+				// In relation to ticket #1488
+				$e     = $this->_tokenizer->bracketExplode($value, array(' AND ', ' \&\& '), '(', ')');
+				$value = array();
+				
+				foreach ($e as $part) {
+					$value[] = $this->parseLiteralValue($part);
+				}
+				
+				$value = implode(' AND ', $value);
+			}
+			
+			/*if ($hasRightAggExpression) {
+				$rightExpr = $rightMatches[1] . '(' . $value . ')' . $rightMatches[3];
+				$rightExpr = $this->query->parseClause($rightExpr);
+			} else {
+				$rightExpr = $value;
+			}
+			
+			$condition  = $leftExpr . ' ' . $operator . ' ' . $rightExpr;
+			
+			return $condition;*/
+		}
+		
+		$parser = new Doctrine_Query_Where($this->query, $this->_tokenizer);
+		
+		return $parser->parse($condition);
+	}
+	
+	
+	/*protected function _processPossibleAggExpression(& $expr, & $matches = array())
+	{
+		$hasAggExpr = preg_match('/(.*[^\s\(\=])\(([^\)]*)\)(.*)/', $expr, $matches);
+		
+		if ($hasAggExpr) {
+			$expr = $matches[2];
+			
+			// We need to process possible comma separated items
+			if (str_starts_with(trim($matches[3]), ',')) {
+				$xplod = $this->_tokenizer->sqlExplode(trim($matches[3], ' )'), ',');
+				
+				$matches[3] = array();
+				
+				foreach ($xplod as $part) {
+					if ($part !== '') {
+						$matches[3][] = $this->parseLiteralValue($part);
+					}
+				}
+				
+				$matches[3] = '), ' . implode(', ', $matches[3]);
+			}
+		}
+		
+		return $hasAggExpr;
+	}*/
 }

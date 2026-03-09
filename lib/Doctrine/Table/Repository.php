@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Repository.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -34,132 +32,130 @@
  */
 class Doctrine_Table_Repository implements Countable, IteratorAggregate
 {
-    /**
-     * @var object Doctrine_Table $table
-     */
-    private $table;
-
-    /**
-     * @var array $registry
-     * an array of all records
-     * keys representing record object identifiers
-     */
-    private $registry = [];
-
-    /**
-     * constructor
-     *
-     * @param Doctrine_Table $table
-     */
-    public function __construct(Doctrine_Table $table)
-    {
-        $this->table = $table;
-    }
-
-    /**
-     * getTable
-     *
-     * @return Doctrine_Table
-     */
-    public function getTable()
-    {
-        return $this->table;
-    }
-
-    /**
-     * add
-     *
-     * @param Doctrine_Record $record       record to be added into registry
-     * @return boolean
-     */
-    public function add(Doctrine_Record $record)
-    {
-        $oid = $record->getOID();
-
-        if (isset($this->registry[$oid])) {
-            return false;
-        }
-        $this->registry[$oid] = $record;
-
-        return true;
-    }
-
-    /**
-     * get
-     * @param integer $oid
-     * @throws Doctrine_Table_Repository_Exception
-     */
-    public function get($oid)
-    {
-        if ( ! isset($this->registry[$oid])) {
-            throw new Doctrine_Table_Repository_Exception("Unknown object identifier");
-        }
-        return $this->registry[$oid];
-    }
-
-    /**
-     * count
-     * Doctrine_Registry implements interface Countable
-     * @return integer                      the number of records this registry has
-     */
-    #[\ReturnTypeWillChange]
-    public function count()
-    {
-        return count($this->registry);
-    }
-
-    /**
-     * @param integer $oid                  object identifier
-     * @return boolean                      whether ot not the operation was successful
-     */
-    public function evict($oid)
-    {
-        if ( ! isset($this->registry[$oid])) {
-            return false;
-        }
-        unset($this->registry[$oid]);
-        return true;
-    }
-
-    /**
-     * @return integer                      number of records evicted
-     */
-    public function evictAll()
-    {
-        $evicted = 0;
-        foreach ($this->registry as $oid=>$record) {
-            if ($this->evict($oid)) {
-                $evicted++;
-            }
-        }
-        return $evicted;
-    }
-
-    /**
-     * getIterator
-     * @return ArrayIterator
-     */
-    #[\ReturnTypeWillChange]
-    public function getIterator()
-    {
-        return new ArrayIterator($this->registry);
-    }
-
-    /**
-     * contains
-     * @param integer $oid                  object identifier
-     */
-    public function contains($oid)
-    {
-        return isset($this->registry[$oid]);
-    }
-
-    /**
-     * loadAll
-     * @return void
-     */
-    public function loadAll()
-    {
-        $this->table->findAll();
-    }
+	/**
+	 * @var object Doctrine_Table $table
+	 */
+	private $table;
+	
+	/**
+	 * @var array $registry
+	 * an array of all records
+	 * keys representing record object identifiers
+	 */
+	private array $registry = [];
+	
+	/**
+	 * constructor
+	 *
+	 * @param Doctrine_Table $table
+	 */
+	public function __construct(Doctrine_Table $table)
+	{
+		$this->table = $table;
+	}
+	
+	/**
+	 * getTable
+	 *
+	 * @return Doctrine_Table
+	 */
+	public function getTable()
+	{
+		return $this->table;
+	}
+	
+	/**
+	 * add
+	 *
+	 * @param Doctrine_Record $record       record to be added into registry
+	 * @return boolean
+	 */
+	public function add(Doctrine_Record $record)
+	{
+		$oid = $record->getOID();
+		
+		if (isset($this->registry[$oid])) {
+			return false;
+		}
+		$this->registry[$oid] = $record;
+		
+		return true;
+	}
+	
+	/**
+	 * get
+	 * @param integer $oid
+	 * @throws Doctrine_Table_Repository_Exception
+	 */
+	public function get($oid)
+	{
+		if ( ! isset($this->registry[$oid])) {
+			throw new Doctrine_Table_Repository_Exception("Unknown object identifier");
+		}
+		return $this->registry[$oid];
+	}
+	
+	/**
+	 * count
+	 * Doctrine_Registry implements interface Countable
+	 * @return integer                      the number of records this registry has
+	 */
+	public function count(): int
+	{
+		return count($this->registry);
+	}
+	
+	/**
+	 * @param integer $oid                  object identifier
+	 * @return boolean                      whether ot not the operation was successful
+	 */
+	public function evict($oid)
+	{
+		if ( ! isset($this->registry[$oid])) {
+			return false;
+		}
+		unset($this->registry[$oid]);
+		return true;
+	}
+	
+	/**
+	 * @return integer                      number of records evicted
+	 */
+	public function evictAll()
+	{
+		$evicted = 0;
+		foreach ($this->registry as $oid=>$record) {
+			if ($this->evict($oid)) {
+				$evicted++;
+			}
+		}
+		return $evicted;
+	}
+	
+	/**
+	 * getIterator
+	 * @return ArrayIterator
+	 */
+	public function getIterator(): \Iterator
+	{
+		return new ArrayIterator($this->registry);
+	}
+	
+	/**
+	 * contains
+	 * @param integer $oid                  object identifier
+	 */
+	public function contains($oid)
+	{
+		return isset($this->registry[$oid]);
+	}
+	
+	/**
+	 * loadAll
+	 * @return void
+	 */
+	public function loadAll()
+	{
+		$this->table->findAll();
+	}
 }

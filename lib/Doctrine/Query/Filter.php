@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id$
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,32 +30,32 @@
  */
 class Doctrine_Query_Filter implements Doctrine_Query_Filter_Interface
 {
-    /**
-     * preQuery
-     *
-     * Method for listening the preQuery method of Doctrine_Query and
-     * hooking into the query building procedure, doing any custom / specialized
-     * query building procedures that are neccessary.
-     *
-     * @return void
-     */
-    public function preQuery(Doctrine_Query $query)
-    {
-    
-    }
-
-    /**
-     * postQuery
-     *
-     * Method for listening the postQuery method of Doctrine_Query and
-     * to hook into the query building procedure, doing any custom / specialized
-     * post query procedures (for example logging) that are neccessary.
-     *
-     * @param Doctrine_Query $query
-     * @return void
-     */
-    public function postQuery(Doctrine_Query $query)
-    {
-    
-    }
+	/**
+	 * preQuery
+	 *
+	 * Method for listening the preQuery method of Doctrine_Query and
+	 * hooking into the query building procedure, doing any custom / specialized
+	 * query building procedures that are neccessary.
+	 *
+	 * @return void
+	 */
+	public function preQuery(Doctrine_Query $query)
+	{
+	
+	}
+	
+	/**
+	 * postQuery
+	 *
+	 * Method for listening the postQuery method of Doctrine_Query and
+	 * to hook into the query building procedure, doing any custom / specialized
+	 * post query procedures (for example logging) that are neccessary.
+	 *
+	 * @param Doctrine_Query $query
+	 * @return void
+	 */
+	public function postQuery(Doctrine_Query $query)
+	{
+	
+	}
 }

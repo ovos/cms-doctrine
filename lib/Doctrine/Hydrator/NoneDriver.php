@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Hydrate.php 3192 2007-11-19 17:55:23Z romanb $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -33,8 +31,8 @@
  */
 class Doctrine_Hydrator_NoneDriver extends Doctrine_Hydrator_Abstract
 {
-    public function hydrateResultSet($stmt)
-    {
-        return $stmt->fetchAll(PDO::FETCH_NUM);
-    }
+	public function hydrateResultSet($stmt)
+	{
+		return $stmt->fetchAll(PDO::FETCH_NUM);
+	}
 }

@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Mock.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -33,19 +31,19 @@
  */
 class Doctrine_Connection_Mock extends Doctrine_Connection_Common
 {
-    /**
-     * @var string $driverName                  the name of this connection driver
-     */
-    protected $driverName = 'Mock';
-
-    /**
-     * the constructor
-     *
-     * @param Doctrine_Manager $manager
-     * @param PDO|Doctrine_Adapter $adapter     database handler
-     */
-    public function __construct(Doctrine_Manager $manager, $adapter)
-    {
-
-    }
+	/**
+	 * @var string $driverName                  the name of this connection driver
+	 */
+	protected string $driverName = 'Mock';
+	
+	/**
+	 * the constructor
+	 *
+	 * @param Doctrine_Manager $manager
+	 * @param PDO|Doctrine_Adapter $adapter     database handler
+	 */
+	public function __construct(Doctrine_Manager $manager, $adapter)
+	{
+	
+	}
 }

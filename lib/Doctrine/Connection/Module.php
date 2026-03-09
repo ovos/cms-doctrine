@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Module.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,52 +30,52 @@
  */
 class Doctrine_Connection_Module
 {
-    /**
-     * @var Doctrine_Connection $conn       Doctrine_Connection object, every connection
-     *                                      module holds an instance of Doctrine_Connection
-     */
-    protected $conn;
-
-    /**
-     * @var string $moduleName              the name of this module
-     */
-    protected $moduleName;
-
-    /**
-     * @param Doctrine_Connection $conn     Doctrine_Connection object, every connection
-     *                                      module holds an instance of Doctrine_Connection
-     */
-    public function __construct($conn = null)
-    {
-        if ( ! ($conn instanceof Doctrine_Connection)) {
-            $conn = Doctrine_Manager::getInstance()->getCurrentConnection();
-        }
-        $this->conn = $conn;
-
-        $e = explode('_', get_class($this));
-
-        $this->moduleName = $e[1];
-    }
-
-    /**
-     * getConnection
-     * returns the connection object this module uses
-     *
-     * @return Doctrine_Connection
-     */
-    public function getConnection()
-    {
-        return $this->conn;
-    }
-
-    /**
-     * getModuleName
-     * returns the name of this module
-     *
-     * @return string       the name of this module
-     */
-    public function getModuleName()
-    {
-        return $this->moduleName;
-    }
+	/**
+	 * @var Doctrine_Connection $conn       Doctrine_Connection object, every connection
+	 *                                      module holds an instance of Doctrine_Connection
+	 */
+	protected $conn;
+	
+	/**
+	 * @var string $moduleName              the name of this module
+	 */
+	protected $moduleName;
+	
+	/**
+	 * @param Doctrine_Connection $conn     Doctrine_Connection object, every connection
+	 *                                      module holds an instance of Doctrine_Connection
+	 */
+	public function __construct($conn = null)
+	{
+		if ( ! ($conn instanceof Doctrine_Connection)) {
+			$conn = Doctrine_Manager::getInstance()->getCurrentConnection();
+		}
+		$this->conn = $conn;
+		
+		// Support both namespaced and underscore-separated class names
+		$e = preg_split('/[\\\\\_]/', get_class($this));
+		$this->moduleName = end($e);
+	}
+	
+	/**
+	 * getConnection
+	 * returns the connection object this module uses
+	 *
+	 * @return Doctrine_Connection
+	 */
+	public function getConnection()
+	{
+		return $this->conn;
+	}
+	
+	/**
+	 * getModuleName
+	 * returns the name of this module
+	 *
+	 * @return string       the name of this module
+	 */
+	public function getModuleName()
+	{
+		return $this->moduleName;
+	}
 }

@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Date.php 2367 2007-09-02 20:00:27Z zYne $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,48 +30,48 @@
  */
 class Doctrine_Validator_Past extends Doctrine_Validator_Driver
 {
-    /**
-     * checks if the given value is a valid date in the past.
-     *
-     * @param mixed $value
-     * @return boolean
-     */
-    public function validate($value)
-    {
-        if ($value === null) {
-            return true;
-        }
-        $e = explode('-', $value);
-
-        if (count($e) !== 3) {
-            return false;
-        }
-        
-        if (is_array($this->args) && isset($this->args['timezone'])) {
-            switch (strtolower($this->args['timezone'])) {
-                case 'gmt':
-                    $now = gmdate("U") - date("Z");
-                    break;
-                default:
-                    $now = getdate();
-                    break;
-            }
-        } else {
-            $now = getdate();
-        }
-        
-        if ($now['year'] < $e[0]) {
-            return false;
-        } elseif ($now['year'] == $e[0]) {
-            if ($now['mon'] < $e[1]) {
-                return false;
-            } elseif ($now['mon'] == $e[1]) {
-                return $now['mday'] > $e[2];
-            } else {
-                return true;
-            }
-        } else {
-            return true;
-        }
-    }
+	/**
+	 * checks if the given value is a valid date in the past.
+	 *
+	 * @param mixed $value
+	 * @return boolean
+	 */
+	public function validate($value)
+	{
+		if ($value === null) {
+			return true;
+		}
+		$e = explode('-', $value);
+		
+		if (count($e) !== 3) {
+			return false;
+		}
+		
+		if (is_array($this->args) && isset($this->args['timezone'])) {
+			switch (strtolower($this->args['timezone'])) {
+				case 'gmt':
+					$now = gmdate("U") - date("Z");
+					break;
+				default:
+					$now = getdate();
+					break;
+			}
+		} else {
+			$now = getdate();
+		}
+		
+		if ($now['year'] < $e[0]) {
+			return false;
+		} elseif ($now['year'] == $e[0]) {
+			if ($now['mon'] < $e[1]) {
+				return false;
+			} elseif ($now['mon'] == $e[1]) {
+				return $now['mday'] > $e[2];
+			} else {
+				return true;
+			}
+		} else {
+			return true;
+		}
+	}
 }

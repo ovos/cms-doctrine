@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: View.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -34,159 +32,159 @@
  */
 class Doctrine_View
 {
-    /**
-     * SQL DROP constant
-     */
-    const DROP   = 'DROP VIEW %s';
-
-    /**
-     * SQL CREATE constant
-     */
-    const CREATE = 'CREATE VIEW %s AS %s';
-
-    /**
-     * SQL SELECT constant
-     */
-    const SELECT = 'SELECT * FROM %s';
-
-    /**
-     * @var string $name                the name of the view
-     */
-    protected $_name;
-
-    /**
-     * @var Doctrine_Query $query       the DQL query object this view is hooked into
-     */
-    protected $_query;
-
-    /**
-     * @var Doctrine_Connection $conn   the connection object
-     */
-    protected $_conn;
-
-    /**
-     * @var string $_dql The view dql string
-     */
-    protected $_dql;
-
-    /**
-     * @var string $_sql The view sql string
-     */
-    protected $_sql;
-
-    /**
-     * constructor
-     *
-     * @param Doctrine_Query $query
-     */
-    public function __construct(Doctrine_Query $query, $viewName)
-    {
-        $this->_name  = $viewName;
-        $this->_query = $query;
-        $this->_query->setView($this);
-        $this->_conn   = $query->getConnection();
-        $this->_dql = $query->getDql();
-        $this->_sql = $query->getSqlQuery();
-    }
-
-    /**
-     * returns the associated query object
-     *
-     * @return Doctrine_Query
-     */
-    public function getQuery()
-    {
-        return $this->_query;
-    }
-
-    /**
-     * returns the name of this view
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->_name;
-    }
-
-    /**
-     * returns the connection object
-     *
-     * @return Doctrine_Connection
-     */
-    public function getConnection()
-    {
-        return $this->_conn;
-    }
-
-    /**
-     * creates this view
-     *
-     * @throws Doctrine_View_Exception
-     * @return void
-     */
-    public function create()
-    {
-        $sql = sprintf(self::CREATE, $this->_name, $this->_query->getSqlQuery());
-        try {
-            $this->_conn->execute($sql, $this->_query->getFlattenedParams());
-        } catch(Doctrine_Exception $e) {
-            throw new Doctrine_View_Exception($e->__toString());
-        }
-    }
-
-    /**
-     * drops this view from the database
-     *
-     * @throws Doctrine_View_Exception
-     * @return void
-     */
-    public function drop()
-    {
-        try {
-            $this->_conn->execute(sprintf(self::DROP, $this->_name));
-        } catch(Doctrine_Exception $e) {
-            throw new Doctrine_View_Exception($e->__toString());
-        }
-    }
-
-    /**
-     * returns a collection of Doctrine_Record objects
-     *
-     * @return Doctrine_Collection
-     */
-    public function execute()
-    {
-        return $this->_query->execute();
-    }
-
-    /**
-     * returns the select sql for this view
-     *
-     * @return string
-     */
-    public function getSelectSql()
-    {
-        return sprintf(self::SELECT, $this->_name);
-    }
-
-    /**
-     * Get the view sql string
-     *
-     * @return string $sql
-     */
-    public function getViewSql()
-    {
-        return $this->_sql;
-    }
-
-    /**
-     * Get the view dql string
-     *
-     * @return string $dql
-     */
-    public function getViewDql()
-    {
-        return $this->_dql;
-    }
+	/**
+	 * SQL DROP constant
+	 */
+	const string DROP   = 'DROP VIEW %s';
+	
+	/**
+	 * SQL CREATE constant
+	 */
+	const string CREATE = 'CREATE VIEW %s AS %s';
+	
+	/**
+	 * SQL SELECT constant
+	 */
+	const string SELECT = 'SELECT * FROM %s';
+	
+	/**
+	 * @var string $name                the name of the view
+	 */
+	protected $_name;
+	
+	/**
+	 * @var Doctrine_Query $query       the DQL query object this view is hooked into
+	 */
+	protected $_query;
+	
+	/**
+	 * @var Doctrine_Connection $conn   the connection object
+	 */
+	protected $_conn;
+	
+	/**
+	 * @var string $_dql The view dql string
+	 */
+	protected $_dql;
+	
+	/**
+	 * @var string $_sql The view sql string
+	 */
+	protected $_sql;
+	
+	/**
+	 * constructor
+	 *
+	 * @param Doctrine_Query $query
+	 */
+	public function __construct(Doctrine_Query $query, $viewName)
+	{
+		$this->_name  = $viewName;
+		$this->_query = $query;
+		$this->_query->setView($this);
+		$this->_conn   = $query->getConnection();
+		$this->_dql = $query->getDql();
+		$this->_sql = $query->getSqlQuery();
+	}
+	
+	/**
+	 * returns the associated query object
+	 *
+	 * @return Doctrine_Query
+	 */
+	public function getQuery()
+	{
+		return $this->_query;
+	}
+	
+	/**
+	 * returns the name of this view
+	 *
+	 * @return string
+	 */
+	public function getName()
+	{
+		return $this->_name;
+	}
+	
+	/**
+	 * returns the connection object
+	 *
+	 * @return Doctrine_Connection
+	 */
+	public function getConnection()
+	{
+		return $this->_conn;
+	}
+	
+	/**
+	 * creates this view
+	 *
+	 * @throws Doctrine_View_Exception
+	 * @return void
+	 */
+	public function create()
+	{
+		$sql = sprintf(self::CREATE, $this->_name, $this->_query->getSqlQuery());
+		try {
+			$this->_conn->execute($sql, $this->_query->getFlattenedParams());
+		} catch(Doctrine_Exception $e) {
+			throw new Doctrine_View_Exception($e->__toString());
+		}
+	}
+	
+	/**
+	 * drops this view from the database
+	 *
+	 * @throws Doctrine_View_Exception
+	 * @return void
+	 */
+	public function drop()
+	{
+		try {
+			$this->_conn->execute(sprintf(self::DROP, $this->_name));
+		} catch(Doctrine_Exception $e) {
+			throw new Doctrine_View_Exception($e->__toString());
+		}
+	}
+	
+	/**
+	 * returns a collection of Doctrine_Record objects
+	 *
+	 * @return Doctrine_Collection
+	 */
+	public function execute()
+	{
+		return $this->_query->execute();
+	}
+	
+	/**
+	 * returns the select sql for this view
+	 *
+	 * @return string
+	 */
+	public function getSelectSql()
+	{
+		return sprintf(self::SELECT, $this->_name);
+	}
+	
+	/**
+	 * Get the view sql string
+	 *
+	 * @return string $sql
+	 */
+	public function getViewSql()
+	{
+		return $this->_sql;
+	}
+	
+	/**
+	 * Get the view dql string
+	 *
+	 * @return string $dql
+	 */
+	public function getViewDql()
+	{
+		return $this->_dql;
+	}
 }

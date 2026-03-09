@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: DataDict.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -33,22 +31,22 @@
  */
 class Doctrine_DataDict extends Doctrine_Connection_Module
 {
-    /**
-     * parseBoolean
-     * parses a literal boolean value and returns 
-     * proper sql equivalent
-     *
-     * @param string $value     boolean value to be parsed
-     * @return string           parsed boolean value
-     */
-    public function parseBoolean($value)
-    {
-        // parse booleans
-        if ($value == 'true') {
-            $value = 1;
-        } elseif ($value == 'false') {
-            $value = 0;
-        }
-        return $value;
-    }
+	/**
+	 * parseBoolean
+	 * parses a literal boolean value and returns 
+	 * proper sql equivalent
+	 *
+	 * @param string $value     boolean value to be parsed
+	 * @return string           parsed boolean value
+	 */
+	public function parseBoolean($value)
+	{
+		// parse booleans
+		if ($value == 'true') {
+			$value = 1;
+		} elseif ($value == 'false') {
+			$value = 0;
+		}
+		return $value;
+	}
 }

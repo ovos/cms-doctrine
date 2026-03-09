@@ -77,7 +77,7 @@ class T1395_MyModel extends Doctrine_Record
 
 class T1395_Listener extends Doctrine_Record_Listener
 {
-    public function preHydrate(Doctrine_Event $event)
+    public function preHydrate(Doctrine_Event $event): void
     {
         $data = $event->data;
         

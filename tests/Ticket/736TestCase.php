@@ -81,7 +81,7 @@ class T736_ModuleDelegate extends Doctrine_Record
 
 class T736_ModuleLoaderListener extends Doctrine_Record_Listener
 {
-    public function postHydrate(Doctrine_Event $event)
+    public function postHydrate(Doctrine_Event $event): void
     {
         $contents = $event->data;
         $delegate = Doctrine_Core::getTable("T736_ModuleDelegate")->find($contents["moduledelegateid"], ($contents instanceof Doctrine_Record) ? Doctrine_Core::HYDRATE_RECORD :Doctrine_Core::HYDRATE_ARRAY );

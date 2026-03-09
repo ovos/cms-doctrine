@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id$
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,16 +30,16 @@
  */
 class Doctrine_Hydrator_SingleScalarDriver extends Doctrine_Hydrator_Abstract
 {
-    public function hydrateResultSet($stmt)
-    {
-        $result = [];
-        while (($val = $stmt->fetchColumn()) !== false) {
-            $result[] = $val;
-        }
-        if (count($result) === 1) {
-            return $result[0];
-        } else {
-            return $result;
-        }
-    }
+	public function hydrateResultSet($stmt)
+	{
+		$result = [];
+		while (($val = $stmt->fetchColumn()) !== false) {
+			$result[] = $val;
+		}
+		if (count($result) === 1) {
+			return $result[0];
+		} else {
+			return $result;
+		}
+	}
 }

@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Record.php 1298 2007-05-01 19:26:03Z zYne $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -33,25 +31,25 @@
  */
 class Doctrine_Record_Filter_Standard extends Doctrine_Record_Filter
 {
-    /**
-     * filterSet
-     * defines an implementation for filtering the set() method of Doctrine_Record
-     *
-     * @param mixed $name                       name of the property or related component
-     */
-    public function filterSet(Doctrine_Record $record, $name, $value)
-    {
-        throw new Doctrine_Record_UnknownPropertyException(sprintf('Unknown record property / related component "%s" on "%s"', $name, get_class($record)));
-    }
-
-    /**
-     * filterGet
-     * defines an implementation for filtering the get() method of Doctrine_Record
-     *
-     * @param mixed $name                       name of the property or related component
-     */
-    public function filterGet(Doctrine_Record $record, $name)
-    {
-        throw new Doctrine_Record_UnknownPropertyException(sprintf('Unknown record property / related component "%s" on "%s"', $name, get_class($record)));
-    }
+	/**
+	 * filterSet
+	 * defines an implementation for filtering the set() method of Doctrine_Record
+	 *
+	 * @param mixed $name                       name of the property or related component
+	 */
+	public function filterSet(Doctrine_Record $record, $name, $value)
+	{
+		throw new Doctrine_Record_UnknownPropertyException(sprintf('Unknown record property / related component "%s" on "%s"', $name, get_class($record)));
+	}
+	
+	/**
+	 * filterGet
+	 * defines an implementation for filtering the get() method of Doctrine_Record
+	 *
+	 * @param mixed $name                       name of the property or related component
+	 */
+	public function filterGet(Doctrine_Record $record, $name)
+	{
+		throw new Doctrine_Record_UnknownPropertyException(sprintf('Unknown record property / related component "%s" on "%s"', $name, get_class($record)));
+	}
 }

@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id$
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,52 +30,52 @@
  */
 class Doctrine_Hydrator_ArrayHierarchyDriver extends Doctrine_Hydrator_ArrayDriver
 {
-    public function hydrateResultSet($stmt)
-    {
-        $collection = parent::hydrateResultSet($stmt);
-
-        $table = $this->getRootComponent();
-
-        if ( ! $table->isTree() || ! $table->hasColumn('level')) {
-            throw new Doctrine_Exception('Cannot hydrate model that does not implements Tree behavior with `level` column');
-        }
-
-        // Trees mapped
-        $trees = [];
-        $l = 0;
-
-        if (count($collection) > 0) {
-            // Node Stack. Used to help building the hierarchy
-            $stack = [];
-
-            foreach ($collection as $child) {
-                $item = $child;
-
-                $item['__children'] = [];
-
-                // Number of stack items
-                $l = count($stack);
-
-                // Check if we're dealing with different levels
-                while($l > 0 && $stack[$l - 1]['level'] >= $item['level']) {
-                    array_pop($stack);
-                    $l--;
-                }
-
-                // Stack is empty (we are inspecting the root)
-                if ($l == 0) {
-                    // Assigning the root child
-                    $i = count($trees);
-                    $trees[$i] = $item;
-                    $stack[] = & $trees[$i];
-                } else {
-                    // Add child to parent
-                    $i = count($stack[$l - 1]['__children']);
-                    $stack[$l - 1]['__children'][$i] = $item;
-                    $stack[] = & $stack[$l - 1]['__children'][$i];
-                }
-            }
-        }
-        return $trees;
-    }
+	public function hydrateResultSet($stmt)
+	{
+		$collection = parent::hydrateResultSet($stmt);
+		
+		$table = $this->getRootComponent();
+		
+		if ( ! $table->isTree() || ! $table->hasColumn('level')) {
+			throw new Doctrine_Exception('Cannot hydrate model that does not implements Tree behavior with `level` column');
+		}
+		
+		// Trees mapped
+		$trees = [];
+		$l = 0;
+		
+		if (count($collection) > 0) {
+			// Node Stack. Used to help building the hierarchy
+			$stack = [];
+			
+			foreach ($collection as $child) {
+				$item = $child;
+				
+				$item['__children'] = [];
+				
+				// Number of stack items
+				$l = count($stack);
+				
+				// Check if we're dealing with different levels
+				while($l > 0 && $stack[$l - 1]['level'] >= $item['level']) {
+					array_pop($stack);
+					$l--;
+				}
+				
+				// Stack is empty (we are inspecting the root)
+				if ($l === 0) {
+					// Assigning the root child
+					$i = count($trees);
+					$trees[$i] = $item;
+					$stack[] = & $trees[$i];
+				} else {
+					// Add child to parent
+					$i = count($stack[$l - 1]['__children']);
+					$stack[$l - 1]['__children'][$i] = $item;
+					$stack[] = & $stack[$l - 1]['__children'][$i];
+				}
+			}
+		}
+		return $trees;
+	}
 }

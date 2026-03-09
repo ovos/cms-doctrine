@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id$
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,53 +30,53 @@
  */
 class Doctrine_Search_File extends Doctrine_Search
 {
-    /**
-     * constructor
-     *
-     * @param array $options    an array of plugin options
-     */
-    public function __construct(array $options = [])
-    {
-        parent::__construct($options);
-
-        if ( ! isset($this->_options['resource'])) {
-            $conn = Doctrine_Manager::connection();
-            $tableClass = $conn->getAttribute(Doctrine_Core::ATTR_TABLE_CLASS);
-            $table = new $tableClass('File', $conn);
-
-            $table->setColumn('url', 'string', 255, ['primary' => true]);
-        }
-
-        if (empty($this->_options['fields'])) {
-            $this->_options['fields'] = ['url', 'content'];
-        }
-
-        $this->initialize($table);
-    }
-
-    public function buildRelation()
-    {
-    	
-    }
-
-    /**
-     * indexes given directory
-     *
-     * @param string $dir   the name of the directory to index
-     * @return void
-     */
-    public function indexDirectory($dir)
-    {
-        $it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS),
-                                                RecursiveIteratorIterator::LEAVES_ONLY);
-                                                
-        foreach ($it as $file) {
-            if (str_contains($file, DIRECTORY_SEPARATOR . '.svn')) {
-                continue;
-            }
-
-            $this->updateIndex(['url' => $file->getPathName(),
-                                     'content' => file_get_contents($file)]);
-        }
-    }
+	/**
+	 * constructor
+	 *
+	 * @param array $options    an array of plugin options
+	 */
+	public function __construct(array $options = [])
+	{
+		parent::__construct($options);
+		
+		if ( ! isset($this->_options['resource'])) {
+			$conn = Doctrine_Manager::connection();
+			$tableClass = $conn->getAttribute(Doctrine_Core::ATTR_TABLE_CLASS);
+			$table = new $tableClass('File', $conn);
+			
+			$table->setColumn('url', 'string', 255, ['primary' => true]);
+		}
+		
+		if (empty($this->_options['fields'])) {
+			$this->_options['fields'] = ['url', 'content'];
+		}
+		
+		$this->initialize($table);
+	}
+	
+	public function buildRelation()
+	{
+	
+	}
+	
+	/**
+	 * indexes given directory
+	 *
+	 * @param string $dir   the name of the directory to index
+	 * @return void
+	 */
+	public function indexDirectory($dir)
+	{
+		$it = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS),
+												RecursiveIteratorIterator::LEAVES_ONLY);
+		
+		foreach ($it as $file) {
+			if (str_contains($file, DIRECTORY_SEPARATOR . '.svn')) {
+				continue;
+			}
+			
+			$this->updateIndex(['url' => $file->getPathName(),
+										'content' => file_get_contents($file)]);
+		}
+	}
 }

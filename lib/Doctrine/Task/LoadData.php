@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: LoadData.php 2761 2007-10-07 23:42:29Z zYne $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,16 +30,16 @@
  */
 class Doctrine_Task_LoadData extends Doctrine_Task
 {
-    public $description          =   'Load data from a yaml data fixture file.',
-           $requiredArguments    =   ['data_fixtures_path' =>  'Specify the complete path to load the yaml data fixtures files from.',
-                                           'models_path'        =>  'Specify path to your Doctrine_Record definitions.'],
-           $optionalArguments    =   ['append'             =>  'Whether or not to append the data'];
-    
-    public function execute()
-    {
-        Doctrine_Core::loadModels($this->getArgument('models_path'));
-        Doctrine_Core::loadData($this->getArgument('data_fixtures_path'), $this->getArgument('append', false));
-        
-        $this->notify('Data was successfully loaded');
-    }
+	public $description          =   'Load data from a yaml data fixture file.',
+			$requiredArguments    =   ['data_fixtures_path' =>  'Specify the complete path to load the yaml data fixtures files from.',
+											'models_path'        =>  'Specify path to your Doctrine_Record definitions.'],
+			$optionalArguments    =   ['append'             =>  'Whether or not to append the data'];
+	
+	public function execute()
+	{
+		Doctrine_Core::loadModels($this->getArgument('models_path'));
+		Doctrine_Core::loadData($this->getArgument('data_fixtures_path'), $this->getArgument('append', false));
+		
+		$this->notify('Data was successfully loaded');
+	}
 }

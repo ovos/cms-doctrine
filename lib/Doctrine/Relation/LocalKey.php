@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: LocalKey.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -33,56 +31,56 @@
  */
 class Doctrine_Relation_LocalKey extends Doctrine_Relation
 {
-    /**
-     * fetchRelatedFor
-     *
-     * fetches a component related to given record
-     *
-     * @param Doctrine_Record $record
-     * @return Doctrine_Record|Doctrine_Collection
-     */
-    public function fetchRelatedFor(Doctrine_Record $record)
-    {
-        $localFieldName = $record->getTable()->getFieldName($this->definition['local']);
-        $id = $record->get($localFieldName);
-
-        if ($id === null || ! $this->definition['table']->getAttribute(Doctrine_Core::ATTR_LOAD_REFERENCES)) {
-            $related = $this->getTable()->create();
-
-            // Ticket #1131 Patch.            
-            if ( $id !== null) {
-                $related->assignIdentifier($id);
-                $related->state(Doctrine_Record::STATE_PROXY);
-            }
-        } else {
-            $dql  = 'FROM ' . $this->getTable()->getComponentName()
-                 . ' WHERE ' . $this->getCondition() . $this->getOrderBy(null, false);
-
-            $related = $this->getTable()
-                            ->getConnection()
-                            ->query($dql, [$id])
-                            ->getFirst();
-            
-            if ( ! $related || empty($related)) {
-                $related = $this->getTable()->create();
-            }
-        }
-
-        $record->set($localFieldName, $id, false);
-
-        return $related;
-    }
-
-    /**
-     * getCondition
-     *
-     * @param string $alias
-     */
-    public function getCondition($alias = null)
-    {
-        if ( ! $alias) {
-           $alias = $this->getTable()->getComponentName();
-        }
-        return $alias . '.' . $this->definition['foreign'] . ' = ?';
-    }
+	/**
+	 * fetchRelatedFor
+	 *
+	 * fetches a component related to given record
+	 *
+	 * @param Doctrine_Record $record
+	 * @return Doctrine_Record|Doctrine_Collection
+	 */
+	public function fetchRelatedFor(Doctrine_Record $record)
+	{
+		$localFieldName = $record->getTable()->getFieldName($this->definition['local']);
+		$id = $record->get($localFieldName);
+		
+		if ($id === null || ! $this->definition['table']->getAttribute(Doctrine_Core::ATTR_LOAD_REFERENCES)) {
+			$related = $this->getTable()->create();
+			
+			// Ticket #1131 Patch.            
+			if ( $id !== null) {
+				$related->assignIdentifier($id);
+				$related->state(Doctrine_Record::STATE_PROXY);
+			}
+		} else {
+			$dql  = 'FROM ' . $this->getTable()->getComponentName()
+					. ' WHERE ' . $this->getCondition() . $this->getOrderBy(null, false);
+			
+			$related = $this->getTable()
+							->getConnection()
+							->query($dql, [$id])
+							->getFirst();
+			
+			if ( ! $related || empty($related)) {
+				$related = $this->getTable()->create();
+			}
+		}
+		
+		$record->set($localFieldName, $id, false);
+		
+		return $related;
+	}
+	
+	/**
+	 * getCondition
+	 *
+	 * @param string $alias
+	 */
+	public function getCondition($alias = null)
+	{
+		if ( ! $alias) {
+			$alias = $this->getTable()->getComponentName();
+		}
+		return $alias . '.' . $this->definition['foreign'] . ' = ?';
+	}
 }

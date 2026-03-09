@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Pgsql.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,66 +30,66 @@
  */
 class Doctrine_Sequence_Pgsql extends Doctrine_Sequence
 {
-    /**
-     * Returns the next free id of a sequence
-     *
-     * @param string $seqName   name of the sequence
-     * @param bool onDemand     when true missing sequences are automatic created
-     *
-     * @return integer          next id in the given sequence
-     */
-    public function nextId($seqName, $onDemand = true)
-    {
-        $sequenceName = $this->conn->quoteIdentifier($this->conn->formatter->getSequenceName($seqName), true);
-        $query = "SELECT NEXTVAL('" . $sequenceName . "')";
-
-        try {
-            $result = (int) $this->conn->fetchOne($query);
-        } catch(Doctrine_Connection_Exception $e) {
-            if ($onDemand && $e->getPortableCode() == Doctrine_Core::ERR_NOSUCHTABLE) {
-                try {
-                    $result = $this->conn->export->createSequence($seqName);
-                } catch(Doctrine_Exception $e) {
-                    throw new Doctrine_Sequence_Exception('on demand sequence ' . $seqName . ' could not be created');
-                }
-
-                return $this->nextId($seqName, false);
-            } else {
-                throw new Doctrine_Sequence_Exception('sequence ' .$seqName . ' does not exist');
-            }
-        }
-
-        return $result;
-    }
-
-    /**
-     * lastInsertId
-     *
-     * Returns the autoincrement ID if supported or $id or fetches the current
-     * ID in a sequence called: $table.(empty($field) ? '' : '_'.$field)
-     *
-     * @param   string  name of the table into which a new row was inserted
-     * @param   string  name of the field into which a new row was inserted
-     * @return integer      the autoincremented id
-     */
-    public function lastInsertId($table = null, $field = null)
-    {
-        $seqName = $table . (empty($field) ? '' : '_' . $field);
-        $sequenceName = $this->conn->quoteIdentifier($this->conn->formatter->getSequenceName($seqName), true);
-
-        return (int) $this->conn->fetchOne("SELECT CURRVAL('" . $sequenceName . "')");
-    }
-
-    /**
-     * Returns the current id of a sequence
-     *
-     * @param string $seqName   name of the sequence
-     *
-     * @return integer          current id in the given sequence
-     */
-    public function currId($seqName)
-    {
-        $sequenceName = $this->conn->quoteIdentifier($this->conn->formatter->getSequenceName($seqName), true);
-        return (int) $this->conn->fetchOne('SELECT last_value FROM ' . $sequenceName);
-    }
+	/**
+	 * Returns the next free id of a sequence
+	 *
+	 * @param string $seqName   name of the sequence
+	 * @param bool onDemand     when true missing sequences are automatic created
+	 *
+	 * @return integer          next id in the given sequence
+	 */
+	public function nextId($seqName, $onDemand = true)
+	{
+		$sequenceName = $this->conn->quoteIdentifier($this->conn->formatter->getSequenceName($seqName), true);
+		$query = "SELECT NEXTVAL('" . $sequenceName . "')";
+		
+		try {
+			$result = (int) $this->conn->fetchOne($query);
+		} catch(Doctrine_Connection_Exception $e) {
+			if ($onDemand && $e->getPortableCode() === Doctrine_Core::ERR_NOSUCHTABLE) {
+				try {
+					$result = $this->conn->export->createSequence($seqName);
+				} catch(Doctrine_Exception $e) {
+					throw new Doctrine_Sequence_Exception('on demand sequence ' . $seqName . ' could not be created');
+				}
+				
+				return $this->nextId($seqName, false);
+			} else {
+				throw new Doctrine_Sequence_Exception('sequence ' .$seqName . ' does not exist');
+			}
+		}
+		
+		return $result;
+	}
+	
+	/**
+	 * lastInsertId
+	 *
+	 * Returns the autoincrement ID if supported or $id or fetches the current
+	 * ID in a sequence called: $table.(empty($field) ? '' : '_'.$field)
+	 *
+	 * @param   string  name of the table into which a new row was inserted
+	 * @param   string  name of the field into which a new row was inserted
+	 * @return integer      the autoincremented id
+	 */
+	public function lastInsertId($table = null, $field = null)
+	{
+		$seqName = $table . (empty($field) ? '' : '_' . $field);
+		$sequenceName = $this->conn->quoteIdentifier($this->conn->formatter->getSequenceName($seqName), true);
+		
+		return (int) $this->conn->fetchOne("SELECT CURRVAL('" . $sequenceName . "')");
+	}
+	
+	/**
+	 * Returns the current id of a sequence
+	 *
+	 * @param string $seqName   name of the sequence
+	 *
+	 * @return integer          current id in the given sequence
+	 */
+	public function currId($seqName)
+	{
+		$sequenceName = $this->conn->quoteIdentifier($this->conn->formatter->getSequenceName($seqName), true);
+		return (int) $this->conn->fetchOne('SELECT last_value FROM ' . $sequenceName);
+	}
 }

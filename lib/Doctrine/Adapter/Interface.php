@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Interface.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,16 +30,16 @@
  */
 interface Doctrine_Adapter_Interface
 {
-    public function prepare($prepareString);
-    public function query($queryString);
-    public function quote($input);
-    public function exec($statement);
-    public function lastInsertId();
-    public function beginTransaction();
-    public function commit();
-    public function rollBack();
-    public function errorCode();
-    public function errorInfo();
-    public function setAttribute($attribute, $value);
-    public function getAttribute($attribute);
+	public function prepare($prepareString);
+	public function query($queryString);
+	public function quote($input);
+	public function exec($statement);
+	public function lastInsertId();
+	public function beginTransaction();
+	public function commit();
+	public function rollBack();
+	public function errorCode();
+	public function errorInfo();
+	public function setAttribute($attribute, $value);
+	public function getAttribute($attribute);
 }

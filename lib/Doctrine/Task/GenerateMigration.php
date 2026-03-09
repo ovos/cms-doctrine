@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: GenerateMigration.php 2761 2007-10-07 23:42:29Z zYne $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,15 +30,15 @@
  */
 class Doctrine_Task_GenerateMigration extends Doctrine_Task
 {
-    public $description          =   'Generate new migration class definition',
-           $requiredArguments    =   ['class_name'      => 'Name of the migration class to generate',
-                                           'migrations_path' => 'Specify the complete path to your migration classes folder.'],
-           $optionalArguments    =   [];
-    
-    public function execute()
-    {
-        Doctrine_Core::generateMigrationClass($this->getArgument('class_name'), $this->getArgument('migrations_path'));
-        
-        $this->notify(sprintf('Generated migration class: %s successfully to %s', $this->getArgument('class_name'), $this->getArgument('migrations_path')));
-    }
+	public $description          =   'Generate new migration class definition',
+			$requiredArguments    =   ['class_name'      => 'Name of the migration class to generate',
+											'migrations_path' => 'Specify the complete path to your migration classes folder.'],
+			$optionalArguments    =   [];
+	
+	public function execute()
+	{
+		Doctrine_Core::generateMigrationClass($this->getArgument('class_name'), $this->getArgument('migrations_path'));
+		
+		$this->notify(sprintf('Generated migration class: %s successfully to %s', $this->getArgument('class_name'), $this->getArgument('migrations_path')));
+	}
 }

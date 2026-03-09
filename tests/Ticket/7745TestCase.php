@@ -106,7 +106,7 @@ class RecordTest2 extends Doctrine_Record
 
 class RecordTest2Listener extends Doctrine_Record_Listener
 {
-    public function preDqlSelect(Doctrine_Event $event)
+    public function preDqlSelect(Doctrine_Event $event): void
     {
         $params = $event->getParams();
         $alias = $params['alias'];

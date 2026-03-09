@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Usstate.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,77 +30,35 @@
  */
 class Doctrine_Validator_Usstate extends Doctrine_Validator_Driver
 {
-    private static $states = [
-                'AK' => true,
-                'AL' => true,
-                'AR' => true,
-                'AZ' => true,
-                'CA' => true,
-                'CO' => true,
-                'CT' => true,
-                'DC' => true,
-                'DE' => true,
-                'FL' => true,
-                'GA' => true,
-                'HI' => true,
-                'IA' => true,
-                'ID' => true,
-                'IL' => true,
-                'IN' => true,
-                'KS' => true,
-                'KY' => true,
-                'LA' => true,
-                'MA' => true,
-                'MD' => true,
-                'ME' => true,
-                'MI' => true,
-                'MN' => true,
-                'MO' => true,
-                'MS' => true,
-                'MT' => true,
-                'NC' => true,
-                'ND' => true,
-                'NE' => true,
-                'NH' => true,
-                'NJ' => true,
-                'NM' => true,
-                'NV' => true,
-                'NY' => true,
-                'OH' => true,
-                'OK' => true,
-                'OR' => true,
-                'PA' => true,
-                'PR' => true,
-                'RI' => true,
-                'SC' => true,
-                'SD' => true,
-                'TN' => true,
-                'TX' => true,
-                'UT' => true,
-                'VA' => true,
-                'VI' => true,
-                'VT' => true,
-                'WA' => true,
-                'WI' => true,
-                'WV' => true,
-                'WY' => true
-            ];
-    public function getStates()
-    {
-        return self::$states;
-    }
-
-    /**
-     * checks if given value is a valid US state code
-     *
-     * @param string $args
-     * @return boolean
-     */
-    public function validate($value)
-    {
-        if ($value === null) {
-            return true;
-        }
-        return isset(self::$states[$value]);
-    }
+	private static array $states = [
+		'AK' => true, 'AL' => true, 'AR' => true, 'AZ' => true, 'CA' => true,
+		'CO' => true, 'CT' => true, 'DC' => true, 'DE' => true, 'FL' => true,
+		'GA' => true, 'HI' => true, 'IA' => true, 'ID' => true, 'IL' => true,
+		'IN' => true, 'KS' => true, 'KY' => true, 'LA' => true, 'MA' => true,
+		'MD' => true, 'ME' => true, 'MI' => true, 'MN' => true, 'MO' => true,
+		'MS' => true, 'MT' => true, 'NC' => true, 'ND' => true, 'NE' => true,
+		'NH' => true, 'NJ' => true, 'NM' => true, 'NV' => true, 'NY' => true,
+		'OH' => true, 'OK' => true, 'OR' => true, 'PA' => true, 'PR' => true,
+		'RI' => true, 'SC' => true, 'SD' => true, 'TN' => true, 'TX' => true,
+		'UT' => true, 'VA' => true, 'VI' => true, 'VT' => true, 'WA' => true,
+		'WI' => true, 'WV' => true, 'WY' => true,
+	];
+	public function getStates()
+	{
+		return self::$states;
+	}
+	
+	/**
+	 * checks if given value is a valid US state code
+	 *
+	 * @param string $args
+	 * @return boolean
+	 */
+	public function validate($value)
+	{
+		if ($value === null) {
+			return true;
+		}
+		return isset(self::$states[$value]);
+	}
 }

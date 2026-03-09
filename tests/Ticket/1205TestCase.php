@@ -40,7 +40,7 @@ class Doctrine_Ticket_1205_TestCase extends Doctrine_UnitTestCase
 
 class Ticket1205HydrationListener extends Doctrine_Record_Listener
 {
-    public function postHydrate(Doctrine_Event $event)
+    public function postHydrate(Doctrine_Event $event): void
     {
         throw new Exception('This is called so we are successfull!');
     }

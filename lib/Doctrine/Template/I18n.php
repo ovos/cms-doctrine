@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id$
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,35 +30,35 @@
  */
 class Doctrine_Template_I18n extends Doctrine_Template
 {
-    /**
-     * __construct
-     *
-     * @param string $array 
-     * @return void
-     */
-    public function __construct(array $options = [])
-    {
-	    parent::__construct($options);
-        $this->_plugin = new Doctrine_I18n($this->_options);
-    }
-
-    /**
-     * Initialize the I18n plugin for the template
-     *
-     * @return void
-     */
-    public function setUp()
-    {
-        $this->_plugin->initialize($this->_table); 
-    }
-
-    /**
-     * Get the plugin instance for the I18n template
-     *
-     * @return void
-     */
-    public function getI18n()
-    {
-        return $this->_plugin;
-    }
+	/**
+	 * __construct
+	 *
+	 * @param string $array 
+	 * @return void
+	 */
+	public function __construct(array $options = [])
+	{
+		parent::__construct($options);
+		$this->_plugin = new Doctrine_I18n($this->_options);
+	}
+	
+	/**
+	 * Initialize the I18n plugin for the template
+	 *
+	 * @return void
+	 */
+	public function setUp()
+	{
+		$this->_plugin->initialize($this->_table); 
+	}
+	
+	/**
+	 * Get the plugin instance for the I18n template
+	 *
+	 * @return void
+	 */
+	public function getI18n()
+	{
+		return $this->_plugin;
+	}
 }

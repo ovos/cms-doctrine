@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Range.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,23 +30,23 @@
  */
 class Doctrine_Validator_Range extends Doctrine_Validator_Driver
 {
-    /**
-     * checks if value is within given range
-     *
-     * @param mixed $value
-     * @return boolean
-     */
-    public function validate($value)
-    {
-        if ($value === null) {
-            return true;
-        }
-        if (isset($this->args[0]) && $value < $this->args[0]) {
-            return false;
-        }
-        if (isset($this->args[1]) && $value > $this->args[1]) {
-            return false;
-        }
-        return true;
-    }
+	/**
+	 * checks if value is within given range
+	 *
+	 * @param mixed $value
+	 * @return boolean
+	 */
+	public function validate($value)
+	{
+		if ($value === null) {
+			return true;
+		}
+		if (isset($this->args[0]) && $value < $this->args[0]) {
+			return false;
+		}
+		if (isset($this->args[1]) && $value > $this->args[1]) {
+			return false;
+		}
+		return true;
+	}
 }

@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Exception.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,60 +30,58 @@
  */
 class Doctrine_Validator_Exception extends Doctrine_Exception implements Countable, IteratorAggregate
 {
-    /**
-     * @var array $invalid
-     */
-    private $invalid = [];
-
-    /**
-     * @param Doctrine_Validator $validator
-     */
-    public function __construct(array $invalid)
-    {
-        $this->invalid = $invalid;
-        parent::__construct($this->generateMessage());
-    }
-
-    public function getInvalidRecords()
-    {
-        return $this->invalid;
-    }
-
-    #[\ReturnTypeWillChange]
-    public function getIterator()
-    {
-        return new ArrayIterator($this->invalid);
-    }
-
-    #[\ReturnTypeWillChange]
-    public function count()
-    {
-        return count($this->invalid);
-    }
-
-    /**
-     * Generate a message with all classes that have exceptions
-     */
-    private function generateMessage()
-    {
-        $message = '';
-        foreach ($this->invalid as $record) {
-            $message .= $record->getErrorStackAsString();
-        }
-        return $message;
-    }
-
-    /**
-     * This method will apply the value of the $function variable as a user_func 
-     * to tall errorstack objects in the exception
-     *
-     * @param mixed Either string with function name or array with object, 
-     * functionname. See call_user_func in php manual for more inforamtion
-     */
-    public function inspect($function)
-    {
-        foreach ($this->invalid as $record) {
-            $function($record->getErrorStack());
-        }
-    }
+	/**
+	 * @var array $invalid
+	 */
+	private array $invalid = [];
+	
+	/**
+	 * @param Doctrine_Validator $validator
+	 */
+	public function __construct(array $invalid)
+	{
+		$this->invalid = $invalid;
+		parent::__construct($this->generateMessage());
+	}
+	
+	public function getInvalidRecords()
+	{
+		return $this->invalid;
+	}
+	
+	public function getIterator(): \Iterator
+	{
+		return new ArrayIterator($this->invalid);
+	}
+	
+	public function count(): int
+	{
+		return count($this->invalid);
+	}
+	
+	/**
+	 * Generate a message with all classes that have exceptions
+	 */
+	private function generateMessage()
+	{
+		$message = '';
+		foreach ($this->invalid as $record) {
+			$message .= $record->getErrorStackAsString();
+		}
+		return $message;
+	}
+	
+	/**
+	 * This method will apply the value of the $function variable as a user_func 
+	 * to tall errorstack objects in the exception
+	 *
+	 * @param mixed Either string with function name or array with object, 
+	 * functionname. See call_user_func in php manual for more inforamtion
+	 */
+	public function inspect($function)
+	{
+		foreach ($this->invalid as $record) {
+			$function($record->getErrorStack());
+		}
+	}
 }

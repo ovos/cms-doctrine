@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Data.php 2552 2007-09-19 19:33:00Z Jonathan.Wage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -35,245 +33,245 @@
  */
 class Doctrine_Data
 {
-    /**
-     * formats
-     *
-     * array of formats data can be in
-     *
-     * @var string
-     */
-    protected $_formats = ['csv', 'yml', 'xml'];
-
-    /**
-     * format
-     * 
-     * the default and current format we are working with
-     *
-     * @var string
-     */
-    protected $_format = 'yml';
-
-    /**
-     * directory
-     *
-     * array of directory/yml paths or single directory/yml file
-     *
-     * @var string
-     */
-    protected $_directory = null;
-
-    /**
-     * models
-     *
-     * specified array of models to use
-     *
-     * @var string
-     */
-    protected $_models = [];
-
-    /**
-     * _exportIndividualFiles
-     *
-     * whether or not to export data to individual files instead of 1
-     *
-     * @var string
-     */
-    protected $_exportIndividualFiles = false;
-
-    /**
-     * setFormat
-     *
-     * Set the current format we are working with
-     * 
-     * @param string $format 
-     * @return void
-     */
-    public function setFormat($format)
-    {
-        $this->_format = $format;
-    }
-
-    /**
-     * getFormat
-     *
-     * Get the current format we are working with
-     * 
-     * @return void
-     */
-    public function getFormat()
-    {
-        return $this->_format;
-    }
-
-    /**
-     * getFormats 
-     *
-     * Get array of available formats
-     * 
-     * @return void
-     */
-    public function getFormats()
-    {
-        return $this->_formats;
-    }
-
-    /**
-     * setDirectory
-     *
-     * Set the array/string of directories or yml file paths
-     * 
-     * @return void
-     */
-    public function setDirectory($directory)
-    {
-        $this->_directory = $directory;
-    }
-
-    /**
-     * getDirectory
-     *
-     * Get directory for dumping/loading data from and to
-     * 
-     * @return void
-     */
-    public function getDirectory()
-    {
-        return $this->_directory;
-    }
-
-    /**
-     * setModels
-     *
-     * Set the array of specified models to work with
-     * 
-     * @param string $models 
-     * @return void
-     */
-    public function setModels($models)
-    {
-        $this->_models = $models;
-    }
-
-    /**
-     * getModels
-     *
-     * Get the array of specified models to work with
-     *
-     * @return void
-     */
-    public function getModels()
-    {
-        return $this->_models;
-    }
-
-    /**
-     * _exportIndividualFiles 
-     *
-     * Set/Get whether or not to export individual files
-     * 
-     * @return bool $_exportIndividualFiles
-     */
-    public function exportIndividualFiles($bool = null)
-    {
-        if ($bool !== null) {
-            $this->_exportIndividualFiles = $bool;
-        }
-        
-        return $this->_exportIndividualFiles;
-    }
-
-    /**
-     * exportData
-     *
-     * Interface for exporting data to fixtures files from Doctrine models
-     *
-     * @param string $directory 
-     * @param string $format 
-     * @param string $models 
-     * @param string $_exportIndividualFiles 
-     * @return void
-     */
-    public function exportData($directory, $format = 'yml', $models = [], $_exportIndividualFiles = false)
-    {
-        $export = new Doctrine_Data_Export($directory);
-        $export->setFormat($format);
-        $export->setModels($models);
-        $export->exportIndividualFiles($_exportIndividualFiles);
-        
-        return $export->doExport();
-    }
-
-    /**
-     * importData
-     *
-     * Interface for importing data from fixture files to Doctrine models
-     *
-     * @param string $directory 
-     * @param string $format 
-     * @param string $models 
-     * @return void
-     */
-    public function importData($directory, $format = 'yml', $models = [], $append = false)
-    {
-        $import = new Doctrine_Data_Import($directory);
-        $import->setFormat($format);
-        $import->setModels($models);
-        
-        return $import->doImport($append);
-    }
-
-    /**
-     * isRelation
-     *
-     * Check if a fieldName on a Doctrine_Record is a relation, if it is we return that relationData
-     * 
-     * @param string $Doctrine_Record 
-     * @param string $fieldName 
-     * @return void
-     */
-    public function isRelation(Doctrine_Record $record, $fieldName)
-    {
-        $relations = $record->getTable()->getRelations();
-        
-        foreach ($relations as $relation) {
-            $relationData = $relation->toArray();
-            
-            if ($relationData['local'] === $fieldName) {
-                return $relationData;
-            }
-            
-        }
-        
-        return false;
-    }
-
-    /**
-     * purge
-     * 
-     * Purge all data for loaded models or for the passed array of Doctrine_Records
-     *
-     * @param string $models 
-     * @return void
-     */
-    public function purge($models = null)
-    {
-        if ($models) {
-            $models = Doctrine_Core::filterInvalidModels($models);
-        } else {
-            $models = Doctrine_Core::getLoadedModels();
-        }
-
-        $connections = [];
-        foreach ($models as $model) {
-          $connections[Doctrine_Core::getTable($model)->getConnection()->getName()][] = $model;
-        }
-
-        foreach ($connections as $connection => $models) {
-            $models = Doctrine_Manager::getInstance()->getConnection($connection)->unitOfWork->buildFlushTree($models);
-            $models = array_reverse($models);
-            foreach ($models as $model) {
-                Doctrine_Core::getTable($model)->createQuery()->delete()->execute();
-            }
-        }
-    }
+	/**
+	 * formats
+	 *
+	 * array of formats data can be in
+	 *
+	 * @var string
+	 */
+	protected array $_formats = ['csv', 'yml', 'xml'];
+	
+	/**
+	 * format
+	 * 
+	 * the default and current format we are working with
+	 *
+	 * @var string
+	 */
+	protected string $_format = 'yml';
+	
+	/**
+	 * directory
+	 *
+	 * array of directory/yml paths or single directory/yml file
+	 *
+	 * @var string
+	 */
+	protected ?string $_directory = null;
+	
+	/**
+	 * models
+	 *
+	 * specified array of models to use
+	 *
+	 * @var string
+	 */
+	protected array $_models = [];
+	
+	/**
+	 * _exportIndividualFiles
+	 *
+	 * whether or not to export data to individual files instead of 1
+	 *
+	 * @var string
+	 */
+	protected bool $_exportIndividualFiles = false;
+	
+	/**
+	 * setFormat
+	 *
+	 * Set the current format we are working with
+	 * 
+	 * @param string $format 
+	 * @return void
+	 */
+	public function setFormat($format)
+	{
+		$this->_format = $format;
+	}
+	
+	/**
+	 * getFormat
+	 *
+	 * Get the current format we are working with
+	 * 
+	 * @return void
+	 */
+	public function getFormat()
+	{
+		return $this->_format;
+	}
+	
+	/**
+	 * getFormats 
+	 *
+	 * Get array of available formats
+	 * 
+	 * @return void
+	 */
+	public function getFormats()
+	{
+		return $this->_formats;
+	}
+	
+	/**
+	 * setDirectory
+	 *
+	 * Set the array/string of directories or yml file paths
+	 * 
+	 * @return void
+	 */
+	public function setDirectory($directory)
+	{
+		$this->_directory = $directory;
+	}
+	
+	/**
+	 * getDirectory
+	 *
+	 * Get directory for dumping/loading data from and to
+	 * 
+	 * @return void
+	 */
+	public function getDirectory()
+	{
+		return $this->_directory;
+	}
+	
+	/**
+	 * setModels
+	 *
+	 * Set the array of specified models to work with
+	 * 
+	 * @param string $models 
+	 * @return void
+	 */
+	public function setModels($models)
+	{
+		$this->_models = $models;
+	}
+	
+	/**
+	 * getModels
+	 *
+	 * Get the array of specified models to work with
+	 *
+	 * @return void
+	 */
+	public function getModels()
+	{
+		return $this->_models;
+	}
+	
+	/**
+	 * _exportIndividualFiles 
+	 *
+	 * Set/Get whether or not to export individual files
+	 * 
+	 * @return bool $_exportIndividualFiles
+	 */
+	public function exportIndividualFiles($bool = null)
+	{
+		if ($bool !== null) {
+			$this->_exportIndividualFiles = $bool;
+		}
+		
+		return $this->_exportIndividualFiles;
+	}
+	
+	/**
+	 * exportData
+	 *
+	 * Interface for exporting data to fixtures files from Doctrine models
+	 *
+	 * @param string $directory 
+	 * @param string $format 
+	 * @param string $models 
+	 * @param string $_exportIndividualFiles 
+	 * @return void
+	 */
+	public function exportData($directory, $format = 'yml', $models = [], $_exportIndividualFiles = false)
+	{
+		$export = new Doctrine_Data_Export($directory);
+		$export->setFormat($format);
+		$export->setModels($models);
+		$export->exportIndividualFiles($_exportIndividualFiles);
+		
+		return $export->doExport();
+	}
+	
+	/**
+	 * importData
+	 *
+	 * Interface for importing data from fixture files to Doctrine models
+	 *
+	 * @param string $directory 
+	 * @param string $format 
+	 * @param string $models 
+	 * @return void
+	 */
+	public function importData($directory, $format = 'yml', $models = [], $append = false)
+	{
+		$import = new Doctrine_Data_Import($directory);
+		$import->setFormat($format);
+		$import->setModels($models);
+		
+		return $import->doImport($append);
+	}
+	
+	/**
+	 * isRelation
+	 *
+	 * Check if a fieldName on a Doctrine_Record is a relation, if it is we return that relationData
+	 * 
+	 * @param string $Doctrine_Record 
+	 * @param string $fieldName 
+	 * @return void
+	 */
+	public function isRelation(Doctrine_Record $record, $fieldName)
+	{
+		$relations = $record->getTable()->getRelations();
+		
+		foreach ($relations as $relation) {
+			$relationData = $relation->toArray();
+			
+			if ($relationData['local'] === $fieldName) {
+				return $relationData;
+			}
+		
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * purge
+	 * 
+	 * Purge all data for loaded models or for the passed array of Doctrine_Records
+	 *
+	 * @param string $models 
+	 * @return void
+	 */
+	public function purge($models = null)
+	{
+		if ($models) {
+			$models = Doctrine_Core::filterInvalidModels($models);
+		} else {
+			$models = Doctrine_Core::getLoadedModels();
+		}
+		
+		$connections = [];
+		foreach ($models as $model) {
+			$connections[Doctrine_Core::getTable($model)->getConnection()->getName()][] = $model;
+		}
+		
+		foreach ($connections as $connection => $models) {
+			$models = Doctrine_Manager::getInstance()->getConnection($connection)->unitOfWork->buildFlushTree($models);
+			$models = array_reverse($models);
+			foreach ($models as $model) {
+				Doctrine_Core::getTable($model)->createQuery()->delete()->execute();
+			}
+		}
+	}
 }

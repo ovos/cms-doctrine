@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Normal.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,11 +30,11 @@
  */
 class Doctrine_Collection_Iterator_Normal extends Doctrine_Collection_Iterator
 {
-    /**
-     * @return boolean                          whether or not the iteration will continue
-     */
-    public function valid()
-    {
-        return ($this->index < $this->count);
-    }
+	/**
+	 * @return boolean                          whether or not the iteration will continue
+	 */
+	public function valid()
+	{
+		return ($this->index < $this->count);
+	}
 }

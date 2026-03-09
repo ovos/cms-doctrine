@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Iterator.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -33,87 +31,87 @@
  */
 abstract class Doctrine_Collection_Iterator implements Iterator
 {
-    /**
-     * @var Doctrine_Collection $collection
-     */
-    protected $collection;
-
-    /**
-     * @var array $keys
-     */
-    protected $keys;
-
-    /**
-     * @var mixed $key
-     */
-    protected $key;
-
-    /**
-     * @var integer $index
-     */
-    protected $index;
-
-    /**
-     * @var integer $count
-     */
-    protected $count;
-
-    /**
-     * constructor
-     * @var Doctrine_Collection $collection
-     */
-    public function __construct($collection)
-    {
-        $this->collection = $collection;
-        $this->keys       = $this->collection->getKeys();
-        $this->count      = $this->collection->count();
-    }
-
-    /**
-     * rewinds the iterator
-     *
-     * @return void
-     */
-    public function rewind()
-    {
-        $this->index = 0;
-        $i = $this->index;
-        if (isset($this->keys[$i])) {
-            $this->key   = $this->keys[$i];
-        }
-    }
-
-    /**
-     * returns the current key
-     *
-     * @return integer
-     */
-    public function key()
-    {
-        return $this->key;
-    }
-
-    /**
-     * returns the current record
-     *
-     * @return Doctrine_Record
-     */
-    public function current()
-    {
-        return $this->collection->get($this->key);
-    }
-
-    /**
-     * advances the internal pointer
-     *
-     * @return void
-     */
-    public function next()
-    {
-        $this->index++;
-        $i = $this->index;
-        if (isset($this->keys[$i])) {
-            $this->key   = $this->keys[$i];
-        }
-    }
+	/**
+	 * @var Doctrine_Collection $collection
+	 */
+	protected $collection;
+	
+	/**
+	 * @var array $keys
+	 */
+	protected $keys;
+	
+	/**
+	 * @var mixed $key
+	 */
+	protected $key;
+	
+	/**
+	 * @var integer $index
+	 */
+	protected $index;
+	
+	/**
+	 * @var integer $count
+	 */
+	protected $count;
+	
+	/**
+	 * constructor
+	 * @var Doctrine_Collection $collection
+	 */
+	public function __construct($collection)
+	{
+		$this->collection = $collection;
+		$this->keys       = $this->collection->getKeys();
+		$this->count      = $this->collection->count();
+	}
+	
+	/**
+	 * rewinds the iterator
+	 *
+	 * @return void
+	 */
+	public function rewind()
+	{
+		$this->index = 0;
+		$i = $this->index;
+		if (isset($this->keys[$i])) {
+			$this->key   = $this->keys[$i];
+		}
+	}
+	
+	/**
+	 * returns the current key
+	 *
+	 * @return integer
+	 */
+	public function key()
+	{
+		return $this->key;
+	}
+	
+	/**
+	 * returns the current record
+	 *
+	 * @return Doctrine_Record
+	 */
+	public function current()
+	{
+		return $this->collection->get($this->key);
+	}
+	
+	/**
+	 * advances the internal pointer
+	 *
+	 * @return void
+	 */
+	public function next()
+	{
+		$this->index++;
+		$i = $this->index;
+		if (isset($this->keys[$i])) {
+			$this->key   = $this->keys[$i];
+		}
+	}
 }

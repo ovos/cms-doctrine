@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: BuildAllReload.php 2761 2007-10-07 23:42:29Z zYne $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,37 +30,37 @@
  */
 class Doctrine_Task_BuildAllReload extends Doctrine_Task
 {
-    public $description          =   'Calls rebuild-db and load-data',
-           $requiredArguments    =   [],
-           $optionalArguments    =   [];
-
-    /**
-     * @var Doctrine_Task_RebuildDb
-     */
-    protected $rebuildDb;
-
-    /**
-     * @var Doctrine_Task_LoadData
-     */
-    protected $loadData;
-
-    public function __construct($dispatcher = null)
-    {
-        parent::__construct($dispatcher);
-
-        $this->rebuildDb = new Doctrine_Task_RebuildDb($this->dispatcher);
-        $this->loadData = new Doctrine_Task_LoadData($this->dispatcher);
-        
-        $this->requiredArguments = array_merge($this->requiredArguments, $this->rebuildDb->requiredArguments, $this->loadData->requiredArguments);
-        $this->optionalArguments = array_merge($this->optionalArguments, $this->rebuildDb->optionalArguments, $this->loadData->optionalArguments);
-    }
-    
-    public function execute()
-    {
-        $this->rebuildDb->setArguments($this->getArguments());
-        $this->rebuildDb->execute();
-        
-        $this->loadData->setArguments($this->getArguments());
-        $this->loadData->execute();
-    }
+	public $description          =   'Calls rebuild-db and load-data',
+			$requiredArguments    =   [],
+			$optionalArguments    =   [];
+	
+	/**
+	 * @var Doctrine_Task_RebuildDb
+	 */
+	protected $rebuildDb;
+	
+	/**
+	 * @var Doctrine_Task_LoadData
+	 */
+	protected $loadData;
+	
+	public function __construct($dispatcher = null)
+	{
+		parent::__construct($dispatcher);
+		
+		$this->rebuildDb = new Doctrine_Task_RebuildDb($this->dispatcher);
+		$this->loadData = new Doctrine_Task_LoadData($this->dispatcher);
+		
+		$this->requiredArguments = array_merge($this->requiredArguments, $this->rebuildDb->requiredArguments, $this->loadData->requiredArguments);
+		$this->optionalArguments = array_merge($this->optionalArguments, $this->rebuildDb->optionalArguments, $this->loadData->optionalArguments);
+	}
+	
+	public function execute()
+	{
+		$this->rebuildDb->setArguments($this->getArguments());
+		$this->rebuildDb->execute();
+		
+		$this->loadData->setArguments($this->getArguments());
+		$this->loadData->execute();
+	}
 }

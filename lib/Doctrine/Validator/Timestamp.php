@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Timestamp.php 3884 2008-02-22 18:26:35Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,36 +30,36 @@
  */
 class Doctrine_Validator_Timestamp extends Doctrine_Validator_Driver
 {
-    /**
-     * checks if given value is a valid timestamp
-     * ISO-8601 timestamp (YYYY-MM-DDTHH:MM:SS+00:00) or (YYYY-MM-DD HH:MM:SS)
-     *
-     * @param mixed $value
-     * @return boolean
-     */
-    public function validate($value)
-    {
-        if ($value === null) {
-            return true;
-        }
-
-        $splitChar = str_contains($value, 'T') ? 'T' : ' ';
-
-        $e = explode($splitChar, trim($value));
-        $date = $e[0] ?? null;
-        $time = $e[1] ?? null;
-
-        $dateValidator = Doctrine_Validator::getValidator('date');
-        $timeValidator = Doctrine_Validator::getValidator('time');
-
-        if ( ! $dateValidator->validate($date)) {
-            return false;
-        }
-
-        if ( ! $timeValidator->validate($time)) {
-            return false;
-        } 
-
-        return true;
-    }
+	/**
+	 * checks if given value is a valid timestamp
+	 * ISO-8601 timestamp (YYYY-MM-DDTHH:MM:SS+00:00) or (YYYY-MM-DD HH:MM:SS)
+	 *
+	 * @param mixed $value
+	 * @return boolean
+	 */
+	public function validate($value)
+	{
+		if ($value === null) {
+			return true;
+		}
+		
+		$splitChar = str_contains($value, 'T') ? 'T' : ' ';
+		
+		$e = explode($splitChar, trim($value));
+		$date = $e[0] ?? null;
+		$time = $e[1] ?? null;
+		
+		$dateValidator = Doctrine_Validator::getValidator('date');
+		$timeValidator = Doctrine_Validator::getValidator('time');
+		
+		if ( ! $dateValidator->validate($date)) {
+			return false;
+		}
+		
+		if ( ! $timeValidator->validate($time)) {
+			return false;
+		} 
+		
+		return true;
+	}
 }

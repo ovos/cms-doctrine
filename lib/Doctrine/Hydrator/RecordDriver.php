@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id$
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -34,91 +32,91 @@
  */
 class Doctrine_Hydrator_RecordDriver extends Doctrine_Hydrator_Graph
 {
-    protected $_collections = [];
-    private $_initializedRelations = [];
-
-    public function getElementCollection($component)
-    {
-        $coll = Doctrine_Collection::create($component);
-        $this->_collections[] = $coll;
-
-        return $coll;
-    }
-    
-    public function initRelated(&$record, $name, $keyColumn = null)
-    {
-        if ( ! isset($this->_initializedRelations[$record->getOid()][$name])) {
-            $relation = $record->getTable()->getRelation($name);
-            $coll = Doctrine_Collection::create($relation->getTable()->getComponentName(), $keyColumn);
-            $coll->setReference($record, $relation);
-            $record[$name] = $coll;
-            $this->_initializedRelations[$record->getOid()][$name] = true;
-        }
-        return true;
-    }
-    
-    public function registerCollection($coll)
-    {
-        $this->_collections[] = $coll;
-    }
-    
-    public function getNullPointer() 
-    {
-        return self::$_null;
-    }
-    
-    public function getElement(array $data, $component)
-    {
-        $component = $this->_getClassNameToReturn($data, $component);
-
-        $this->_tables[$component]->setData($data);
-        $record = $this->_tables[$component]->getRecord();
-
-        return $record;
-    }
-
-    public function getLastKey(&$coll) 
-    {
-        $coll->end();
-        
-        return $coll->key();
-    }
-
-    /**
-     * sets the last element of given data array / collection
-     * as previous element
-     *
-     * @param boolean|integer $index
-     * @return void
-     * @todo Detailed documentation
-     */
-    public function setLastElement(&$prev, &$coll, $index, $dqlAlias, $oneToOne)
-    {
-        if ($coll === self::$_null) {
-            unset($prev[$dqlAlias]); // Ticket #1228
-            return;
-        }
-
-        if ($index !== false) {
-            // Link element at $index to previous element for the component
-            // identified by the DQL alias $alias
-            $prev[$dqlAlias] = $coll[$index];
-            return;
-        }
-        
-        if (count($coll) > 0) {
-            $prev[$dqlAlias] = $coll->getLast();
-        }
-    }
-
-    public function flush()
-    {
-        // take snapshots from all initialized collections
-        foreach ($this->_collections as $key => $coll) {
-            $coll->takeSnapshot();
-        }
-        $this->_initializedRelations = null;
-        $this->_collections = null;
-        $this->_tables = null;
-    }
+	protected ?array $_collections = [];
+	private ?array $_initializedRelations = [];
+	
+	public function getElementCollection($component)
+	{
+		$coll = Doctrine_Collection::create($component);
+		$this->_collections[] = $coll;
+		
+		return $coll;
+	}
+	
+	public function initRelated(&$record, $name, $keyColumn = null)
+	{
+		if ( ! isset($this->_initializedRelations[$record->getOid()][$name])) {
+			$relation = $record->getTable()->getRelation($name);
+			$coll = Doctrine_Collection::create($relation->getTable()->getComponentName(), $keyColumn);
+			$coll->setReference($record, $relation);
+			$record[$name] = $coll;
+			$this->_initializedRelations[$record->getOid()][$name] = true;
+		}
+		return true;
+	}
+	
+	public function registerCollection($coll)
+	{
+		$this->_collections[] = $coll;
+	}
+	
+	public function getNullPointer() 
+	{
+		return self::$_null;
+	}
+	
+	public function getElement(array $data, $component)
+	{
+		$component = $this->_getClassNameToReturn($data, $component);
+		
+		$this->_tables[$component]->setData($data);
+		$record = $this->_tables[$component]->getRecord();
+		
+		return $record;
+	}
+	
+	public function getLastKey(&$coll) 
+	{
+		$coll->end();
+		
+		return $coll->key();
+	}
+	
+	/**
+	 * sets the last element of given data array / collection
+	 * as previous element
+	 *
+	 * @param boolean|integer $index
+	 * @return void
+	 * @todo Detailed documentation
+	 */
+	public function setLastElement(&$prev, &$coll, $index, $dqlAlias, $oneToOne)
+	{
+		if ($coll === self::$_null) {
+			unset($prev[$dqlAlias]); // Ticket #1228
+			return;
+		}
+		
+		if ($index !== false) {
+			// Link element at $index to previous element for the component
+			// identified by the DQL alias $alias
+			$prev[$dqlAlias] = $coll[$index];
+			return;
+		}
+		
+		if (count($coll) > 0) {
+			$prev[$dqlAlias] = $coll->getLast();
+		}
+	}
+	
+	public function flush()
+	{
+		// take snapshots from all initialized collections
+		foreach ($this->_collections as $key => $coll) {
+			$coll->takeSnapshot();
+		}
+		$this->_initializedRelations = null;
+		$this->_collections = null;
+		$this->_tables = null;
+	}
 }

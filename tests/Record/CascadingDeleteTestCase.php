@@ -200,13 +200,13 @@ class CascadeDeleteListener extends Doctrine_Record_Listener {
         $this->_test = $test;
     }
     
-    public function preDelete(Doctrine_Event $event) {
+    public function preDelete(Doctrine_Event $event): void {
         $this->_test->assertEqual(Doctrine_Record::STATE_CLEAN, $event->getInvoker()->state());
         $this->preDeleteInvoked = true;
         $this->preDeleteInvocationCount++;
     }
     
-    public function postDelete(Doctrine_Event $event) {
+    public function postDelete(Doctrine_Event $event): void {
         $this->_test->assertEqual(Doctrine_Record::STATE_TCLEAN, $event->getInvoker()->state());
         $this->postDeleteInvoked = true;
         $this->postDeleteInvocationCount++;

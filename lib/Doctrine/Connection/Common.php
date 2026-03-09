@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Common.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,26 +30,26 @@
  */
 class Doctrine_Connection_Common extends Doctrine_Connection
 {
-    /**
-     * Adds an driver-specific LIMIT clause to the query
-     *
-     * @param string $query
-     * @param mixed $limit
-     * @param mixed $offset
-     */
-    public function modifyLimitQuery($query, $limit = false,$offset = false,$isManip=false)
-    {
-        $limit = (int) $limit;
-        $offset = (int) $offset;
-        
-        if ($limit && $offset) {
-            $query .= ' LIMIT ' . $limit . ' OFFSET ' . $offset;
-        } elseif ($limit && ! $offset) {
-            $query .= ' LIMIT ' . $limit;
-        } elseif ( ! $limit && $offset) {
-            $query .= ' LIMIT 999999999999 OFFSET ' . $offset;
-        }
-
-        return $query;
-    }
+	/**
+	 * Adds an driver-specific LIMIT clause to the query
+	 *
+	 * @param string $query
+	 * @param mixed $limit
+	 * @param mixed $offset
+	 */
+	public function modifyLimitQuery($query, $limit = false,$offset = false,$isManip=false)
+	{
+		$limit = (int) $limit;
+		$offset = (int) $offset;
+		
+		if ($limit && $offset) {
+			$query .= ' LIMIT ' . $limit . ' OFFSET ' . $offset;
+		} elseif ($limit && ! $offset) {
+			$query .= ' LIMIT ' . $limit;
+		} elseif ( ! $limit && $offset) {
+			$query .= ' LIMIT 999999999999 OFFSET ' . $offset;
+		}
+		
+		return $query;
+	}
 }

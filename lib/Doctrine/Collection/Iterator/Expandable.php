@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Expandable.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,23 +30,23 @@
  */
 class Doctrine_Collection_Iterator_Expandable extends Doctrine_Collection_Iterator
 {
-    public function valid()
-    {
-        if ($this->index < $this->count) {
-            return true;
-        } elseif ($this->index == $this->count) {
-            $coll  = $this->collection->expand($this->index);
-
-            if ($coll instanceof Doctrine_Collection) {
-                $count = count($coll);
-                if ($count > 0) {
-                    $this->keys   = array_merge($this->keys, $coll->getKeys());
-                    $this->count += $count;
-                    return true;
-                }
-            }
-
-            return false;
-        }
-    }
+	public function valid()
+	{
+		if ($this->index < $this->count) {
+			return true;
+		} elseif ($this->index === $this->count) {
+			$coll  = $this->collection->expand($this->index);
+			
+			if ($coll instanceof Doctrine_Collection) {
+				$count = count($coll);
+				if ($count > 0) {
+					$this->keys   = array_merge($this->keys, $coll->getKeys());
+					$this->count += $count;
+					return true;
+				}
+			}
+			
+			return false;
+		}
+	}
 }

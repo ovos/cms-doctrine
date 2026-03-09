@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: DropDb.php 2761 2007-10-07 23:42:29Z zYne $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,30 +30,30 @@
  */
 class Doctrine_Task_DropDb extends Doctrine_Task
 {
-    public $description          =   'Drop database for all existing connections',
-           $requiredArguments    =   [],
-           $optionalArguments    =   ['force'  =>  'Whether or not to force the drop database task'];
-
-    public function execute()
-    {
-        if ( ! $this->getArgument('force')) {
-            $answer = $this->ask('Are you sure you wish to drop your databases? (y/n)');
-
-            if ($answer != 'y') {
-                $this->notify('Successfully cancelled');
-
-                return;
-            }
-        }
-
-        $manager = Doctrine_Manager::getInstance();
-        foreach ($manager as $name => $connection) {
-            try {
-                $connection->dropDatabase();
-                $this->notify("Successfully dropped database for connection named '" . $name . "'");
-            } catch (Exception $e) {
-                $this->notify($e->getMessage());
-            }
-        }
-    }
+	public $description          =   'Drop database for all existing connections',
+			$requiredArguments    =   [],
+			$optionalArguments    =   ['force'  =>  'Whether or not to force the drop database task'];
+	
+	public function execute()
+	{
+		if ( ! $this->getArgument('force')) {
+			$answer = $this->ask('Are you sure you wish to drop your databases? (y/n)');
+			
+			if ($answer !== 'y') {
+				$this->notify('Successfully cancelled');
+				
+				return;
+			}
+		}
+		
+		$manager = Doctrine_Manager::getInstance();
+		foreach ($manager as $name => $connection) {
+			try {
+				$connection->dropDatabase();
+				$this->notify("Successfully dropped database for connection named '" . $name . "'");
+			} catch (Exception $e) {
+				$this->notify($e->getMessage());
+			}
+		}
+	}
 }

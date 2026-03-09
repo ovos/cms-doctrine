@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Iterator.php 3884 2008-02-22 18:26:35Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -33,73 +31,68 @@
  */
 class Doctrine_Collection_OnDemand implements Iterator
 {
-    protected $_stmt;
-    protected $_current;
-    protected $_tableAliasMap;
-    protected $_hydrator;
-    protected $index;
-
-    public function __construct($stmt, $hydrator, $tableAliasMap)
-    {
-        $this->_stmt = $stmt;
-        $this->_hydrator = $hydrator;
-        $this->_tableAliasMap = $tableAliasMap;
-        $this->_current = null;
-        $this->index = 0;
-
-        $this->_hydrateCurrent();
-    }
-
-    private function _hydrateCurrent()
-    {
-        $record = $this->_hydrator->hydrateResultSet($this->_stmt);
-        if ($record instanceof Doctrine_Collection) {
-            $this->_current = $record->getFirst();
-        } elseif (is_array($record) && count($record) == 0) {
-            $this->_current = null;
-        } elseif (is_array($record) && isset($record[0])) {
-            $this->_current = $record[0];
-        } else {
-            $this->_current = $record;
-        }
-    }
-
-    #[\ReturnTypeWillChange]
-    public function rewind()
-    {
-        $this->index = 0;
-        $this->_stmt->closeCursor();
-        $this->_stmt->execute();
-        $this->_hydrator->onDemandReset();
-        $this->_hydrateCurrent();
-    }
-
-    #[\ReturnTypeWillChange]
-    public function key()
-    {
-        return $this->index;
-    }
-
-    #[\ReturnTypeWillChange]
-    public function current()
-    {
-        return $this->_current;
-    }
-
-    #[\ReturnTypeWillChange]
-    public function next()
-    {
-        $this->_current = null;
-        $this->index++;
-        $this->_hydrateCurrent();
-    }
-
-    #[\ReturnTypeWillChange]
-    public function valid()
-    {
-        if ( $this->_current !== null && $this->_current !== false) {
-            return true;
-        }
-        return false;
-    }
+	protected $_stmt;
+	protected $_current;
+	protected $_tableAliasMap;
+	protected $_hydrator;
+	protected $index;
+	
+	public function __construct($stmt, $hydrator, $tableAliasMap)
+	{
+		$this->_stmt = $stmt;
+		$this->_hydrator = $hydrator;
+		$this->_tableAliasMap = $tableAliasMap;
+		$this->_current = null;
+		$this->index = 0;
+		
+		$this->_hydrateCurrent();
+	}
+	
+	private function _hydrateCurrent()
+	{
+		$record = $this->_hydrator->hydrateResultSet($this->_stmt);
+		if ($record instanceof Doctrine_Collection) {
+			$this->_current = $record->getFirst();
+		} elseif (is_array($record) && count($record) === 0) {
+			$this->_current = null;
+		} elseif (is_array($record) && isset($record[0])) {
+			$this->_current = $record[0];
+		} else {
+			$this->_current = $record;
+		}
+	}
+	
+	public function rewind(): void
+	{
+		$this->index = 0;
+		$this->_stmt->closeCursor();
+		$this->_stmt->execute();
+		$this->_hydrator->onDemandReset();
+		$this->_hydrateCurrent();
+	}
+	
+	public function key(): mixed
+	{
+		return $this->index;
+	}
+	
+	public function current(): mixed
+	{
+		return $this->_current;
+	}
+	
+	public function next(): void
+	{
+		$this->_current = null;
+		$this->index++;
+		$this->_hydrateCurrent();
+	}
+	
+	public function valid(): bool
+	{
+		if ( $this->_current !== null && $this->_current !== false) {
+			return true;
+		}
+		return false;
+	}
 }

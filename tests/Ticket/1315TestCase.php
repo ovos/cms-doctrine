@@ -66,7 +66,7 @@ class Doctrine_Ticket_1315_TestCase extends Doctrine_UnitTestCase
 
 class Ticket_1315_Listener extends Doctrine_Record_Listener
 {
-   public function preDqlSelect(Doctrine_Event $event)
+   public function preDqlSelect(Doctrine_Event $event): void
    {
        throw new Doctrine_Exception('Test');
    }

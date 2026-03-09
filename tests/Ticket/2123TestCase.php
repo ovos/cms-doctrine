@@ -32,16 +32,12 @@
  */
 class Doctrine_Ticket_2123_TestCase extends Doctrine_UnitTestCase 
 {
-    public function testCheckingRelatedExistsOnCollectionThrowsException()
+    public function testCheckingRelatedExistsOnCollectionReturnsTrue()
     {
-        try {
-            $user = Doctrine_Core::getTable('User')
-                ->createQuery('u')
-                ->fetchOne();
-            $user->relatedExists('Phonenumber');
-        } catch (Exception $e) {
-            $this->pass();
-        }
+        $user = Doctrine_Core::getTable('User')
+            ->createQuery('u')
+            ->fetchOne();
+        $this->assertTrue($user->relatedExists('Phonenumber'));
     }
 
     public function testRelatedExistsClearsReference()

@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id$
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,82 +30,82 @@
  */
 class Doctrine_Pager_Range_Jumping extends Doctrine_Pager_Range
 {
-    /**
-     * @var int $_chunkLength     Chunk length to be returned
-     */
-    private $_chunkLength;
-
-    /**
-     * _initialize
-     *
-     * Initialize Doctrine_Pager_Range_Jumping and does custom assignments
-     *
-     * @return void
-     */
-    protected function _initialize()
-    {
-        if (isset($this->_options['chunk'])) {
-            $this->_setChunkLength($this->_options['chunk']);
-        } else {
-            throw new Doctrine_Pager_Exception('Missing parameter \'chunk\' that must be define in options.');
-        }
-    }
-
-    /**
-     * getChunkLength
-     *
-     * Returns the size of the chunk defined
-     *
-     * @return int        Chunk length
-     */
-    public function getChunkLength()
-    {
-        return $this->_chunkLength;
-    }
-
-    /**
-     * _setChunkLength
-     *
-     * Defines the size of the chunk
-     *
-     * @param $chunkLength       Chunk length
-     * @return void
-     */
-    protected function _setChunkLength($chunkLength)
-    {
-        $this->_chunkLength = $chunkLength;
-    }
-
-    /**
-     * rangeAroundPage
-     *
-     * Calculate and returns an array representing the range around the current page
-     *
-     * @return array
-     */
-    public function rangeAroundPage()
-    {
-        $pager = $this->getPager();
-
-        if ($pager->getExecuted()) {
-            $page = $pager->getPage();
-
-            // Define initial assignments for StartPage and EndPage
-            $startPage = $page - ($page - 1) % $this->getChunkLength();
-            $endPage = ($startPage + $this->getChunkLength()) - 1;
-
-            // Check for EndPage out-range
-            if ($endPage > $pager->getLastPage()) {
-                $endPage = $pager->getLastPage();
-            }
-
-            // No need to check for out-range in start, it will never happens
-
-            return range($startPage, $endPage);
-        }
-
-        throw new Doctrine_Pager_Exception(
-            'Cannot retrieve the range around the page of a not yet executed Pager query'
-        );
-    }
+	/**
+	 * @var int $_chunkLength     Chunk length to be returned
+	 */
+	private $_chunkLength;
+	
+	/**
+	 * _initialize
+	 *
+	 * Initialize Doctrine_Pager_Range_Jumping and does custom assignments
+	 *
+	 * @return void
+	 */
+	protected function _initialize()
+	{
+		if (isset($this->_options['chunk'])) {
+			$this->_setChunkLength($this->_options['chunk']);
+		} else {
+			throw new Doctrine_Pager_Exception('Missing parameter \'chunk\' that must be define in options.');
+		}
+	}
+	
+	/**
+	 * getChunkLength
+	 *
+	 * Returns the size of the chunk defined
+	 *
+	 * @return int        Chunk length
+	 */
+	public function getChunkLength()
+	{
+		return $this->_chunkLength;
+	}
+	
+	/**
+	 * _setChunkLength
+	 *
+	 * Defines the size of the chunk
+	 *
+	 * @param $chunkLength       Chunk length
+	 * @return void
+	 */
+	protected function _setChunkLength($chunkLength)
+	{
+		$this->_chunkLength = $chunkLength;
+	}
+	
+	/**
+	 * rangeAroundPage
+	 *
+	 * Calculate and returns an array representing the range around the current page
+	 *
+	 * @return array
+	 */
+	public function rangeAroundPage()
+	{
+		$pager = $this->getPager();
+		
+		if ($pager->getExecuted()) {
+			$page = $pager->getPage();
+			
+			// Define initial assignments for StartPage and EndPage
+			$startPage = $page - ($page - 1) % $this->getChunkLength();
+			$endPage = ($startPage + $this->getChunkLength()) - 1;
+			
+			// Check for EndPage out-range
+			if ($endPage > $pager->getLastPage()) {
+				$endPage = $pager->getLastPage();
+			}
+			
+			// No need to check for out-range in start, it will never happens
+			
+			return range($startPage, $endPage);
+		}
+		
+		throw new Doctrine_Pager_Exception(
+			'Cannot retrieve the range around the page of a not yet executed Pager query'
+		);
+	}
 }

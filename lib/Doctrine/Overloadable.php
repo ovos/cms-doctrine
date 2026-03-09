@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Overloadable.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,13 +30,13 @@
  * @author      Konsta Vesterinen <kvesteri@cc.hut.fi>
  */
 interface Doctrine_Overloadable {
-    /**
-     * __call
-     * method overloader
-     *
-     * @param string $m     the name of the method
-     * @param array $a      method arguments
-     * @return mixed        return value of the method
-     */
-    public function __call($m, $a);
+	/**
+	 * __call
+	 * method overloader
+	 *
+	 * @param string $m     the name of the method
+	 * @param array $a      method arguments
+	 * @return mixed        return value of the method
+	 */
+	public function __call($m, $a);
 }

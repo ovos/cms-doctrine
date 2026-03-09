@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Builder.php 4593 2008-06-29 03:24:50Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,25 +30,25 @@
  */
 class Doctrine_Builder
 {
-    /**
-     * Special function for var_export()
-     * The normal code which is returned is malformed and does not follow Doctrine standards
-     * So we do some string replacing to clean it up
-     *
-     * @param string $var
-     * @return void
-     */
-    public function varExport($var)
-    {
-        $export = var_export($var, true);
-        $export = str_replace("\n", PHP_EOL . str_repeat(' ', 50), $export);
-        $export = str_replace('  ', ' ', $export);
-        $export = str_replace('array (', 'array(', $export);
-        $export = str_replace('array( ', 'array(', $export);
-        $export = str_replace(',)', ')', $export);
-        $export = str_replace(', )', ')', $export);
-        $export = str_replace('  ', ' ', $export);
-
-        return $export;
-    }
+	/**
+	 * Special function for var_export()
+	 * The normal code which is returned is malformed and does not follow Doctrine standards
+	 * So we do some string replacing to clean it up
+	 *
+	 * @param string $var
+	 * @return void
+	 */
+	public function varExport($var)
+	{
+		$export = var_export($var, true);
+		$export = str_replace("\n", PHP_EOL . str_repeat(' ', 50), $export);
+		$export = str_replace('  ', ' ', $export);
+		$export = str_replace('array (', 'array(', $export);
+		$export = str_replace('array( ', 'array(', $export);
+		$export = str_replace(',)', ')', $export);
+		$export = str_replace(', )', ')', $export);
+		$export = str_replace('  ', ' ', $export);
+		
+		return $export;
+	}
 }

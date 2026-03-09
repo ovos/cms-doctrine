@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Column.php 7663 2010-06-08 19:00:08Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -33,131 +31,131 @@
  */
 class Doctrine_Column extends Doctrine_Access implements IteratorAggregate, Countable
 {
-    /**
-     * @var array $_definition  @see getDefinition()
-     */
-    protected $_definition = [
-                                'type'    => null,
-                                'length'  => 0,
-                                ];
-
-    /**
-     * @var array $definition  @see getDefinition()
-     */
-    public function __construct(array $definition = [])
-    {
-        $this->_definition = $definition;
-    }
-
-    /**
-     * Returns the definition of the column.
-     *
-     * Keys can be: 
-     *     string type,
-     *     integer length,
-     *     array values (only for enum fields, maps integer indexes to mixed values),
-     * @return array
-     */
-    public function getDefinition()
-    {
-        return $this->_definition;
-    }
-
-    /**
-     * contains
-     *
-     * @return boolean
-     */
-    public function contains($name) 
-    {
-        return isset($this->_definition[$name]);
-    }
-
-    /**
-     * get
-     *
-     * @param string $name
-     * @return mixed
-     */
-    public function get($name)
-    {
-        if ( ! isset($this->_definition[$name])) {
-            return null;
-        }
-        
-        return $this->_definition[$name];
-    }
-
-    /**
-     * set
-     *
-     * @param string $name
-     * @return void
-     */
-    public function set($name, $value)
-    {
-        $this->_definition[$name] = $value;
-    }
-
-    /**
-     * @param string $field
-     * @return array
-     */
-    public function getEnumValues()
-    {
-        if (isset($this->_definition['values'])) {
-            return $this->_definition['values'];
-        } else {
-            return [];
-        }
-    }
-
-    /**
-     * Retrieves an enum value.
-     *
-     * @param integer $index
-     * @return string       integer ($index) if not present
-     */
-    public function enumValue($index)
-    {
-        if ($index instanceof Doctrine_Null) {
-            return false;
-        }
-
-        return $this->_definition['values'][$index] ?? false;
-    }
-
-    /**
-     * enumIndex
-     *
-     * @param string $field
-     * @param mixed $value
-     * @return mixed
-     */
-    public function enumIndex($field, $value)
-    {
-        $values = $this->getEnumValues($field);
-
-        return array_search($value, $values);
-    }
-
-    /**
-     * count
-     *
-     * @return integer
-     */
-    public function count()
-    {
-        return count($this->_definition);
-    }
-
-    /**
-     * getIterator
-     *
-     * @return ArrayIterator
-     */
-    public function getIterator() 
-    {
-        return new ArrayIterator($this->_definition);
-    }
+	/**
+	 * @var array $_definition  @see getDefinition()
+	 */
+	protected array $_definition = [
+		'type'   => null,
+		'length' => 0,
+	];
+	
+	/**
+	 * @var array $definition  @see getDefinition()
+	 */
+	public function __construct(array $definition = [])
+	{
+		$this->_definition = $definition;
+	}
+	
+	/**
+	 * Returns the definition of the column.
+	 *
+	 * Keys can be: 
+	 *     string type,
+	 *     integer length,
+	 *     array values (only for enum fields, maps integer indexes to mixed values),
+	 * @return array
+	 */
+	public function getDefinition()
+	{
+		return $this->_definition;
+	}
+	
+	/**
+	 * contains
+	 *
+	 * @return boolean
+	 */
+	public function contains($name) 
+	{
+		return isset($this->_definition[$name]);
+	}
+	
+	/**
+	 * get
+	 *
+	 * @param string $name
+	 * @return mixed
+	 */
+	public function get($name)
+	{
+		if ( ! isset($this->_definition[$name])) {
+			return null;
+		}
+		
+		return $this->_definition[$name];
+	}
+	
+	/**
+	 * set
+	 *
+	 * @param string $name
+	 * @return void
+	 */
+	public function set($name, $value)
+	{
+		$this->_definition[$name] = $value;
+	}
+	
+	/**
+	 * @param string $field
+	 * @return array
+	 */
+	public function getEnumValues()
+	{
+		if (isset($this->_definition['values'])) {
+			return $this->_definition['values'];
+		} else {
+			return [];
+		}
+	}
+	
+	/**
+	 * Retrieves an enum value.
+	 *
+	 * @param integer $index
+	 * @return string       integer ($index) if not present
+	 */
+	public function enumValue($index)
+	{
+		if ($index instanceof Doctrine_Null) {
+			return false;
+		}
+		
+		return $this->_definition['values'][$index] ?? false;
+	}
+	
+	/**
+	 * enumIndex
+	 *
+	 * @param string $field
+	 * @param mixed $value
+	 * @return mixed
+	 */
+	public function enumIndex($field, $value)
+	{
+		$values = $this->getEnumValues($field);
+		
+		return array_search($value, $values);
+	}
+	
+	/**
+	 * count
+	 *
+	 * @return integer
+	 */
+	public function count()
+	{
+		return count($this->_definition);
+	}
+	
+	/**
+	 * getIterator
+	 *
+	 * @return ArrayIterator
+	 */
+	public function getIterator() 
+	{
+		return new ArrayIterator($this->_definition);
+	}
 }

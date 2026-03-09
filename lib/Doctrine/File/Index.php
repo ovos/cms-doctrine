@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id$
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,26 +30,26 @@
  */
 class Doctrine_File_Index extends Doctrine_Record
 {
-    public function setTableDefinition()
-    {
-        $this->hasColumn('keyword', 'string', 255, ['notnull' => true,
-                                                         'primary' => true]);
-                                                         
-        $this->hasColumn('field', 'string', 50, ['notnull' => true,
-                                                      'primary' => true]);
-
-        $this->hasColumn('position', 'string', 255, ['notnull' => true,
-                                                          'primary' => true]);
-                                                          
-        $this->hasColumn('file_id', 'integer', 8, ['notnull' => true,
-                                                        'primary' => true]);
-    }
-
-    public function setUp()
-    {
-        $this->hasOne('Doctrine_File', ['local' => 'file_id',
-                                             'foreign' => 'id',
-                                             'onDelete' => 'CASCADE',
-                                             'onUpdate' => 'CASCADE']);
-    }
+	public function setTableDefinition()
+	{
+		$this->hasColumn('keyword', 'string', 255, ['notnull' => true,
+															'primary' => true]);
+		
+		$this->hasColumn('field', 'string', 50, ['notnull' => true,
+														'primary' => true]);
+		
+		$this->hasColumn('position', 'string', 255, ['notnull' => true,
+															'primary' => true]);
+		
+		$this->hasColumn('file_id', 'integer', 8, ['notnull' => true,
+														'primary' => true]);
+	}
+	
+	public function setUp()
+	{
+		$this->hasOne('Doctrine_File', ['local' => 'file_id',
+												'foreign' => 'id',
+												'onDelete' => 'CASCADE',
+												'onUpdate' => 'CASCADE']);
+	}
 }

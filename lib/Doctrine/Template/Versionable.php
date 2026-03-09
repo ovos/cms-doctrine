@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id$
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -34,90 +32,94 @@
  */
 class Doctrine_Template_Versionable extends Doctrine_Template
 {
-    /**
-     * Array of AuditLog Options
-     *
-     * @var array
-     */
-    protected $_options = ['version'           => ['name'   => 'version',
-                                                             'alias'  => null,
-                                                             'type'   => 'integer',
-                                                             'length' => 8,
-                                                             'options' => []],
-								'generateRelations' => true,
-                                'tableName'         => false,
-                                'generateFiles'     => false,
-                                'auditLog'          => true,
-                                'deleteVersions'    => true,
-                                'listener'          => 'Doctrine_AuditLog_Listener'];
-
-    /**
-     * __construct
-     *
-     * @param array $options
-     * @return void
-     */
-    public function __construct(array $options = [])
-    {
-	    parent::__construct($options);
-        $this->_plugin = new Doctrine_AuditLog($this->_options);
-    }
-
-    /**
-     * Setup the Versionable behavior for the template
-     *
-     * @return void
-     */
-    public function setUp()
-    {
-        if ($this->_plugin->getOption('auditLog')) {
-            $this->_plugin->initialize($this->_table);
-        }
-
-        $version = $this->_options['version'];
-        $name = $version['name'] . (isset($version['alias']) ? ' as ' . $version['alias'] : '');
-        $this->hasColumn($name, $version['type'], $version['length'], $version['options']);
-
-        $listener = $this->_options['listener'];
-        $this->addListener(new $listener($this->_plugin));
-    }
-
-    /**
-     * Get plugin for Versionable template
-     *
-     * @return void
-     */
-    public function getAuditLog()
-    {
-        return $this->_plugin;
-    }
-
-     /**
-     * revert
-     * reverts this record to given version, this method only works if versioning plugin
-     * is enabled
-     *
-     * @throws Doctrine_Record_Exception    if given version does not exist
-     * @param integer $version      an integer > 1
-     * @return Doctrine_Record      this object
-     */
-    public function revert($version)
-    {
-        $auditLog = $this->_plugin;
-
-        if ( ! $auditLog->getOption('auditLog')) {
-            throw new Doctrine_Record_Exception('Audit log is turned off, no version history is recorded.');
-        }
-
-        $data = $auditLog->getVersion($this->getInvoker(), $version);
-
-        if ( ! isset($data[0])) {
-            throw new Doctrine_Record_Exception('Version ' . $version . ' does not exist!');
-        }
-
-        $this->getInvoker()->merge($data[0]);
-
-
-        return $this->getInvoker();
-    }
+	/**
+	 * Array of AuditLog Options
+	 *
+	 * @var array
+	 */
+	protected array $_options = [
+		'version' => [
+			'name'    => 'version',
+			'alias'   => null,
+			'type'    => 'integer',
+			'length'  => 8,
+			'options' => [],
+		],
+		'generateRelations' => true,
+		'tableName'         => false,
+		'generateFiles'     => false,
+		'auditLog'          => true,
+		'deleteVersions'    => true,
+		'listener'          => 'Doctrine_AuditLog_Listener',
+	];
+	
+	/**
+	 * __construct
+	 *
+	 * @param array $options
+	 * @return void
+	 */
+	public function __construct(array $options = [])
+	{
+		parent::__construct($options);
+		$this->_plugin = new Doctrine_AuditLog($this->_options);
+	}
+	
+	/**
+	 * Setup the Versionable behavior for the template
+	 *
+	 * @return void
+	 */
+	public function setUp()
+	{
+		if ($this->_plugin->getOption('auditLog')) {
+			$this->_plugin->initialize($this->_table);
+		}
+		
+		$version = $this->_options['version'];
+		$name = $version['name'] . (isset($version['alias']) ? ' as ' . $version['alias'] : '');
+		$this->hasColumn($name, $version['type'], $version['length'], $version['options']);
+		
+		$listener = $this->_options['listener'];
+		$this->addListener(new $listener($this->_plugin));
+	}
+	
+	/**
+	 * Get plugin for Versionable template
+	 *
+	 * @return void
+	 */
+	public function getAuditLog()
+	{
+		return $this->_plugin;
+	}
+	
+		/**
+	 * revert
+	 * reverts this record to given version, this method only works if versioning plugin
+	 * is enabled
+	 *
+	 * @throws Doctrine_Record_Exception    if given version does not exist
+	 * @param integer $version      an integer > 1
+	 * @return Doctrine_Record      this object
+	 */
+	public function revert($version)
+	{
+		$auditLog = $this->_plugin;
+		
+		if ( ! $auditLog->getOption('auditLog')) {
+			throw new Doctrine_Record_Exception('Audit log is turned off, no version history is recorded.');
+		}
+		
+		$data = $auditLog->getVersion($this->getInvoker(), $version);
+		
+		if ( ! isset($data[0])) {
+			throw new Doctrine_Record_Exception('Version ' . $version . ' does not exist!');
+		}
+		
+		$this->getInvoker()->merge($data[0]);
+		
+		
+		return $this->getInvoker();
+	}
 }

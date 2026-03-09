@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Task.php 2761 2007-10-07 23:42:29Z zYne $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,15 +30,15 @@
  */
 class Doctrine_Task_Compile extends Doctrine_Task
 {
-    public $description          =   'Compile doctrine classes in to one single php file',
-           $requiredArguments    =   [],
-           $optionalArguments    =   ['drivers'        =>  'Specify list of drivers you wish to compile. Ex: mysql|mssql|sqlite',
-                                           'compiled_path'  =>  'The path where you want to write the compiled doctrine libs.'];
-    
-    public function execute()
-    {
-        $compiledPath = Doctrine_Core::compile($this->getArgument('compiled_path'), $this->getArgument('drivers', []));
-        
-        $this->notify('Compiled Doctrine successfully to: ' . $compiledPath);
-    }
+	public $description          =   'Compile doctrine classes in to one single php file',
+			$requiredArguments    =   [],
+			$optionalArguments    =   ['drivers'        =>  'Specify list of drivers you wish to compile. Ex: mysql|sqlite',
+											'compiled_path'  =>  'The path where you want to write the compiled doctrine libs.'];
+	
+	public function execute()
+	{
+		$compiledPath = Doctrine_Core::compile($this->getArgument('compiled_path'), $this->getArgument('drivers', []));
+		
+		$this->notify('Compiled Doctrine successfully to: ' . $compiledPath);
+	}
 }

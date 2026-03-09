@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Parser.php 7490 2010-03-29 19:53:27Z jwage $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,36 +30,36 @@
  */
 abstract class Doctrine_Hook_Parser
 {
-    protected $condition;
-    protected $params = [];
-
-    public function getCondition()
-    {
-        return $this->condition;
-    }
-
-    /**
-     * getParams
-     * returns the parameters associated with this parser
-     *
-     * @return array
-     */
-    public function getParams()
-    {
-        return $this->params;
-    }
-
-    /**
-     * parse
-     * Parses given field and field value to DQL condition
-     * and parameters. This method should always return
-     * prepared statement conditions (conditions that use
-     * placeholders instead of literal values).
-     *
-     * @param string $alias     component alias
-     * @param string $field     the field name
-     * @param mixed $value      the value of the field
-     * @return void
-     */
-    abstract public function parse($alias, $field, $value);
+	protected $condition;
+	protected array $params = [];
+	
+	public function getCondition()
+	{
+		return $this->condition;
+	}
+	
+	/**
+	 * getParams
+	 * returns the parameters associated with this parser
+	 *
+	 * @return array
+	 */
+	public function getParams()
+	{
+		return $this->params;
+	}
+	
+	/**
+	 * parse
+	 * Parses given field and field value to DQL condition
+	 * and parameters. This method should always return
+	 * prepared statement conditions (conditions that use
+	 * placeholders instead of literal values).
+	 *
+	 * @param string $alias     component alias
+	 * @param string $field     the field name
+	 * @param mixed $value      the value of the field
+	 * @return void
+	 */
+	abstract public function parse($alias, $field, $value);
 }

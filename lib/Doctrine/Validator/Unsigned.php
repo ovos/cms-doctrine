@@ -1,7 +1,5 @@
 <?php
 /*
- *  $Id: Enum.php 1080 2007-02-10 18:17:08Z romanb $
- *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
@@ -32,29 +30,29 @@
  */
 class Doctrine_Validator_Unsigned extends Doctrine_Validator_Driver
 {
-    /**
-     * checks if given value is a valid unsigned integer or float
-     *
-     * valid values: null, '', 5, '5', 5.9, '5.9'
-     * invalid values: -5, '-5', 'five', -5.9, '-5.9', '5.5.5'
-     *
-     * @param mixed $value
-     * @return boolean
-     */
-    public function validate($value)
-    {
-        if ($value === null || $value == '') {
-            return true;
-        }
-        if (preg_match('/[^0-9\-\.]/', $value)) {
-            return false;
-        }
-
-        if ((float) $value >= 0)
-        {
-            return true;
-        }
-
-        return false;
-    }
+	/**
+	 * checks if given value is a valid unsigned integer or float
+	 *
+	 * valid values: null, '', 5, '5', 5.9, '5.9'
+	 * invalid values: -5, '-5', 'five', -5.9, '-5.9', '5.5.5'
+	 *
+	 * @param mixed $value
+	 * @return boolean
+	 */
+	public function validate($value)
+	{
+		if ($value === null || $value == '') {
+			return true;
+		}
+		if (preg_match('/[^0-9\-\.]/', $value)) {
+			return false;
+		}
+		
+		if ((float) $value >= 0)
+		{
+			return true;
+		}
+		
+		return false;
+	}
 }

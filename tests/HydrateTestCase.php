@@ -76,14 +76,14 @@ class Doctrine_Hydrate_TestCase extends Doctrine_UnitTestCase
 
 class HydrationListener extends Doctrine_Record_Listener
 {
-    public function preHydrate(Doctrine_Event $event) 
+    public function preHydrate(Doctrine_Event $event) : void
     {
         $data = $event->data;
         $data['password'] = 'default pass';
         
         $event->data = $data;
     }
-    public function postHydrate(Doctrine_Event $event)
+    public function postHydrate(Doctrine_Event $event): void
     {
     	foreach ($event->data as $key => $value) {
             $event->data[$key] = is_string($value) ? strtoupper($value) : $value;

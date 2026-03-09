@@ -1,7 +1,5 @@
 <?php
 
-use Zf1s\Compat\Types;
-
 class UnitTestCase
 {
     protected $_passed = 0;
@@ -154,7 +152,7 @@ class UnitTestCase
 
     public function run($reporter = null, $filter = null)
     {
-        Types::isNullable('reporter', $reporter, 'DoctrineTest_Reporter');
+        assert($reporter === null || $reporter instanceof DoctrineTest_Reporter);
 
         foreach (get_class_methods($this) as $method) {
             if (substr($method, 0, 4) === 'test') {
