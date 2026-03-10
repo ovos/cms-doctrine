@@ -441,7 +441,7 @@ abstract class Doctrine_Relation implements ArrayAccess
 	 *
 	 * @return string
 	 */
-	public function __toString()
+	public function __toString(): string
 	{
 		$r[] = "<pre>";
 		foreach ($this->definition as $k => $v) {

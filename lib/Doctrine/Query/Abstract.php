@@ -2386,7 +2386,7 @@ abstract class Doctrine_Query_Abstract
 	 *
 	 * @return string DQL string
 	 */
-	public function __toString()
+	public function __toString(): string
 	{
 		return $this->getDql();
 	}

@@ -14,8 +14,7 @@
 - Replaced deprecated `utf8_decode()` with `mb_strlen()` in `Doctrine_Validator`
 - Removed `Zf1s\Compat\Types` usage from test files
 
-1.4.0 (2026-03-09)
-------------------
+### Other changes
 - [OV26] Memory usage improvements:
   - `Doctrine_Query::free()` — comprehensive cleanup of 20+ properties; breaks PHP references shared via `copySubqueryInfo()` (using `unset()` before reassignment) to avoid corrupting parent query state when freeing subqueries
   - `Doctrine_Record::free()` — now also clears `_pendingDeletes`, `_pendingUnlinks`, `_pendingUnlinksExcept`, `_pendingLinks`, `_modified`, `_oldValues`, `_values`
@@ -30,6 +29,7 @@
 - Updated `Doctrine_Ticket_2123_TestCase` to reflect the new `relatedExists()` behavior
 
 1.3.4 (2022-10-17)
+------------------
 - php 8.2 compatibility fixes [#12](https://github.com/ovos/doctrine1/pull/12)
 - php 8.1 compatibility fixes [#11](https://github.com/ovos/doctrine1/pull/11)
 

@@ -377,7 +377,7 @@ class Doctrine_Pager_Layout
 	/**
 	 * Simply calls display, and returns the output.
 	 */
-	public function __toString()
+	public function __toString(): string
 	{
 		return $this->display([], true);
 	}

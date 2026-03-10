@@ -38,7 +38,7 @@ final class Doctrine_Null
 		return false;    
 	}
 	
-	public function __toString()
+	public function __toString(): string
 	{
 		return '';
 	}

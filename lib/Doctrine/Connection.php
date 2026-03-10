@@ -1550,7 +1550,7 @@ abstract class Doctrine_Connection extends Doctrine_Configurable implements Coun
 	 * returns a string representation of this object
 	 * @return string
 	 */
-	public function __toString()
+	public function __toString(): string
 	{
 		return Doctrine_Lib::getConnectionAsString($this);
 	}
@@ -1560,7 +1560,7 @@ abstract class Doctrine_Connection extends Doctrine_Configurable implements Coun
 	 *
 	 * @return string
 	 */
-	public function serialize()
+	public function serialize(): ?string
 	{
 		return serialize($this->__serialize());
 	}
@@ -1586,7 +1586,7 @@ abstract class Doctrine_Connection extends Doctrine_Configurable implements Coun
 	 * @param string $serialized
 	 * @return void
 	 */
-	public function unserialize($serialized)
+	public function unserialize(string $serialized): void
 	{
 		$this->__unserialize(unserialize($serialized));
 	}

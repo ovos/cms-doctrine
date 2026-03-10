@@ -145,7 +145,7 @@ class Doctrine_Collection extends Doctrine_Access implements Countable, Iterator
 	 *
 	 * @return string
 	 */
-	public function serialize()
+	public function serialize(): ?string
 	{
 		return serialize($this->__serialize());
 	}
@@ -182,7 +182,7 @@ class Doctrine_Collection extends Doctrine_Access implements Countable, Iterator
 	 *
 	 * @return void
 	 */
-	public function unserialize($serialized)
+	public function unserialize(string $serialized): void
 	{
 		$this->__unserialize(unserialize($serialized));
 	}
@@ -1080,7 +1080,7 @@ class Doctrine_Collection extends Doctrine_Access implements Countable, Iterator
 	 *
 	 * @return string $string
 	 */
-	public function __toString()
+	public function __toString(): string
 	{
 		return Doctrine_Lib::getCollectionAsString($this);
 	}

@@ -685,7 +685,7 @@ class Doctrine_Manager extends Doctrine_Configurable implements Countable, Itera
 	 *
 	 * @return string
 	 */
-	public function __toString()
+	public function __toString(): string
 	{
 		$r[] = "<pre>";
 		$r[] = "Doctrine_Manager";

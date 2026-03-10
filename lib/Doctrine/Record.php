@@ -883,7 +883,7 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
 	 *
 	 * @return string
 	 */
-	public function serialize()
+	public function serialize(): ?string
 	{
 		return serialize($this->__serialize());
 	}
@@ -916,7 +916,7 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
 	 * @throws Doctrine_Record_Exception        if the cleanData operation fails somehow
 	 * @return void
 	 */
-	public function unserialize($serialized)
+	public function unserialize(string $serialized): void
 	{
 		$this->__unserialize(unserialize($serialized));
 	}
@@ -2987,7 +2987,7 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
 	 * magic method
 	 * @return string representation of this object
 	 */
-	public function __toString()
+	public function __toString(): string
 	{
 		return (string) $this->_oid;
 	}

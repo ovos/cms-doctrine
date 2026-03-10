@@ -2747,7 +2747,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
 	 *
 	 * @return string
 	 */
-	public function __toString()
+	public function __toString(): string
 	{
 		return Doctrine_Lib::getTableAsString($this);
 	}
