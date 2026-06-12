@@ -350,6 +350,10 @@ class Doctrine_Transaction extends Doctrine_Connection_Module
 			if ( ! $event->skipOperation) {
 				$this->_nestingLevel = 0;
 				$this->_internalNestingLevel = 0;
+				// release references accumulated during the aborted transaction,
+				// otherwise they are pinned until the next successful commit
+				$this->_collections = [];
+				$this->invalid = [];
 				try {
 					$this->_doRollback();
 				} catch (Exception $e) {

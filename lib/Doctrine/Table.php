@@ -56,9 +56,31 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
 	protected $_conn;
 	
 	/**
-	 * @var array $identityMap                          first level cache
+	 * @var array<string, WeakReference> $identityMap   first level cache
+	 *
+	 * Holds weak references so that records can be garbage collected as soon
+	 * as user code drops them, instead of being pinned for the lifetime of
+	 * the connection.
 	 */
 	protected array $_identityMap        = [];
+	
+	/**
+	 * @var int $_identityMapSweepThreshold             dead weak references are
+	 *                                                  compacted once the map grows past this size
+	 */
+	private int $_identityMapSweepThreshold = 1024;
+	
+	/**
+	 * @var bool $_autoAccessorOverride                 cached value of the
+	 *                                                  ATTR_AUTO_ACCESSOR_OVERRIDE attribute
+	 */
+	private bool $_autoAccessorOverride = false;
+	
+	/**
+	 * @var int $_autoAccessorOverrideEpoch             attribute epoch the cached
+	 *                                                  auto-accessor-override flag was resolved at
+	 */
+	private int $_autoAccessorOverrideEpoch = -1;
 	
 	/**
 	 * @var Doctrine_Table_Repository $repository       record repository
@@ -1548,6 +1570,24 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
 	}
 	
 	/**
+	 * Cached lookup of the ATTR_AUTO_ACCESSOR_OVERRIDE attribute.
+	 *
+	 * Doctrine_Record::get()/set() consult this attribute on every field access;
+	 * walking the configuration hierarchy each time is wasteful. The cache is
+	 * re-resolved whenever any attribute changes anywhere in the hierarchy.
+	 *
+	 * @return bool
+	 */
+	public function getAutoAccessorOverride(): bool
+	{
+		if ($this->_autoAccessorOverrideEpoch !== Doctrine_Configurable::$_attributeEpoch) {
+			$this->_autoAccessorOverride = (bool) $this->getAttribute(Doctrine_Core::ATTR_AUTO_ACCESSOR_OVERRIDE);
+			$this->_autoAccessorOverrideEpoch = Doctrine_Configurable::$_attributeEpoch;
+		}
+		return $this->_autoAccessorOverride;
+	}
+	
+	/**
 	 * Adds a named query in the query registry.
 	 *
 	 * This methods register a query object with a name to use in the future.
@@ -1781,6 +1821,29 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
 	}
 	
 	/**
+	 * Stores a weak reference to the given record in the identity map,
+	 * compacting entries whose records have been garbage collected when
+	 * the map grows past the sweep threshold.
+	 *
+	 * @param string $id
+	 * @param Doctrine_Record $record
+	 * @return void
+	 */
+	private function _registerIdentity($id, Doctrine_Record $record): void
+	{
+		if (count($this->_identityMap) >= $this->_identityMapSweepThreshold) {
+			foreach ($this->_identityMap as $key => $ref) {
+				if ($ref->get() === null) {
+					unset($this->_identityMap[$key]);
+				}
+			}
+			$this->_identityMapSweepThreshold = max(1024, count($this->_identityMap) * 2);
+		}
+		
+		$this->_identityMap[$id] = WeakReference::create($record);
+	}
+	
+	/**
 	 * Adds a record to the first level cache (identity map).
 	 *
 	 * This method is used internally to cache records, ensuring that only one
@@ -1794,11 +1857,11 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
 	{
 		$id = implode(' ', $record->identifier());
 		
-		if (isset($this->_identityMap[$id])) {
+		if (isset($this->_identityMap[$id]) && $this->_identityMap[$id]->get() !== null) {
 			return false;
 		}
 		
-		$this->_identityMap[$id] = $record;
+		$this->_registerIdentity($id, $record);
 		
 		return true;
 	}
@@ -1818,8 +1881,9 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
 		$id = implode(' ', $record->identifier());
 		
 		if (isset($this->_identityMap[$id])) {
+			$live = $this->_identityMap[$id]->get() !== null;
 			unset($this->_identityMap[$id]);
-			return true;
+			return $live;
 		}
 		
 		return false;
@@ -1860,8 +1924,8 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
 			
 			$id = implode(' ', $id);
 			
-			if (isset($this->_identityMap[$id])) {
-				$record = $this->_identityMap[$id];
+			$record = isset($this->_identityMap[$id]) ? $this->_identityMap[$id]->get() : null;
+			if ($record !== null) {
 				if ($record->getTable()->getAttribute(Doctrine_Core::ATTR_HYDRATE_OVERWRITE)) {
 					$record->hydrate($this->_data);
 					if ($record->state() === Doctrine_Record::STATE_PROXY) {
@@ -1874,7 +1938,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
 				}
 			} else {
 				$record = $this->makeRecordInstance(false);
-				$this->_identityMap[$id] = $record;
+				$this->_registerIdentity($id, $record);
 			}
 			$this->_data = [];
 		} else {
@@ -1892,7 +1956,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
 	 */
 	public function hasLoadedRecord($id)
 	{
-		return isset($this->_identityMap[$id]);
+		return isset($this->_identityMap[$id]) && $this->_identityMap[$id]->get() !== null;
 	}
 	
 	/**
@@ -1903,7 +1967,7 @@ class Doctrine_Table extends Doctrine_Configurable implements Countable
 	 */
 	public function getLoadedRecord($id)
 	{
-		return $this->_identityMap[$id] ?? null;
+		return isset($this->_identityMap[$id]) ? $this->_identityMap[$id]->get() : null;
 	}
 	
 	/**

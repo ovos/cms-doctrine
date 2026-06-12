@@ -163,6 +163,7 @@ class Doctrine_Collection extends Doctrine_Access implements Countable, Iterator
 		unset($vars['reference']);
 		unset($vars['referenceField']);
 		unset($vars['relation']);
+		unset($vars['_backRefAlias']); // derived from relation, which is not serialized
 		unset($vars['expandable']);
 		unset($vars['expanded']);
 		unset($vars['generator']);
@@ -296,6 +297,7 @@ class Doctrine_Collection extends Doctrine_Access implements Countable, Iterator
 	{
 		$this->reference = $record;
 		$this->relation  = $relation;
+		$this->_backRefAlias = false;
 		
 		if ($relation instanceof Doctrine_Relation_ForeignKey ||
 				$relation instanceof Doctrine_Relation_LocalKey) {
@@ -473,6 +475,51 @@ class Doctrine_Collection extends Doctrine_Access implements Countable, Iterator
 	 */
 	public function add($record, $key = null)
 	{
+		$this->_setReferenceFor($record);
+		
+		// strict in_array compares object identity only and never recurses
+		// into the record graph (the old loose comparison did, which is why
+		// a manual foreach used to live here)
+		if (in_array($record, $this->data, true)) {
+			return false;
+		}
+		
+		return $this->_attach($record, $key);
+	}
+	
+	/**
+	 * Adds a record without checking whether it is already present in the
+	 * collection. Used by the hydrator, which already guarantees uniqueness
+	 * through its own identifier map; the duplicate scan in add() is O(n)
+	 * per call and makes building large collections quadratic.
+	 *
+	 * @param Doctrine_Record $record   record to be added
+	 * @param string $key               optional key for the record
+	 * @return boolean
+	 */
+	public function addUnchecked($record, $key = null)
+	{
+		$this->_setReferenceFor($record);
+		
+		return $this->_attach($record, $key);
+	}
+	
+	/**
+	 * @var string|null|false $_backRefAlias    alias of the back-reference relation
+	 *                                          on the record side, false when not
+	 *                                          yet resolved, null when there is none
+	 */
+	private $_backRefAlias = false;
+	
+	/**
+	 * Applies the collection's owning reference (foreign key value and
+	 * back-reference) to the given record, if this collection belongs to one.
+	 *
+	 * @param Doctrine_Record $record
+	 * @return void
+	 */
+	private function _setReferenceFor($record): void
+	{
 		if (isset($this->referenceField)) {
 			$value = $this->reference->get($this->relation->getLocalFieldName());
 			if ($value !== null) {
@@ -480,25 +527,32 @@ class Doctrine_Collection extends Doctrine_Access implements Countable, Iterator
 			} else {
 				$record->set($this->referenceField, $this->reference, false);
 			}
-			$relations = $this->relation['table']->getRelations();
-			foreach ($relations as $relation) {
-				if ($this->relation['class'] === $relation['localTable']->getOption('name') && $relation->getLocal() === $this->relation->getForeignFieldName()) {
-					$record->{$relation['alias']} = $this->reference;
-					break;
+			// The back-reference alias only depends on the collection's relation,
+			// so resolve it once instead of scanning the relations on every add
+			if ($this->_backRefAlias === false) {
+				$this->_backRefAlias = null;
+				foreach ($this->relation['table']->getRelations() as $relation) {
+					if ($this->relation['class'] === $relation['localTable']->getOption('name') && $relation->getLocal() === $this->relation->getForeignFieldName()) {
+						$this->_backRefAlias = $relation['alias'];
+						break;
+					}
 				}
 			}
-		}
-		/**
-		 * for some weird reason in_array cannot be used here (php bug ?)
-		 *
-		 * if used it results in fatal error : [ nesting level too deep ]
-		 */
-		foreach ($this->data as $val) {
-			if ($val === $record) {
-				return false;
+			if ($this->_backRefAlias !== null) {
+				$record->{$this->_backRefAlias} = $this->reference;
 			}
 		}
-		
+	}
+	
+	/**
+	 * Appends the record to the internal data array.
+	 *
+	 * @param Doctrine_Record $record
+	 * @param string|null $key
+	 * @return boolean
+	 */
+	private function _attach($record, $key)
+	{
 		if (isset($key)) {
 			if (isset($this->data[$key])) {
 				return false;
