@@ -39,13 +39,13 @@ class Doctrine_Ticket_DC313_TestCase extends Doctrine_UnitTestCase
         $this->tables[] = 'Ticket_DC313_BlogPostCategory';
         parent::prepareTables();
     }
-    
+
     public function testTest()
     {
         $query = Doctrine_Query::create()
             ->from('Ticket_DC313_BlogPost b')
             ->leftJoin('b.BlogCategories bc');
-            
+
         $this->assertEqual($query->getSqlQuery(), 'SELECT t.id AS t__id, t.title AS t__title, t.content AS t__content, t2.id AS t2__id, t2.name AS t2__name FROM ticket__d_c313__blog_post t LEFT JOIN ticket__d_c313__blog_post_category t3 ON (t.id = t3.id_blog_post) LEFT JOIN ticket__d_c313__blog_category t2 ON t2.id = t3.id_blog_category ORDER BY t2.name');
     }
 }
@@ -57,7 +57,7 @@ class Ticket_DC313_BlogPost extends Doctrine_Record
         $this->hasColumn('title', 'string', 128);
         $this->hasColumn('content', 'string');
     }
-    
+
     public function setUp()
     {
         $this->hasMany('Ticket_DC313_BlogCategory as BlogCategories', array('local' => 'id_blog_post', 'foreign' => 'id_blog_category', 'refClass' => 'Ticket_DC313_BlogPostCategory', 'orderBy' => 'name'));
@@ -70,7 +70,7 @@ class Ticket_DC313_BlogCategory extends Doctrine_Record
     {
         $this->hasColumn('name', 'string', 128);
     }
-    
+
     public function setUp()
     {
         $this->hasMany('Ticket_DC313_BlogPost as BlogPosts', array('local' => 'id_blog_category', 'foreign' => 'id_blog_post', 'refClass' => 'Ticket_DC313_BlogPostCategory'));
@@ -84,7 +84,7 @@ class Ticket_DC313_BlogPostCategory extends Doctrine_Record
         $this->hasColumn('id_blog_post', 'integer', null, array('primary' => true));
         $this->hasColumn('id_blog_category', 'integer', null, array('primary' => true));
     }
-    
+
     public function setUp()
     {
         $this->hasOne('Ticket_DC313_BlogPost as BlogPost', array('local' => 'id_blog_post', 'foreign' => 'id', 'onDelete' => 'CASCADE'));

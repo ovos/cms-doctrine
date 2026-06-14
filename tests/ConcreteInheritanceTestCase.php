@@ -34,7 +34,7 @@ class Doctrine_ConcreteInheritance_TestCase extends Doctrine_UnitTestCase
 {
     public function prepareTables()
     {
-        
+
     }
 }
 

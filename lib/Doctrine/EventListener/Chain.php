@@ -373,7 +373,7 @@ class Doctrine_EventListener_Chain extends Doctrine_Access implements Doctrine_E
 			$listener->onCollectionDelete($collection);
 		}
 	}
-
+	
 	/**
 	 * onCollectionDelete
 	 * an event invoked after a Doctrine_Collection is being deleted

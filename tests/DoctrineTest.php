@@ -137,7 +137,7 @@ class DoctrineTest
         if (isset($options['help'])) {
             $availableGroups = array_keys($this->groups);
             sort($availableGroups);
-	
+
             echo "Doctrine test runner help\n";
             echo "===========================\n";
             echo " To run all tests simply run this script without arguments. \n";

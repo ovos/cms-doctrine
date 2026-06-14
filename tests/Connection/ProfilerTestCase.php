@@ -54,12 +54,12 @@ class Doctrine_Connection_Profiler_TestCase extends Doctrine_UnitTestCase
         $this->conn->setListener($this->profiler);
 
         $this->conn->exec('CREATE TABLE test (id INT)');
-        
+
         $this->assertEqual($this->profiler->lastEvent()->getQuery(), 'CREATE TABLE test (id INT)');
         $this->assertTrue($this->profiler->lastEvent()->hasEnded());
         $this->assertEqual($this->profiler->lastEvent()->getCode(), Doctrine_Event::CONN_EXEC);
         $this->assertTrue(is_numeric($this->profiler->lastEvent()->getElapsedSecs()));
-        
+
         $this->assertEqual($this->conn->count(), 1);
     }
 
@@ -110,7 +110,7 @@ class Doctrine_Connection_Profiler_TestCase extends Doctrine_UnitTestCase
         $this->assertEqual($this->conn->count(), 4);
         */
     }
-    
+
     public function testExecuteStatementMultipleTimes() 
     {
         try {
@@ -145,7 +145,7 @@ class Doctrine_Connection_Profiler_TestCase extends Doctrine_UnitTestCase
         $this->assertTrue($this->profiler->lastEvent()->hasEnded());
         $this->assertEqual($this->profiler->lastEvent()->getCode(), Doctrine_Event::TX_BEGIN);
         $this->assertTrue(is_numeric($this->profiler->lastEvent()->getElapsedSecs()));
-        
+
         try {
             $this->conn->rollback();
             $this->pass();
@@ -171,7 +171,7 @@ class Doctrine_Connection_Profiler_TestCase extends Doctrine_UnitTestCase
         $this->assertTrue($this->profiler->lastEvent()->hasEnded());
         $this->assertEqual($this->profiler->lastEvent()->getCode(), Doctrine_Event::TX_BEGIN);
         $this->assertTrue(is_numeric($this->profiler->lastEvent()->getElapsedSecs()));
-        
+
         try {
             $this->conn->commit();
             $this->pass();

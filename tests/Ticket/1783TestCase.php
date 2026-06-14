@@ -6,7 +6,7 @@ class Doctrine_Ticket_1783_TestCase extends Doctrine_UnitTestCase
         $this->tables[] = 'Ticket_1783';
         parent::prepareTables();
     }
-	
+
     public function testValidateLargeIntegers()
     {
         $this->manager->setAttribute(Doctrine_Core::ATTR_VALIDATE, Doctrine_Core::VALIDATE_ALL);        

@@ -44,7 +44,7 @@ class Doctrine_Query_Driver_TestCase extends Doctrine_UnitTestCase
         $conn = $this->manager->openConnection($this->dbh);
 
         $q = new Doctrine_Query($conn);
-    
+
         $q->from('User u')->limit(5);
 
         $this->assertEqual($q->getSqlQuery(), 'SELECT e.id AS e__id, e.name AS e__name, e.loginname AS e__loginname, e.password AS e__password, e.type AS e__type, e.created AS e__created, e.updated AS e__updated, e.email_id AS e__email_id FROM entity e WHERE (e.type = 0) LIMIT 5');
@@ -57,12 +57,12 @@ class Doctrine_Query_Driver_TestCase extends Doctrine_UnitTestCase
         $conn = $this->manager->openConnection($this->dbh);
 
         $q = new Doctrine_Query($conn);
-    
+
         $q->from('User u')->limit(5);
 
         $this->assertEqual($q->getSqlQuery(), 'SELECT e.id AS e__id, e.name AS e__name, e.loginname AS e__loginname, e.password AS e__password, e.type AS e__type, e.created AS e__created, e.updated AS e__updated, e.email_id AS e__email_id FROM entity e WHERE (e.type = 0) LIMIT 5');
     }
-    
+
     public function testLimitQueriesForMysql()
     {
         $this->dbh = new Doctrine_Adapter_Mock('mysql');
@@ -70,7 +70,7 @@ class Doctrine_Query_Driver_TestCase extends Doctrine_UnitTestCase
         $conn = $this->manager->openConnection($this->dbh);
 
         $q = new Doctrine_Query($conn);
-    
+
         $q->from('User u')->limit(5);
 
         $this->assertEqual($q->getSqlQuery(), 'SELECT e.id AS e__id, e.name AS e__name, e.loginname AS e__loginname, e.password AS e__password, e.type AS e__type, e.created AS e__created, e.updated AS e__updated, e.email_id AS e__email_id FROM entity e WHERE (e.type = 0) LIMIT 5');

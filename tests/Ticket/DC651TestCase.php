@@ -39,14 +39,14 @@ class Doctrine_Ticket_DC651_TestCase extends Doctrine_UnitTestCase
         $this->tables[] = 'Ticket_DC651_UserGroup';
         parent::prepareTables();
     }
-    
+
     public function testTest()
     {
         $query = Doctrine_Query::create()
             ->select('g.*')
             ->from('Ticket_DC651_Group g')
             ->leftJoin('g.users u WITH u.uid=?', 1);
-        
+
         $this->assertEqual($query->getSqlQuery(), 'SELECT g.gid AS g__gid FROM groups g LEFT JOIN users_groups u2 ON (g.gid = u2.group_gid) LEFT JOIN users u ON u.uid = u2.user_id AND (u.uid = ?) ORDER BY u.uid');
     }
 }

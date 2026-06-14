@@ -49,17 +49,17 @@ class Doctrine_Ticket_OV1_TestCase extends Doctrine_UnitTestCase
 		$user->username = 'username';
 		$user->password = 'password';
 		$user->save();
-
+		
 		$role = new Ticket_OV1_Role();
 		$role->name = 'admin';
 		$role->save();
-
+		
 		$userRole = new Ticket_OV1_UserRole();
 		$userRole->id_user = $user->id;
 		$userRole->id_role = $role->id;
 		$userRole->position = 1;
 		$userRole->save();
-
+		
 		$user->free();
 	    $role->free();
 	    $userRole->free();
@@ -104,7 +104,7 @@ class Doctrine_Ticket_OV1_TestCase extends Doctrine_UnitTestCase
     	$this->conn->addListener($profiler);
 
 		$user = Doctrine_Core::getTable('Ticket_OV1_User')->find(1);
-
+		
 		// lazy load the relation
     	$roles = $user->Roles;
 
@@ -176,7 +176,7 @@ class Ticket_OV1_RoleReference extends Doctrine_Record
 		$this->hasColumn('id_role_parent', 'integer', null, array('primary' => true));
 		$this->hasColumn('id_role_child', 'integer', null, array('primary' => true));
 		$this->hasColumn('position', 'integer', null, array('notnull' => true));
-
+		
 		$this->option('orderBy', 'position DESC');
 	}
 	

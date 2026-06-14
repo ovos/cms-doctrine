@@ -1310,12 +1310,12 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
 				// Pick queryComponents before processing
 				$queryComponentsBefore = $this->getQueryComponents();
 			}
-
+			
 			// FIX #1667: _sqlParts are cleaned inside _processDqlQueryPart.
 			if ($queryPartName !== 'forUpdate') {
 				$this->_processDqlQueryPart($queryPartName, $queryParts);
 			}
-
+			
 			// We need to define the root alias
 			if ($queryPartName === 'from') {
 				// Pick queryComponents aftr processing
@@ -1807,7 +1807,7 @@ class Doctrine_Query extends Doctrine_Query_Abstract implements Countable
 				$subquery = 'SELECT doctrine_subquery_rownum_alias.' . $quotedIdentifierColumnName
 					. ', ROW_NUMBER() OVER() AS ' . $rnAlias
 					. ' FROM (' . $subquery . ') doctrine_subquery_rownum_alias';
-
+				
 				// return unique ids and keep order by using assigned row_number
 				$subquery = 'SELECT doctrine_subquery_alias.' . $quotedIdentifierColumnName . ', MIN(doctrine_subquery_alias.' . $rnAlias . ')'
 					. ' FROM (' . $subquery . ') doctrine_subquery_alias'

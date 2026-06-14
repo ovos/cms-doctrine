@@ -40,7 +40,7 @@ class Doctrine_Ticket_OV5_TestCase extends Doctrine_UnitTestCase
 			->select('u.*, (SELECT COUNT(a.id) FROM Album a WHERE a.user_id = u.id) count')
 			->from('User u')
 			->where('(SELECT COUNT(a.id) FROM Album a WHERE a.user_id = u.id) > ?', 1);
-
+		
 		$this->assertEqual($q->getSqlQuery(), 'SELECT e.id AS e__id, e.name AS e__name, e.loginname AS e__loginname, e.password AS e__password, e.type AS e__type, e.created AS e__created, e.updated AS e__updated, e.email_id AS e__email_id, (SELECT COUNT(a.id) AS a__0 FROM album a WHERE (a.user_id = e.id)) AS e__0 FROM entity e WHERE (SELECT COUNT(a.id) AS a__0 FROM album a WHERE (a.user_id = e.id)) > ? AND (e.type = 0)');
 	}
 }

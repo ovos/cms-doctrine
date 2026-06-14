@@ -8,7 +8,7 @@ class ORM_TestEntry extends Doctrine_Record {
         $this->hasColumn('amount', 'float'); 
         $this->hasColumn('itemID', 'integer'); 
    } 
-    
+
    public function setUp() {  
         $this->hasOne('ORM_TestItem', array(
             'local' => 'itemID', 'foreign' => 'id'

@@ -59,7 +59,7 @@ class Doctrine_Connection_Custom_TestCase extends Doctrine_UnitTestCase
 
 class Doctrine_Connection_Test extends Doctrine_Connection_Common
 {
-    
+
 }
 
 class Doctrine_Adapter_Test implements Doctrine_Adapter_Interface

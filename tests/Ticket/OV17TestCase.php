@@ -142,7 +142,7 @@ class Ticket_OV17_UserData extends Doctrine_Record
 		$this->hasColumn('first_name', 'string', 64);
 		$this->hasColumn('last_name', 'string', 64);
 	}
-
+	
 	public function setUp()
 	{
 		$this->hasOne('Ticket_OV17_User as User', array('local' => 'id_user', 'foreign' => 'id'));
@@ -156,7 +156,7 @@ class Ticket_OV17_Post extends Doctrine_Record
 		$this->hasColumn('id_user', 'integer');
 		$this->hasColumn('content', 'string');
 	}
-
+	
 	public function setUp()
 	{
 		// n:1
@@ -201,7 +201,7 @@ class Ticket_OV17_Player extends Doctrine_Record
 		$this->hasColumn('id_user', 'integer');
 		$this->hasColumn('player_name', 'string');
 	}
-
+	
 	public function setUp()
 	{
 		// 1:1
@@ -217,7 +217,7 @@ class Ticket_OV17_Group extends Doctrine_Record
 	{
 		$this->hasColumn('name', 'string', 64);
 	}
-
+	
 	public function setUp()
 	{
 		$this->hasMany('Ticket_OV17_Player as Players', array('local' => 'id_group', 'foreign' => 'id_player', 'refClass' => 'Ticket_OV17_PlayerGroup'));
@@ -231,7 +231,7 @@ class Ticket_OV17_PlayerGroup extends Doctrine_Record
 		$this->hasColumn('id_player', 'integer', null, array('primary' => true));
 		$this->hasColumn('id_group', 'integer', null, array('primary' => true));
 	}
-
+	
 	public function setUp()
 	{
 		$this->hasOne('Ticket_OV17_Player as Player', array('local' => 'id_player', 'foreign' => 'id', 'onDelete' => 'CASCADE'));

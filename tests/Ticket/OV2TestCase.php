@@ -74,7 +74,7 @@ class Doctrine_Ticket_OV2_TestCase extends Doctrine_UnitTestCase
 			$ref->save();
 			$ref->free();
 		}
-
+		
 		// save data for first user
 		$data = new Ticket_OV2_UserData();
 		$data->id_user = 1;
@@ -93,12 +93,12 @@ class Doctrine_Ticket_OV2_TestCase extends Doctrine_UnitTestCase
     		->fetchOne();
 
 		$this->assertTrue($user->hasReference('Roles'));
-
+		
 		$user->link('Roles', array(1, 2, 3));
 		$user->unlink('Roles', 4);
-
+		
 		$this->assertEqual($user->Roles->getLast()->id, 1);
-
+		
 		$user->free(true);
     }
 
@@ -111,13 +111,13 @@ class Doctrine_Ticket_OV2_TestCase extends Doctrine_UnitTestCase
 
 		$user->link('Roles', array(1, 2, 3));
 		$user->unlink('Roles', 4);
-
+		
 		$this->assertFalse($user->hasReference('Roles'));
-
+		
 		// should lazy-load the relation and apply modifications
 		$this->assertEqual($user->Roles->getLast()->id, 1);
 		$this->assertTrue($user->hasReference('Roles'));
-
+		
 		$user->free(true);
     }
 
@@ -125,21 +125,21 @@ class Doctrine_Ticket_OV2_TestCase extends Doctrine_UnitTestCase
 	{
 		$user = Doctrine_Core::getTable('Ticket_OV2_User')->find(2);
 		$user->link('Data', 1);
-
+		
 		$this->assertFalse($user->hasReference('Data'));
 		$this->assertEqual($user->getPendingLinks(), array('Data' => array(1 => true)));
-
+		
 		$this->assertEqual($user->Data->first_name, 'first_name');
 		$user->save();
-
+		
 		$user->free(true);
-
+		
 		$user = Doctrine_Core::getTable('Ticket_OV2_User')->find(1);
 		$this->assertNull($user->Data->first_name);
-
+		
 		$user->free(true);
 	}
-
+	
 	public function testLinkingOneToMany()
 	{
 		$user = Doctrine_Core::getTable('Ticket_OV2_User')->find(1);
@@ -148,7 +148,7 @@ class Doctrine_Ticket_OV2_TestCase extends Doctrine_UnitTestCase
 		$user->save();
 		$user->free(true);
 	}
-
+	
 	public function testFromArray()
 	{
 		$user = Doctrine_Query::create()
@@ -163,17 +163,17 @@ class Doctrine_Ticket_OV2_TestCase extends Doctrine_UnitTestCase
 			'Data' => array(1),
 			'Posts' => array(), // unlink all
 		));
-
+		
 		$this->assertEqual(array_values($user->Roles->toKeyValueArray('id', 'id')), array(2, 1, 5));
 		$this->assertEqual($user->Data->first_name, 'first_name');
 		$this->assertFalse($user->Posts->getFirst());
 		$user->free(true);
 	}
-
+	
 	public function testFromArray2()
 	{
 		$this->conn->clear();
-
+		
 		$post = Doctrine_Query::create()
     		->from('Ticket_OV2_Post p')
     		->innerJoin('p.User u')
@@ -183,7 +183,7 @@ class Doctrine_Ticket_OV2_TestCase extends Doctrine_UnitTestCase
 		$post->fromArray(array(
 			'User' => array(), // should not clear the user
 		));
-
+		
 		$this->assertEqual($post->User->id, 1);
 	}
 
@@ -197,7 +197,7 @@ class Doctrine_Ticket_OV2_TestCase extends Doctrine_UnitTestCase
 
 		$user->unlink('Roles', array(), false, array(2));
 		$this->assertEqual($user->Roles->getLast()->id, 2);
-
+		
 		$user->free(true);
     }
 
@@ -206,15 +206,15 @@ class Doctrine_Ticket_OV2_TestCase extends Doctrine_UnitTestCase
 		$user = Doctrine_Core::getTable('Ticket_OV2_User')->find(2);
 		$user->unlink('Data');
 		$user->save();
-
+		
 		$user->free(true);
-
+		
 		$data = Doctrine_Core::getTable('Ticket_OV2_UserData')->find(1);
 		$this->assertNull($data->id_user);
-
+		
 		$data->link('User', 1);
 		$data->save();
-
+		
 		$this->assertEqual($data->id_user, 1);
 	}
 
@@ -247,7 +247,7 @@ class Ticket_OV2_UserData extends Doctrine_Record
 		$this->hasColumn('first_name', 'string', 64);
 		$this->hasColumn('last_name', 'string', 64);
 	}
-
+	
 	public function setUp()
 	{
 		$this->hasOne('Ticket_OV2_User as User', array('local' => 'id_user', 'foreign' => 'id'));
@@ -261,7 +261,7 @@ class Ticket_OV2_Post extends Doctrine_Record
 		$this->hasColumn('id_user', 'integer');
 		$this->hasColumn('content', 'string');
 	}
-
+	
 	public function setUp()
 	{
 		// n:1

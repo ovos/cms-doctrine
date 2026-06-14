@@ -18,7 +18,7 @@ class QueryTest_User extends Doctrine_Record
         $this->hasOne('QueryTest_Rank as visibleRank', array(
             'local' => 'visibleRankId', 'foreign' => 'id'
         ));
-        
+
         $this->hasOne('QueryTest_Subscription', array(
             'local' => 'subscriptionId', 'foreign' => 'id'
         ));

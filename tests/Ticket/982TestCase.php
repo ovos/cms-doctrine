@@ -28,12 +28,12 @@ class Doctrine_Ticket_982_TestCase extends Doctrine_UnitTestCase
 	  $myModelZero->parentid = 0;
       $myModelZero->save();
       $this->assertIdentical(0, $myModelZero->id);
-	  
+
       $this->myModelOne = new T982_MyModel();
 	  $this->myModelOne->id = 1;
 	  $this->myModelOne->parentid = 0;
       $this->myModelOne->save();
-	  
+
       $this->myModelTwo = new T982_MyModel();
 	  $this->myModelTwo->id = 2;
 	  $this->myModelTwo->parentid = 1;
@@ -43,7 +43,7 @@ class Doctrine_Ticket_982_TestCase extends Doctrine_UnitTestCase
     public function testTicket()
     {
         $this->conn->getTable('T982_MyModel')->clear();
-        
+
         $myModelZero = $this->conn->getTable('T982_MyModel')->find(0);
 
         // SQLite: In PHP 8.1, the mapping of database types to PHP's native types has been greatly improved.
@@ -55,7 +55,7 @@ class Doctrine_Ticket_982_TestCase extends Doctrine_UnitTestCase
 		$this->assertIdentical($myModelZero, $myModelZero->parent);
 		$this->assertIdentical($myModelZero->parent->id, PHP_VERSION_ID >= 80100 ? 0 : '0');
 		$this->assertIdentical($myModelZero->parent->parentid, PHP_VERSION_ID >= 80100 ? 0 : '0');
-        
+
         $myModelOne = $this->conn->getTable('T982_MyModel')->find(1);
 
         $this->assertIdentical($myModelOne->id, PHP_VERSION_ID >= 80100 ? 1 : '1');
@@ -71,7 +71,7 @@ class Doctrine_Ticket_982_TestCase extends Doctrine_UnitTestCase
 		$this->assertIdentical($myModelTwo->parentid, PHP_VERSION_ID >= 80100 ? 1 : '1');
 		$this->assertIdentical($myModelTwo->parent->id, PHP_VERSION_ID >= 80100 ? 1 : '1');
 		$this->assertIdentical($myModelTwo->parent->parentid, PHP_VERSION_ID >= 80100 ? 0 : '0');
-		
+
    }
 }
 

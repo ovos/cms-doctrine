@@ -58,7 +58,7 @@ class Doctrine_Ticket_1195_TestCase extends Doctrine_UnitTestCase
 				->from('items i')
 				->addWhere('i.col1 = ?','a')
 				->addWhere('i.col2 = ?','a');
-
+		
 		$res = $q->execute();
 
         $this->assertEqual($res->count(), 1);
@@ -71,11 +71,11 @@ class Doctrine_Ticket_1195_TestCase extends Doctrine_UnitTestCase
 				->addComponent('i', 'T1195_Item i')
 				->from('ref r')
 				->leftJoin('items i ON r.item_id=i.id');
-
-
+		
+		
 		$res = $q->execute(array(),Doctrine_Core::HYDRATE_ARRAY);
 		$this->assertEqual(sizeof($res), 2);
-
+		
 		$q->distinct();
 		$res = $q->execute(array(),Doctrine_Core::HYDRATE_ARRAY);
 		$this->assertEqual(sizeof($res), 1);
@@ -87,13 +87,13 @@ class Doctrine_Ticket_1195_TestCase extends Doctrine_UnitTestCase
         $q = $q->select('{i.*}')
 				->addComponent('i', 'T1195_Item i')
 				->from('items i');
-
+		
 		if ( !method_exists( $q, 'count' ))
 		{
 			$this->fail("The query doesn't have a count() method");
 			return;
 		}
-
+		
 		$res = $q->count();
 		$this->assertEqual($res, 4);
 

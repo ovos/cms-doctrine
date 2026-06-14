@@ -107,7 +107,7 @@ class Doctrine_Connection_Sqlite extends Doctrine_Connection_Common
 		} else {
 			parent::connect();
 		}
-
+		
 		self::registerFunctions($this->dbh);
 		return true;
 	}

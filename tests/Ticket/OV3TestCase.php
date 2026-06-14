@@ -54,15 +54,15 @@ class Ticket_OV3_User extends Doctrine_Record
 	{
 		$this->hasColumn('username', 'string', 64, array('notnull' => true));
 		$this->hasColumn('password', 'string', 128, array('notnull' => true));
-
+		
 		$this->hasAccessor('display_name', 'getDisplayName');
 	}
-
+	
 	public function construct()
 	{
 		$this->mapValue('display_name');
 	}
-
+	
 	public function getDisplayName()
 	{
 		$value = $this->_get('display_name');

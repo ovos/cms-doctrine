@@ -54,17 +54,17 @@ class Doctrine_Access_TestCase extends Doctrine_UnitTestCase
 
         $this->assertTrue(isset($user->name));  
         $this->assertFalse(isset($user->unknown));
-        
+
         $this->assertTrue(isset($user['name']));
         $this->assertFalse(isset($user['unknown']));
-        
+
         $coll = new Doctrine_Collection('User');
-        
+
         $this->assertFalse(isset($coll[0]));
         // test repeated call
         $this->assertFalse(isset($coll[0]));
         $coll[0];
-        
+
         $this->assertTrue(isset($coll[0]));
         // test repeated call
         $this->assertTrue(isset($coll[0]));
@@ -97,7 +97,7 @@ class Doctrine_Access_TestCase extends Doctrine_UnitTestCase
         $user->name = 'Jack';
 
         $this->assertEqual($user->name, 'Jack');
-        
+
         $user->save();
 
         $user = $this->connection->getTable('User')->find($user->identifier());
@@ -108,7 +108,7 @@ class Doctrine_Access_TestCase extends Doctrine_UnitTestCase
         $user->name = 'zYne';
         $this->assertEqual($user->name, 'zYne');
     }
-    
+
     public function testSet() {
         $user = new User();
         $this->assertEqual($user->get('name'),null);

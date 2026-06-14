@@ -61,7 +61,7 @@ class Ticket_1940_User extends Doctrine_Record
 		$this->hasColumn('username', 'string', 255);
 		$this->hasColumn('password', 'string', 255);
 		$this->hasColumn('email_address', 'string', 255);
-
+		
 		$this->hasMutator('password', 'customSetPassword');
 		$this->hasAccessor('username', 'customGetUsername');
 	}
@@ -80,7 +80,7 @@ class Ticket_1940_User extends Doctrine_Record
 	{
 		return $this->_get('username').'-modified';
 	}
-
+	
 	public function customSetPassword($value)
 	{
 		return $this->_set('password', md5($value));

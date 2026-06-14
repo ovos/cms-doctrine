@@ -33,7 +33,7 @@ class sfYaml
 	
 	self::$spec = $version;
 	}
-
+	
 	/**
 	* Gets the YAML specification version to use.
 	*
@@ -43,7 +43,7 @@ class sfYaml
 	{
 	return self::$spec;
 	}
-
+	
 	/**
 	* Loads YAML into a PHP array.
 	*
@@ -100,7 +100,7 @@ class sfYaml
 	
 	return $ret;
 	}
-
+	
 	/**
 	* Dumps a PHP array to a YAML string.
 	*
