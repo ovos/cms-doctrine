@@ -32,7 +32,7 @@
  */
 class Doctrine_Query_Select_TestCase extends Doctrine_UnitTestCase
 {
-    
+
     public function testParseSelect()
     {
     	$q = new Doctrine_Query();
@@ -57,7 +57,7 @@ class Doctrine_Query_Select_TestCase extends Doctrine_UnitTestCase
     public function testSelectDistinctIsSupported()
     {
         $q = new Doctrine_Query();
-        
+
         $q->distinct()->select('u.name')->from('User u');
 
         $this->assertEqual($q->getSqlQuery(), "SELECT DISTINCT e.id AS e__id, e.name AS e__name FROM entity e WHERE (e.type = 0)");
@@ -66,7 +66,7 @@ class Doctrine_Query_Select_TestCase extends Doctrine_UnitTestCase
     public function testSelectDistinctIsSupported2()
     {
         $q = new Doctrine_Query();
-        
+
         $q->select('DISTINCT u.name')->from('User u');
 
         $this->assertEqual($q->getSqlQuery(), "SELECT DISTINCT e.id AS e__id, e.name AS e__name FROM entity e WHERE (e.type = 0)");
@@ -127,10 +127,10 @@ class Doctrine_Query_Select_TestCase extends Doctrine_UnitTestCase
     public function testUnknownAggregateFunction() 
     {
         $q = new Doctrine_Query();
-        
+
         try {
             $q->parseDqlQuery('SELECT UNKNOWN(u.id) FROM User u');
-            
+
             $q->getSqlQuery();
             $this->fail();
         } catch(Doctrine_Query_Exception $e) {
@@ -167,7 +167,7 @@ class Doctrine_Query_Select_TestCase extends Doctrine_UnitTestCase
         $q = new Doctrine_Query();
 
         $q->parseDqlQuery('SELECT u.name, u.type FROM User u'); 
-        
+
         $this->assertEqual($q->getSqlQuery(), 'SELECT e.id AS e__id, e.name AS e__name, e.type AS e__type FROM entity e WHERE (e.type = 0)');
     }
     public function testMultipleComponentsWithAsterisk()
@@ -227,7 +227,7 @@ class Doctrine_Query_Select_TestCase extends Doctrine_UnitTestCase
         $q = new Doctrine_Query();
 
         $q->parseDqlQuery('SELECT u.id, COUNT(p.id) count, MAX(p.phonenumber) max FROM User u, u.Phonenumber p GROUP BY u.id');
-        
+
         $this->assertEqual($q->getSqlQuery(), 'SELECT e.id AS e__id, COUNT(p.id) AS p__0, MAX(p.phonenumber) AS p__1 FROM entity e LEFT JOIN phonenumber p ON e.id = p.entity_id WHERE (e.type = 0) GROUP BY e.id');
 
         $users = $q->execute();
@@ -261,7 +261,7 @@ class Doctrine_Query_Select_TestCase extends Doctrine_UnitTestCase
         );
 
         $users = $q->execute($params, Doctrine_Core::HYDRATE_ARRAY);
-        
+
         $this->assertEqual(count($users), 3);
     }
 }

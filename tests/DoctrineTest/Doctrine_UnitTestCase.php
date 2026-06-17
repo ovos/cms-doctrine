@@ -100,7 +100,7 @@ class Doctrine_UnitTestCase extends UnitTestCase
 
         if ( ! $this->driverName) {
             $this->driverName = 'main';
-    
+
             switch($e[1]) {
                 case 'Export':
                 case 'Import':
@@ -110,9 +110,9 @@ class Doctrine_UnitTestCase extends UnitTestCase
                     $this->driverName = 'Sqlite';
                 break;
             }
-            
+
             $module = $e[1];
-    
+
             if (count($e) > 3) {
                 $driver = $e[2];
                 switch($e[2]) {
@@ -171,7 +171,7 @@ class Doctrine_UnitTestCase extends UnitTestCase
                     case 'Sequence':
                     case 'Expression':
                         $lower = strtolower($module);
-    
+
                         $this->$lower = $this->connection->$lower;
                     break;
                     case 'DataDict':
@@ -271,7 +271,7 @@ class Doctrine_UnitTestCase extends UnitTestCase
     public function assertDeclarationType($type, $type2) 
     {
         $dec = $this->getDeclaration($type);
-        
+
         if ( ! is_array($type2)) {
             $type2 = array($type2);
         }
@@ -293,7 +293,7 @@ class Doctrine_UnitTestCase extends UnitTestCase
 
         $this->init = true;
     }
-    
+
     public function tearDown() {
     }
 }

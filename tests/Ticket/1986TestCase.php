@@ -35,13 +35,13 @@ class Doctrine_Ticket_1986_TestCase extends Doctrine_UnitTestCase
 	public function prepareData()
 	{
 	}
-
+	
 	public function prepareTables()
 	{
 		$this->tables = array('Testing_Ticket_1986_1','Testing_Ticket_1986_2','Testing_Ticket_1986Link');
 		parent::prepareTables();
 	}
-
+	
 	public function testTicket()
 	{
 		// this works
@@ -62,7 +62,7 @@ class Doctrine_Ticket_1986_TestCase extends Doctrine_UnitTestCase
 			$this->fail($e->getMessage());
 		}
 	}
-	 
+
 }
 
 class Testing_Ticket_1986_1 extends Doctrine_Record
@@ -85,7 +85,7 @@ class Testing_Ticket_1986_2 extends Doctrine_Record
 		$this->setTableName('testing_ticket_1986_2');
 		$this->hasColumn('value', 'string', 64, array());
 	}
-
+	
 	public function setUp()
 	{
 		$this->hasMany('Testing_Ticket_1986_1', array('refClass' => 'Testing_Ticket_1986Link', 'local' => 'id_2', 'foreign' => 'id_1'));
@@ -106,6 +106,5 @@ class Testing_Ticket_1986Link extends Doctrine_Record
 		$this->hasOne('Testing_Ticket_1986_1 as rel1', array('local' => 'id_1', 'foreign' => 'id', 'onDelete' => 'CASCADE'));
 		$this->hasOne('Testing_Ticket_1986_2 as rel2', array('local' => 'id_2', 'foreign' => 'id', 'onDelete' => 'CASCADE'));
 	}
-  
+
 }
-	

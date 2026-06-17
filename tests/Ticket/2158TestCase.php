@@ -48,7 +48,7 @@ class T2158_Model2 extends Doctrine_Record
     public function setTableDefinition()
     {
     }
-    
+
 
     public function setUp()
     {

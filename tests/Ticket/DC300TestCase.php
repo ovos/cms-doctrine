@@ -64,7 +64,7 @@ class Doctrine_Ticket_DC300_TestCase extends Doctrine_UnitTestCase
     public function testRefTableEntriesOnManyToManyRelationsWithSynchronizeWithArray()
     {
 		$u1 = Doctrine::getTable('Ticket_DC300_User')->find(1);
-
+		
 		// update the groups user (id 1) is linked to
 		$u1->synchronizeWithArray(array(
 			'Groups' => array(
@@ -73,14 +73,14 @@ class Doctrine_Ticket_DC300_TestCase extends Doctrine_UnitTestCase
 			)
 		));
 		$u1->save();
-
+		
 		// update the user-objects with real data from database
 		$u1->loadReference('Groups');
-
+		
 		// check wether the two database-entries in RefTable exists
 		$this->assertEqual(count($u1->Groups), 2);
     }
-   
+
 }
 
 class Ticket_DC300_Group extends Doctrine_Record
@@ -106,7 +106,7 @@ class Ticket_DC300_User extends Doctrine_Record
 	{
 		$this->hasColumn('name', 'string', 255);
 	}
-
+	
 	public function setUp()
 	{
 		$this->hasMany('Ticket_DC300_Group as Groups', array(

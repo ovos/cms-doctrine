@@ -53,7 +53,7 @@ class Ticket_OV12_Model extends Doctrine_Record
 	public function setTableDefinition()
 	{
 	}
-
+	
 	public function setUp()
 	{
 		$this->actAs('Timestampable');

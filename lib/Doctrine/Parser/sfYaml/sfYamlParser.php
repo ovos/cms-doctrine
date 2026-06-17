@@ -39,7 +39,7 @@ class sfYamlParser
 	{
 	$this->offset = $offset;
 	}
-
+	
 	/**
 	* Parses a YAML string to a PHP value.
 	*
@@ -276,7 +276,7 @@ class sfYamlParser
 	
 	return empty($data) ? null : $data;
 	}
-
+	
 	/**
 	* Returns the current line number (takes the offset into account).
 	*
@@ -286,7 +286,7 @@ class sfYamlParser
 	{
 	return $this->currentLineNb + $this->offset;
 	}
-
+	
 	/**
 	* Returns the current line indentation.
 	*
@@ -296,7 +296,7 @@ class sfYamlParser
 	{
 	return strlen($this->currentLine) - strlen(ltrim($this->currentLine, ' '));
 	}
-
+	
 	/**
 	* Returns the next embed block of YAML.
 	*
@@ -361,7 +361,7 @@ class sfYamlParser
 	
 	return implode("\n", $data);
 	}
-
+	
 	/**
 	* Moves the parser to the next line.
 	*/
@@ -376,7 +376,7 @@ class sfYamlParser
 	
 	return true;
 	}
-
+	
 	/**
 	* Moves the parser to the previous line.
 	*/
@@ -384,7 +384,7 @@ class sfYamlParser
 	{
 	$this->currentLine = $this->lines[--$this->currentLineNb];
 	}
-
+	
 	/**
 	* Parses a YAML value.
 	*
@@ -423,7 +423,7 @@ class sfYamlParser
 		return sfYamlInline::load($value);
 	}
 	}
-
+	
 	/**
 	* Parses a folded scalar.
 	*
@@ -509,7 +509,7 @@ class sfYamlParser
 	
 	return $text;
 	}
-
+	
 	/**
 	* Returns true if the next line is indented.
 	*
@@ -540,7 +540,7 @@ class sfYamlParser
 	
 	return $ret;
 	}
-
+	
 	/**
 	* Returns true if the current line is blank or if it is a comment line.
 	*
@@ -550,7 +550,7 @@ class sfYamlParser
 	{
 	return $this->isCurrentLineBlank() || $this->isCurrentLineComment();
 	}
-
+	
 	/**
 	* Returns true if the current line is blank.
 	*
@@ -560,7 +560,7 @@ class sfYamlParser
 	{
 	return '' == trim($this->currentLine, ' ');
 	}
-
+	
 	/**
 	* Returns true if the current line is a comment line.
 	*
@@ -572,7 +572,7 @@ class sfYamlParser
 	$ltrimmedLine = ltrim($this->currentLine, ' ');
 	return $ltrimmedLine[0] === '#';
 	}
-
+	
 	/**
 	* Cleanups a YAML string to be parsed.
 	*

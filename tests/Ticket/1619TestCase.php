@@ -30,7 +30,7 @@
  * @version     $Revision$
  */
 class Doctrine_Ticket_1619_TestCase extends Doctrine_UnitTestCase {
-	
+
 	public function prepareTables()
   {
     $this->tables[] = 'Ticket_1619_Article';
@@ -73,5 +73,5 @@ class Ticket_1619_Article extends Doctrine_Record
     $this->actAs($i18n0);
   }
 }
-	
+
 

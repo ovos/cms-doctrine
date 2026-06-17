@@ -153,7 +153,7 @@ class DoctrineTest_Coverage
             if (strpos($file->getPathname(), ".svn")) {
                 continue;
             } 
-            
+
             $class = $this->getClassNameFromFileName($file->getPathname());
 
             if (strpos($class, '_Interface')) {
@@ -258,7 +258,7 @@ class DoctrineTest_Coverage
     {
         $className = $this->getClassNameFromFileName($fileName);
         $title = "Coverage for " . $className;
-        
+
         $html = '<html>
     <head>
         <title>' . $title . '</title>

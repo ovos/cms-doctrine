@@ -42,7 +42,7 @@ class Doctrine_Connection_Profiler_TestCase extends Doctrine_UnitTestCase
     {}
     public function prepareData() 
     {}
-    
+
     public function testQuery() 
     {
         $this->conn = Doctrine_Manager::getInstance()->openConnection(array('sqlite::memory:'));
@@ -52,12 +52,12 @@ class Doctrine_Connection_Profiler_TestCase extends Doctrine_UnitTestCase
         $this->conn->setListener($this->profiler);
 
         $this->conn->exec('CREATE TABLE test (id INT)');
-        
+
         $this->assertEqual($this->profiler->lastEvent()->getQuery(), 'CREATE TABLE test (id INT)');
         $this->assertTrue($this->profiler->lastEvent()->hasEnded());
         $this->assertEqual($this->profiler->lastEvent()->getCode(), Doctrine_Db_Event::EXEC);
         $this->assertTrue(is_numeric($this->profiler->lastEvent()->getElapsedSecs()));
-        
+
         $this->assertEqual($this->conn->count(), 1);
     }
     public function testPrepareAndExecute() 
@@ -139,7 +139,7 @@ class Doctrine_Connection_Profiler_TestCase extends Doctrine_UnitTestCase
         $this->assertTrue($this->profiler->lastEvent()->hasEnded());
         $this->assertEqual($this->profiler->lastEvent()->getCode(), Doctrine_Db_Event::BEGIN);
         $this->assertTrue(is_numeric($this->profiler->lastEvent()->getElapsedSecs()));
-        
+
         try {
             $this->conn->rollback();
             $this->pass();
@@ -164,7 +164,7 @@ class Doctrine_Connection_Profiler_TestCase extends Doctrine_UnitTestCase
         $this->assertTrue($this->profiler->lastEvent()->hasEnded());
         $this->assertEqual($this->profiler->lastEvent()->getCode(), Doctrine_Db_Event::BEGIN);
         $this->assertTrue(is_numeric($this->profiler->lastEvent()->getElapsedSecs()));
-        
+
         try {
             $this->conn->commit();
             $this->pass();

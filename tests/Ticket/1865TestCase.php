@@ -51,11 +51,11 @@ class Doctrine_Ticket_1865_TestCase extends Doctrine_UnitTestCase
         $user->password = '!';
         $user->Profile;
         $user->save();
-        
+
         $this->assertNotEqual($user->Profile->id, null); // Ticket_1865_Profile is saved
         $user->delete();
     }
-    
+
     public function testSaveWithRelatedWithPreInsert()
     {
         $user = new Ticket_1865_User();
@@ -63,7 +63,7 @@ class Doctrine_Ticket_1865_TestCase extends Doctrine_UnitTestCase
         $user->loginname = 'world';
         $user->password = '!';
         $user->save(); // $user->Ticket_1865_Profile must be called in Ticket_1865_User::preInsert
-        
+
         $this->assertNotEqual($user->Profile->id, null); // Ticket_1865_Profile is NOT saved - test failure
         $user->delete();
     }

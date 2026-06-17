@@ -19,7 +19,7 @@ require_once dirname(__FILE__).'/sfYaml.php';
 class sfYamlInline
 {
 	const string REGEX_QUOTED_STRING = '(?:"([^"\\\\]*(?:\\\\.[^"\\\\]*)*)"|\'([^\']*(?:\'\'[^\']*)*)\')';
-
+	
 	/**
 	* Convert a YAML string to a PHP array.
 	*
@@ -61,7 +61,7 @@ class sfYamlInline
 	
 	return $result;
 	}
-
+	
 	/**
 	* Dumps a given PHP variable to a YAML string.
 	*
@@ -118,7 +118,7 @@ class sfYamlInline
 		return $value;
 	}
 	}
-
+	
 	/**
 	* Dumps a PHP array to a YAML string.
 	*
@@ -154,7 +154,7 @@ class sfYamlInline
 	
 	return sprintf('{ %s }', implode(', ', $output));
 	}
-
+	
 	/**
 	* Parses a scalar to a YAML string.
 	*
@@ -202,7 +202,7 @@ class sfYamlInline
 	
 	return $output;
 	}
-
+	
 	/**
 	* Parses a quoted scalar to YAML.
 	*
@@ -235,7 +235,7 @@ class sfYamlInline
 	
 	return $output;
 	}
-
+	
 	/**
 	* Parses a sequence to a YAML string.
 	*
@@ -295,7 +295,7 @@ class sfYamlInline
 	
 	throw new InvalidArgumentException(sprintf('Malformed inline YAML string %s', $sequence));
 	}
-
+	
 	/**
 	* Parses a mapping to a YAML string.
 	*
@@ -362,7 +362,7 @@ class sfYamlInline
 	
 	throw new InvalidArgumentException(sprintf('Malformed inline YAML string %s', $mapping));
 	}
-
+	
 	/**
 	* Evaluates scalars and replaces magic values.
 	*
@@ -420,7 +420,7 @@ class sfYamlInline
 		return (string) $scalar;
 	}
 	}
-
+	
 	static protected function getTimestampRegex()
 	{
 	return <<<EOF

@@ -55,7 +55,7 @@ class Doctrine_Ticket_OV10_TestCase extends Doctrine_UnitTestCase
 		{
 			$event = array_pop($events);
 		} while ($event->getName() != 'execute');
-
+		
 		$this->assertEqual($event->getQuery(), 'SELECT e.id AS e__id, "test?" AS e__0, \'?test\' AS e__1 FROM entity e LEFT JOIN album a ON e.id = a.user_id AND (user_id = ?) WHERE e.id IN (SELECT DISTINCT e2.id FROM entity e2 LEFT JOIN album a2 ON e2.id = a2.user_id AND (user_id = ?) WHERE e2.name = ? AND (e2.type = 0) LIMIT 10) AND (e.name = ? AND (e.type = 0))');
 		$this->assertEqual($event->getParams(), array(1, 1, 'test', 'test'));
 	}

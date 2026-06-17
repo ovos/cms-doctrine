@@ -50,7 +50,7 @@ class Doctrine_Ticket_966_TestCase extends Doctrine_UnitTestCase
 
     $semesters = $query->execute(array(), Doctrine_Core::HYDRATE_ARRAY);
     $semester = $semesters[0];    
-    
+
     $this->assertAllWeekdaysArePopulated($semester);
   }
 
@@ -62,7 +62,7 @@ class Doctrine_Ticket_966_TestCase extends Doctrine_UnitTestCase
       ->leftJoin('c.Weekdays cw');
 
     $semester = $query->execute()->getFirst();
-    
+
     $weekdayOids = array();
     foreach ($semester->Courses as $course) {
         foreach ($course->Weekdays as $weekday) {
@@ -75,7 +75,7 @@ class Doctrine_Ticket_966_TestCase extends Doctrine_UnitTestCase
     }
     // should be only 3 weekday objects in total
     $this->assertEqual(3, count($weekdayOids));
-    
+
     $queryCountBefore = $this->conn->count();
     $this->assertAllWeekdaysArePopulated($semester);
     $this->assertEqual($queryCountBefore, $this->conn->count());

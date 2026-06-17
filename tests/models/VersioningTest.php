@@ -34,7 +34,7 @@ class VersioningTest3 extends Doctrine_Record
     }
     public function setUp()
     {
-    	  
+
         $this->actAs('Versionable', array('tableName' =>  'tbl_prefix_comments_version',
                                           'className' =>  'VersioningTestClass'));
 

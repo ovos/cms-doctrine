@@ -31,7 +31,7 @@
  * @version     $Revision$
  */
 class Doctrine_CustomResultSetOrder_TestCase extends Doctrine_UnitTestCase {
-    
+
     /**
      * Prepares the data under test.
      * 
@@ -45,35 +45,35 @@ class Doctrine_CustomResultSetOrder_TestCase extends Doctrine_UnitTestCase {
         $cat1 = new CategoryWithPosition();
         $cat1->position = 0;
         $cat1->name = "First";
-        
+
         $cat2 = new CategoryWithPosition();
         $cat2->position = 0; // same 'priority' as the first
         $cat2->name = "Second";
-        
+
         $cat3 = new CategoryWithPosition();
         $cat3->position = 1;
         $cat3->name = "Third";
-        
+
         $board1 = new BoardWithPosition();
         $board1->position = 0;
-        
+
         $board2 = new BoardWithPosition();
         $board2->position = 1;
-        
+
         $board3 = new BoardWithPosition();
         $board3->position = 2;
-        
+
         // The first category gets 3 boards!
         $cat1->Boards[0] = $board1;
         $cat1->Boards[1] = $board2;
         $cat1->Boards[2] = $board3;
-        
+
         $board4 = new BoardWithPosition();
         $board4->position = 0;
-        
+
         // The second category gets 1 board!
         $cat2->Boards[0] = $board4;
-        
+
         $this->connection->flush();
     }
 
@@ -108,7 +108,7 @@ class Doctrine_CustomResultSetOrder_TestCase extends Doctrine_UnitTestCase {
                 ->execute(array(), Doctrine_Core::HYDRATE_ARRAY);
 
         $this->assertEqual(3, count($categories), 'Some categories were doubled!');
-                
+
         // Check each category
         foreach ($categories as $category) {
             switch ($category['name']) {
@@ -127,7 +127,7 @@ class Doctrine_CustomResultSetOrder_TestCase extends Doctrine_UnitTestCase {
                     $this->assertEqual(0, count($category['Boards']));
                 break;
             }
-            
+
         }
     }
 
@@ -152,10 +152,10 @@ class Doctrine_CustomResultSetOrder_TestCase extends Doctrine_UnitTestCase {
                 ->execute();
 
         $this->assertEqual(3, $categories->count(), 'Some categories were doubled!');
-                
+
         // Check each category
         foreach ($categories as $category) {
-            
+
             switch ($category->name) {
                 case 'First':
                     // The first category should have 3 boards
@@ -173,7 +173,7 @@ class Doctrine_CustomResultSetOrder_TestCase extends Doctrine_UnitTestCase {
                     $this->assertEqual(0, $category->Boards->count());
                 break;
             }
-            
+
         }
     }
 }

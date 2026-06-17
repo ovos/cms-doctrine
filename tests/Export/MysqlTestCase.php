@@ -50,10 +50,10 @@ class Doctrine_Export_Mysql_TestCase extends Doctrine_UnitTestCase
     public function testCreateTableExecutesSql() 
     {
         $name = 'mytable';
-        
+
         $fields  = array('id' => array('type' => 'integer', 'unsigned' => 1));
         $options = array('type' => 'MYISAM');
-        
+
         $this->export->createTable($name, $fields, $options);
 
         $this->assertEqual($this->adapter->pop(), 'CREATE TABLE mytable (id INT UNSIGNED) ENGINE = MYISAM');
@@ -61,7 +61,7 @@ class Doctrine_Export_Mysql_TestCase extends Doctrine_UnitTestCase
     public function testCreateTableSupportsDefaultTableType() 
     {
         $name = 'mytable';
-        
+
         $fields  = array('id' => array('type' => 'integer', 'unsigned' => 1));
 
         $this->export->createTable($name, $fields);
@@ -74,10 +74,10 @@ class Doctrine_Export_Mysql_TestCase extends Doctrine_UnitTestCase
         $name = 'mytable';
         $fields  = array('name' => array('type' => 'char', 'length' => 10),
                          'type' => array('type' => 'integer', 'length' => 3));
-                         
+
         $options = array('primary' => array('name', 'type'));
         $this->export->createTable($name, $fields, $options);
-        
+
         $this->assertEqual($this->adapter->pop(), 'CREATE TABLE mytable (name CHAR(10), type MEDIUMINT, PRIMARY KEY(name, type)) ENGINE = INNODB');
     }
     public function testCreateTableSupportsAutoincPks() 
@@ -87,7 +87,7 @@ class Doctrine_Export_Mysql_TestCase extends Doctrine_UnitTestCase
         $fields  = array('id' => array('type' => 'integer', 'unsigned' => 1, 'autoincrement' => true));
         $options = array('primary' => array('id'), 
                         'type' => 'INNODB');
-        
+
         $this->export->createTable($name, $fields, $options);
 
         $this->assertEqual($this->adapter->pop(), 'CREATE TABLE mytable (id INT UNSIGNED AUTO_INCREMENT, PRIMARY KEY(id)) ENGINE = INNODB');
@@ -95,10 +95,10 @@ class Doctrine_Export_Mysql_TestCase extends Doctrine_UnitTestCase
     public function testCreateTableSupportsCharType() 
     {
         $name = 'mytable';
-        
+
         $fields  = array('id' => array('type' => 'char', 'length' => 3));
         $options = array('type' => 'MYISAM');
-        
+
         $this->export->createTable($name, $fields, $options);
 
         $this->assertEqual($this->adapter->pop(), 'CREATE TABLE mytable (id CHAR(3)) ENGINE = MYISAM');
@@ -106,10 +106,10 @@ class Doctrine_Export_Mysql_TestCase extends Doctrine_UnitTestCase
     public function testCreateTableSupportsCharType2() 
     {
         $name = 'mytable';
-        
+
         $fields  = array('id' => array('type' => 'char'));
         $options = array('type' => 'MYISAM');
-        
+
         $this->export->createTable($name, $fields, $options);
 
         $this->assertEqual($this->adapter->pop(), 'CREATE TABLE mytable (id CHAR(255)) ENGINE = MYISAM');
@@ -117,7 +117,7 @@ class Doctrine_Export_Mysql_TestCase extends Doctrine_UnitTestCase
     public function testCreateTableSupportsVarcharType() 
     {
         $name = 'mytable';
-        
+
         $fields  = array('id' => array('type' => 'varchar', 'length' => '100'));
         $options = array('type' => 'MYISAM');
 
@@ -128,7 +128,7 @@ class Doctrine_Export_Mysql_TestCase extends Doctrine_UnitTestCase
     public function testCreateTableSupportsIntegerType() 
     {
         $name = 'mytable';
-        
+
         $fields  = array('id' => array('type' => 'integer', 'length' => '10'));
         $options = array('type' => 'MYISAM');
 
@@ -139,7 +139,7 @@ class Doctrine_Export_Mysql_TestCase extends Doctrine_UnitTestCase
     public function testCreateTableSupportsBlobType() 
     {
         $name = 'mytable';
-        
+
         $fields  = array('content' => array('type' => 'blob'));
         $options = array('type' => 'MYISAM');
 
@@ -150,7 +150,7 @@ class Doctrine_Export_Mysql_TestCase extends Doctrine_UnitTestCase
     public function testCreateTableSupportsBlobType2() 
     {
         $name = 'mytable';
-        
+
         $fields  = array('content' => array('type' => 'blob', 'length' => 2000));
         $options = array('type' => 'MYISAM');
 
@@ -162,7 +162,7 @@ class Doctrine_Export_Mysql_TestCase extends Doctrine_UnitTestCase
     public function testCreateTableSupportsBooleanType()
     {
         $name = 'mytable';
-        
+
         $fields  = array('id' => array('type' => 'boolean'));
         $options = array('type' => 'MYISAM');
 
@@ -173,7 +173,7 @@ class Doctrine_Export_Mysql_TestCase extends Doctrine_UnitTestCase
     public function testCreateTableSupportsForeignKeys()
     {
         $name = 'mytable';
-        
+
         $fields = array('id' => array('type' => 'boolean', 'primary' => true),
                         'foreignKey' => array('type' => 'integer')
                         );
@@ -237,7 +237,7 @@ class Doctrine_Export_Mysql_TestCase extends Doctrine_UnitTestCase
     public function testCreateTableDoesNotAutoAddIndexesWhenIndexForFkFieldAlreadyExists()
     {
         $name = 'mytable';
-        
+
         $fields = array('id' => array('type' => 'boolean', 'primary' => true),
                         'foreignKey' => array('type' => 'integer')
                         );
@@ -323,7 +323,7 @@ class Doctrine_Export_Mysql_TestCase extends Doctrine_UnitTestCase
                          );
 
         $this->export->createTable('sometable', $fields, $options);
-        
+
         $this->assertEqual($this->adapter->pop(), 'CREATE TABLE sometable (id INT UNSIGNED AUTO_INCREMENT, name VARCHAR(4), INDEX myindex_idx (id ASC, name DESC), PRIMARY KEY(id)) ENGINE = INNODB');
     }
     public function testCreateTableSupportsFulltextIndexes()
@@ -343,7 +343,7 @@ class Doctrine_Export_Mysql_TestCase extends Doctrine_UnitTestCase
                          );
 
         $this->export->createTable('sometable', $fields, $options);
-        
+
         $this->assertEqual($this->adapter->pop(), 'CREATE TABLE sometable (id INT UNSIGNED AUTO_INCREMENT, content VARCHAR(4), FULLTEXT INDEX myindex_idx (content DESC), PRIMARY KEY(id)) ENGINE = MYISAM');
     }
     public function testCreateTableSupportsCompoundForeignKeys()

@@ -62,7 +62,7 @@ class Ticket_950_AdresseRecord extends Doctrine_Record
 		$this->hasColumn('ville', 'string', 255);
 		$this->hasColumn('pays', 'string', 2);
 	}
-
+	
 	public function setUp()
 	{
 		$this->hasOne('Ticket_950_CountryRecord as Country', array('local' => 'pays', 'foreign' => 'iso'));
@@ -79,7 +79,7 @@ class Ticket_950_CountryRecord extends Doctrine_Record
                                               'autoincrement' => true));
 
 		$this->hasColumn('iso', 'string', 2, array('notnull' => true));
-
+		
 		$this->hasColumn('name', 'string', 80);
 		$this->hasColumn('printable_name', 'string', 80);
 		$this->hasColumn('iso3', 'string', 3);

@@ -34,7 +34,7 @@ class Doctrine_Record_Listener implements Doctrine_Record_Listener_Interface
 	 * @var array $_options        an array containing options
 	 */
 	protected array $_options = ['disabled' => false];
-
+	
 	/**
 	 * setOption
 	 * sets an option in order to allow flexible listener
@@ -50,7 +50,7 @@ class Doctrine_Record_Listener implements Doctrine_Record_Listener_Interface
 			$this->_options[$name] = $value;
 		}
 	}
-
+	
 	/**
 	 * getOptions
 	 * returns all options of this template and the associated values
@@ -61,7 +61,7 @@ class Doctrine_Record_Listener implements Doctrine_Record_Listener_Interface
 	{
 		return $this->_options;
 	}
-
+	
 	/**
 	 * getOption
 	 * returns the value of given option
@@ -74,68 +74,68 @@ class Doctrine_Record_Listener implements Doctrine_Record_Listener_Interface
 		if (isset($this->_options[$name])) {
 			return $this->_options[$name];
 		}
-
+		
 		return null;
 	}
-
+	
 	public function preSerialize(Doctrine_Event $event): void
 	{ }
-
+	
 	public function postSerialize(Doctrine_Event $event): void
 	{ }
-
+	
 	public function preUnserialize(Doctrine_Event $event): void
 	{ }
-
+	
 	public function postUnserialize(Doctrine_Event $event): void
 	{ }
-
+	
 	public function preDqlSelect(Doctrine_Event $event): void
 	{ }
-
+	
 	public function preSave(Doctrine_Event $event): void
 	{ }
-
+	
 	public function postSave(Doctrine_Event $event): void
 	{ }
-
+	
 	// [OV4] added
 	public function postRelatedSave(Doctrine_Event $event): void
 	{ }
-
+	
 	public function preDqlDelete(Doctrine_Event $event): void
 	{ }
-
+	
 	public function preDelete(Doctrine_Event $event): void
 	{ }
-
+	
 	public function postDelete(Doctrine_Event $event): void
 	{ }
-
+	
 	public function preDqlUpdate(Doctrine_Event $event): void
 	{ }
-
+	
 	public function preUpdate(Doctrine_Event $event): void
 	{ }
-
+	
 	public function postUpdate(Doctrine_Event $event): void
 	{ }
-
+	
 	public function preInsert(Doctrine_Event $event): void
 	{ }
-
+	
 	public function postInsert(Doctrine_Event $event): void
 	{ }
-
+	
 	public function preHydrate(Doctrine_Event $event): void
 	{ }
-
+	
 	public function postHydrate(Doctrine_Event $event): void
 	{ }
-
+	
 	public function preValidate(Doctrine_Event $event): void
 	{ }
-
+	
 	public function postValidate(Doctrine_Event $event): void
 	{ }
 }

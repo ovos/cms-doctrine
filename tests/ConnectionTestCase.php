@@ -80,14 +80,14 @@ class Doctrine_Connection_TestCase extends Doctrine_UnitTestCase
     public function testFetchOne()
     {
         $c = $this->conn->fetchOne('SELECT COUNT(1) FROM entity');
-        
+
         $this->assertEqual($c, 2);
-        
+
         $c = $this->conn->fetchOne('SELECT COUNT(1) FROM entity WHERE id = ?', array(1));
-        
+
         $this->assertEqual($c, 1);
     }
-    
+
 
     public function testFetchColumn() 
     {
@@ -132,7 +132,7 @@ class Doctrine_Connection_TestCase extends Doctrine_UnitTestCase
                             ));
 
         $c = $this->conn->fetchRow('SELECT * FROM entity WHERE id = ?', array(1));
-        
+
         $this->assertEqual($c, array (
                               'id' => '1',
                               'name' => 'zYne',

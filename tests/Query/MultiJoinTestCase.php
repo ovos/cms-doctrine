@@ -71,17 +71,17 @@ class Doctrine_Query_MultiJoin_TestCase extends Doctrine_UnitTestCase
 
         $this->assertEqual(count($user->Album[0]->Song), 3);
         $this->assertEqual(count($user->Album[1]->Song), 4);
-        
-        
+
+
         $user = $this->connection->getTable('User')->find(5);
-        
+
         $user->Album[0]->name = 'Clayman';
         $user->Album[1]->name = 'Colony';
         $user->Album[1]->Song[0]->title = 'Colony';
         $user->Album[1]->Song[1]->title = 'Ordinary Story';
-        
+
         $user->save();
-        
+
         $this->assertEqual(count($user->Album[0]->Song), 0);
         $this->assertEqual(count($user->Album[1]->Song), 2);
     }
@@ -114,9 +114,9 @@ class Doctrine_Query_MultiJoin_TestCase extends Doctrine_UnitTestCase
         $this->assertEqual($users[1]->Album[1]->name, 'Colony');
         $this->assertEqual($users[1]->Album[1]->Song[0]->title, 'Colony');
         $this->assertEqual($users[1]->Album[1]->Song[1]->title, 'Ordinary Story');
-        
+
         $this->assertEqual($users[0]->Phonenumber[0]->phonenumber, '123 123');
-        
+
         $this->assertEqual($users[1]->Phonenumber[0]->phonenumber, '123 123');
         $this->assertEqual($users[1]->Phonenumber[1]->phonenumber, '456 456');
         $this->assertEqual($users[1]->Phonenumber[2]->phonenumber, '789 789');
@@ -153,7 +153,7 @@ class Doctrine_Query_MultiJoin_TestCase extends Doctrine_UnitTestCase
         // added order bys, made it behave
         $users = $query->query("FROM User.Album.Song, User.Book.Author WHERE User.id IN (4,5)
             ORDER BY User.id, User.Album.id, User.Album.Song.id, User.Book.id, User.Book.Author.id");
-        
+
         $this->assertEqual($users->count(), 2);
 
         $this->assertEqual($users[0]->id, 4);
@@ -166,7 +166,7 @@ class Doctrine_Query_MultiJoin_TestCase extends Doctrine_UnitTestCase
         $this->assertEqual($users[0]->Album[1]->Song[1]->title, 'The Wonders At Your Feet');
         $this->assertEqual($users[0]->Album[1]->Song[2]->title, 'Feast Of Burden');
         $this->assertEqual($users[0]->Album[1]->Song[3]->title, 'Fabric');
-        
+
         $this->assertEqual($users[0]->Book[0]->Author[0]->name, 'Niccolo Machiavelli');
         $this->assertEqual($users[0]->Book[0]->Author[1]->name, 'Someone');
         $this->assertEqual($users[0]->Book[1]->name, 'The Art of War');

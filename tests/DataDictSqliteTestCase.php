@@ -2,7 +2,7 @@
 /**
 class Doctrine_DataDict_Sqlite_TestCase extends Doctrine_UnitTestCase {
     private $dict;
-    
+
     private $columns;
     public function prepareData() { }
     public function prepareTables() {
@@ -17,7 +17,7 @@ class Doctrine_DataDict_Sqlite_TestCase extends Doctrine_UnitTestCase {
     }
     public function testListTables() {
         $result = $this->dict->listTables();
-        
+
     }
     public function testIntegerType() {
         $this->assertEqual($this->columns['col_int']->isUnique(), false);

@@ -5,6 +5,6 @@ class gnatEmail extends Doctrine_Record
     {
         $this->hasColumn('address', 'string', 150);
     }
-    
-    
+
+
 }

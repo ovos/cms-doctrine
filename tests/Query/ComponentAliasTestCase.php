@@ -103,7 +103,7 @@ class Doctrine_Query_ComponentAlias_TestCase extends Doctrine_UnitTestCase
         $this->assertEqual(count($users[0]['Group']), 1);
         $this->assertEqual(count($users[0]['Group'][0]['Phonenumber']), 1);
         $this->assertEqual(count($users[1]['Group']), 0);
-        
+
         $this->assertEqual($count, count($this->conn));
     }
 

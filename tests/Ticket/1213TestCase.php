@@ -59,7 +59,7 @@ class Doctrine_Ticket_1213_Birthday extends Doctrine_Record
 	{
 		$this->hasColumn('person_guid', 'string', 32, array('primary' => true));
 		$this->hasColumn('Bday', 'timestamp');
-
+		
 		$this->index('person_guid', array('fields' => array('person_guid')));
 	}
 }
@@ -70,10 +70,10 @@ class Doctrine_Ticket_1213_Person extends Doctrine_Record
 	{
 		$this->hasColumn('guid', 'string', 32, array('primary' => true));
 		$this->hasColumn('Name', 'string', 100);
-
+		
 		$this->index('guid', array('fields' => array('guid')));
 	}
-
+	
 	public function setUp()
 	{
 		$this->hasOne('Doctrine_Ticket_1213_Birthday as Birthday', array('local'    => 'guid',

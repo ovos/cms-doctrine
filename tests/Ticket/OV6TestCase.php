@@ -41,7 +41,7 @@ class Doctrine_Ticket_OV6_TestCase extends Doctrine_UnitTestCase
 			->whereIn('name', array('test', 'test2'))
 			->andWhere('email_id = ?', 2)
 			->andWhere('loginname = ?', array(array('test', 'serialize')));
-
+		
 		$this->assertEqual($q->getDqlWithParams(), 'FROM User WHERE name IN (\'test\', \'test2\') AND email_id = 2 AND loginname = \'a:2:{i:0;s:4:"test";i:1;s:9:"serialize";}\'');
 	}
 }

@@ -35,81 +35,81 @@ class Doctrine_EventListener implements Doctrine_EventListener_Interface
 	{ }
 	public function postClose(Doctrine_Event $event): void
 	{ }
-
+	
 	public function onCollectionDelete(Doctrine_Collection $collection): void
 	{ }
 	public function onPreCollectionDelete(Doctrine_Collection $collection): void
 	{ }
-
+	
 	public function onOpen(Doctrine_Connection $connection): void
 	{ }
-
+	
 	public function preTransactionCommit(Doctrine_Event $event): void
 	{ }
 	public function postTransactionCommit(Doctrine_Event $event): void
 	{ }
-
+	
 	public function preTransactionRollback(Doctrine_Event $event): void
 	{ }
 	public function postTransactionRollback(Doctrine_Event $event): void
 	{ }
-
+	
 	public function preTransactionBegin(Doctrine_Event $event): void
 	{ }
 	public function postTransactionBegin(Doctrine_Event $event): void
 	{ }
-
-
+	
+	
 	public function preSavepointCommit(Doctrine_Event $event): void
 	{ }
 	public function postSavepointCommit(Doctrine_Event $event): void
 	{ }
-
+	
 	public function preSavepointRollback(Doctrine_Event $event): void
 	{ }
 	public function postSavepointRollback(Doctrine_Event $event): void
 	{ }
-
+	
 	public function preSavepointCreate(Doctrine_Event $event): void
 	{ }
 	public function postSavepointCreate(Doctrine_Event $event): void
 	{ }
-
+	
 	public function postConnect(Doctrine_Event $event): void
 	{ }
 	public function preConnect(Doctrine_Event $event): void
 	{ }
-
+	
 	public function preQuery(Doctrine_Event $event): void
 	{ }
 	public function postQuery(Doctrine_Event $event): void
 	{ }
-
+	
 	public function prePrepare(Doctrine_Event $event): void
 	{ }
 	public function postPrepare(Doctrine_Event $event): void
 	{ }
-
+	
 	public function preExec(Doctrine_Event $event): void
 	{ }
 	public function postExec(Doctrine_Event $event): void
 	{ }
-
+	
 	public function preError(Doctrine_Event $event): void
 	{ }
 	public function postError(Doctrine_Event $event): void
 	{ }
-
+	
 	public function preFetch(Doctrine_Event $event): void
 	{ }
 	public function postFetch(Doctrine_Event $event): void
 	{ }
-
+	
 	public function preFetchAll(Doctrine_Event $event): void
 	{ }
 	public function postFetchAll(Doctrine_Event $event): void
 	{ }
-
+	
 	public function preStmtExecute(Doctrine_Event $event): void
 	{ }
 	public function postStmtExecute(Doctrine_Event $event): void

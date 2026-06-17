@@ -81,7 +81,7 @@ class Ticket_1562_User extends Doctrine_Record
 
 class Ticket_1562_UserTable extends Doctrine_Table
 {
-    
+
 }
 
 class Ticket_1562_Template extends Doctrine_Template
