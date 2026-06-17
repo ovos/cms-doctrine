@@ -1,4 +1,32 @@
-1.4.0 (2026-03-09)
+8.5.1 (2026-06-17)
+------------------
+Memory & performance release for the PHP 8.3–8.5 line. No public API signatures changed.
+
+### Memory leaks fixed [#1](https://github.com/ovos/cms-doctrine/pull/1)
+- [OV26] `Doctrine_Table::$_identityMap` and `Doctrine_Table_Repository` now store `WeakReference` entries — records become collectible the moment user code drops them; dead entries are compacted by an amortized sweep. Identity-map semantics preserved: while a record is alive, the same PK returns the same instance.
+- `flush()` semantics preserved via pinning — records with unsaved changes (`TDIRTY`/`DIRTY`) are strongly pinned in the repository and unpinned on save/delete/evict/state-change, so `Doctrine_Connection::flush()` still saves records that user code no longer references.
+- `Doctrine_Transaction::rollback()` now releases `$_collections` and `$invalid`. Previously both held strong references until the next successful commit, and stale invalid records could poison that commit with a spurious `Doctrine_Validator_Exception`.
+- Steady-state memory in hydrate-and-drop loops is now flat (was unbounded): `new Record` + `save()` ×2000 — 4013 KB leaked → 67 KB; `Table::find()` ×2000 — 856 KB → 29 KB; join query loop ×50 — 284 KB → flat. Manual `->free()` and `ATTR_AUTO_FREE_QUERY_OBJECTS` still work, but are no longer required for steady-state memory.
+
+### Performance [#1](https://github.com/ovos/cms-doctrine/pull/1)
+- `Doctrine_Record::get()/set()` — one static-array lookup for registered accessors/mutators; `ATTR_AUTO_ACCESSOR_OVERRIDE` cached per table with epoch invalidation (any `setAttribute` bumps the epoch); failed auto-accessor probes negative-cached. Magic field read −43%, `set()` −37%.
+- `Doctrine_Collection::add()` — duplicate `foreach` replaced with strict `in_array()` (identity comparison at C speed); new internal `addUnchecked()` lets the hydrator skip the O(n) scan only where its identifier map already guarantees uniqueness (simple/RawSql and diamond-join relation collections keep the checked `add()`); back-reference alias resolved once per collection.
+- `Doctrine_Hydrator_Graph` row loop — hoisted invariant lookups; `pre/postHydrate` dispatch skipped when neither the record listener nor the record class overrides the hook (`Doctrine_Overloadable` listeners always dispatched); relation collections fetched once per row. Record hydration on a 1000-row join 19.1 ms → 12.3 ms (−35%); array hydration 3.2 ms → 2.5 ms (−20%).
+- `Doctrine_Hydrator_RecordDriver` — registered collections keyed by `spl_object_id`, snapshotted once per query instead of once per row.
+
+### Behavior notes (intentional, observable only in edge cases)
+- `Repository::count()` / iteration now reflect only *live* records.
+- A rolled-back transaction no longer snapshots its collections at the next unrelated commit, and no longer reports stale `getInvalid()` after rollback.
+- An unreferenced, **clean**, unreachable record can no longer be resurrected through the identity map — a fresh instance is hydrated from the DB (same data, new object).
+- Subclasses touching the protected `$_identityMap` directly would now see `WeakReference` values.
+
+### Tooling [#2](https://github.com/ovos/cms-doctrine/pull/2)
+- `.editorconfig`: `[*.php]` now sets `indent_style = tab` and `trim_trailing_whitespace = false` (blank lines keep block indentation); `[*.json]` keeps 4-space indent. Normalized blank-line indentation across `lib/`, `tools/`, `tests/` (345 files) — whitespace-only; string/heredoc/inline-HTML bodies verified byte-identical via the PHP tokenizer.
+
+### Tests
+- New `tests/Ticket/OV26TestCase.php` regression coverage (records collectible after drop, identity-map reuse while alive, `flush()` of dereferenced new/dirty records, `Doctrine_Overloadable` listeners during hydration, duplicate-row dedup for RawSql and diamond joins). Full suite: 450 cases / 4373 assertions, 0 failures (PHP 8.3–8.5).
+
+8.5.0 (2026-03-09)
 ------------------
 ### PHP 8.3 modernization
 - Converted entire library indentation from spaces to tabs (276+ files)
