@@ -43,6 +43,34 @@ abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
 	protected array $_inheritanceCache = [];
 	
 	/**
+	 * @var array  Cache of "is method overridden beyond its base class" checks,
+	 *             keyed by "Class::method@BaseClass".
+	 */
+	private static array $_methodOverrideCache = [];
+	
+	/**
+	 * Checks whether the given object overrides $method somewhere below $baseClass.
+	 * Used to detect no-op template hooks and listeners so that the hydration row
+	 * loop can skip the event machinery for them, and base-class collections that
+	 * can take the unchecked append path.
+	 *
+	 * @param object $object
+	 * @param string $method
+	 * @param string $baseClass
+	 * @return bool
+	 */
+	protected static function _isMethodOverridden($object, $method, $baseClass): bool
+	{
+		$key = get_class($object) . '::' . $method . '@' . $baseClass;
+		// no declared method means it is handled dynamically (e.g. a
+		// Doctrine_Overloadable listener routing through __call) — treat
+		// that as overridden so the call is never skipped
+		return self::$_methodOverrideCache[$key]
+			??= ! method_exists($object, $method)
+				|| (new ReflectionMethod($object, $method))->getDeclaringClass()->getName() !== $baseClass;
+	}
+	
+	/**
 	 * Gets the custom field used for indexing for the specified component alias.
 	 *
 	 * @return string  The field name of the field used for indexing or NULL
@@ -84,15 +112,26 @@ abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
 		$id = [];
 		$idTemplate = [];
 		
-		// Initialize 
-		foreach ($this->_queryComponents as $dqlAlias => $data) { 
-			$componentName = $data['table']->getComponentName(); 
-			$instances[$componentName] = $data['table']->getRecordInstance(); 
-			$listeners[$componentName] = $data['table']->getRecordListener(); 
-			$identifierMap[$dqlAlias] = []; 
-			$prev[$dqlAlias] = null; 
-			$idTemplate[$dqlAlias] = ''; 
-		} 
+		// Holds per-component flags telling whether any real (overridden)
+		// pre/postHydrate hook exists, so the row loop can skip the event
+		// machinery entirely for the common no-op case
+		$hydrateHooks = [];
+		
+		// Initialize
+		foreach ($this->_queryComponents as $dqlAlias => $data) {
+			$componentName = $data['table']->getComponentName();
+			$instances[$componentName] = $data['table']->getRecordInstance();
+			$listeners[$componentName] = $data['table']->getRecordListener();
+			$identifierMap[$dqlAlias] = [];
+			$prev[$dqlAlias] = null;
+			$idTemplate[$dqlAlias] = '';
+			$hydrateHooks[$componentName] = [
+				'pre' => self::_isMethodOverridden($listeners[$componentName], 'preHydrate', 'Doctrine_Record_Listener')
+					|| self::_isMethodOverridden($instances[$componentName], 'preHydrate', 'Doctrine_Record'),
+				'post' => self::_isMethodOverridden($listeners[$componentName], 'postHydrate', 'Doctrine_Record_Listener')
+					|| self::_isMethodOverridden($instances[$componentName], 'postHydrate', 'Doctrine_Record'),
+			];
+		}
 		$cache = [];
 		
 		$result = $this->getElementCollection($rootComponentName);
@@ -126,10 +165,23 @@ abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
 			}
 		}
 		
+		// Hoisted out of the row loop: these do not change between rows
+		$rootTable = $this->_queryComponents[$rootAlias]['table'];
+		$applyRtrim = (bool) ($rootTable->getConnection()->getAttribute(Doctrine_Core::ATTR_PORTABILITY) & Doctrine_Core::PORTABILITY_RTRIM);
+		$rootPreHooks = $hydrateHooks[$rootComponentName]['pre'];
+		$rootPostHooks = $hydrateHooks[$rootComponentName]['post'];
+		// Root collections with base-class append semantics can take the unchecked
+		// append path: for non-simple queries every row's root identifier is checked
+		// against $identifierMap before appending, so add()'s linear duplicate scan
+		// is redundant. Simple queries skip the identifier map and must keep the
+		// checked add() (e.g. a RawSql query whose join multiplies root rows).
+		$fastResultAdd = ! $isSimpleQuery
+			&& $result instanceof Doctrine_Collection
+			&& ! self::_isMethodOverridden($result, 'add', 'Doctrine_Collection')
+			&& ! self::_isMethodOverridden($result, 'offsetSet', 'Doctrine_Access');
+		
 		do {
-			$table = $this->_queryComponents[$rootAlias]['table'];
-			
-			if ($table->getConnection()->getAttribute(Doctrine_Core::ATTR_PORTABILITY) & Doctrine_Core::PORTABILITY_RTRIM) {
+			if ($applyRtrim) {
 				array_map([$this, '_rtrim'], $data);
 			}
 			
@@ -151,21 +203,25 @@ abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
 			//
 			// hydrate the data of the root component from the current row
 			//
-			$componentName = $table->getComponentName();
-			// Ticket #1115 (getInvoker() should return the component that has addEventListener)
-			$event->setInvoker($table);
-			$event->set('data', $rowData[$rootAlias]);
-			$listeners[$componentName]->preHydrate($event);
-			$instances[$componentName]->preHydrate($event);
+			if ($rootPreHooks) {
+				// Ticket #1115 (getInvoker() should return the component that has addEventListener)
+				$event->setInvoker($rootTable);
+				$event->set('data', $rowData[$rootAlias]);
+				$listeners[$rootComponentName]->preHydrate($event);
+				$instances[$rootComponentName]->preHydrate($event);
+			}
 			
 			$index = false;
 			
 			// Check for an existing element
 			if ($isSimpleQuery || ! isset($identifierMap[$rootAlias][$id[$rootAlias]])) {
-				$element = $this->getElement($rowData[$rootAlias], $componentName);
-				$event->set('data', $element);
-				$listeners[$componentName]->postHydrate($event);
-				$instances[$componentName]->postHydrate($event);
+				$element = $this->getElement($rowData[$rootAlias], $rootComponentName);
+				if ($rootPostHooks) {
+					$event->setInvoker($rootTable);
+					$event->set('data', $element);
+					$listeners[$rootComponentName]->postHydrate($event);
+					$instances[$rootComponentName]->postHydrate($event);
+				}
 				
 				// do we need to index by a custom field?
 				if ($field = $this->_getCustomIndexField($rootAlias)) {
@@ -175,6 +231,8 @@ abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
 						throw new Doctrine_Hydrator_Exception("Couldn't hydrate. Found non-unique key mapping named '{$element[$field]}' for the field named '$field'.");
 					}
 					$result[$element[$field]] = $element;
+				} elseif ($fastResultAdd) {
+					$result->addUnchecked($element);
 				} else {
 					$result[] = $element;
 				}
@@ -197,10 +255,14 @@ abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
 				$map = $this->_queryComponents[$dqlAlias];
 				$table = $map['table'];
 				$componentName = $table->getComponentName();
-				$event->set('data', $data);
-				$event->setInvoker($table);
-				$listeners[$componentName]->preHydrate($event);
-				$instances[$componentName]->preHydrate($event);
+				$preHooks = $hydrateHooks[$componentName]['pre'];
+				$postHooks = $hydrateHooks[$componentName]['post'];
+				if ($preHooks) {
+					$event->set('data', $data);
+					$event->setInvoker($table);
+					$listeners[$componentName]->preHydrate($event);
+					$instances[$componentName]->preHydrate($event);
+				}
 				
 				// It would be nice if this could be moved to the query parser but I could not find a good place to implement it
 				if ( ! isset($map['parent'])) {
@@ -228,34 +290,55 @@ abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
 					$oneToOne = false;
 					// append element
 					if (isset($nonemptyComponents[$dqlAlias])) {
+						// Fetch the related collection once: for record hydration each
+						// $prev[$parent][$relationAlias] read goes through the parent
+						// record's magic offsetGet machinery. For array hydration
+						// $relatedColl is a copy, so writes below keep using the
+						// original expression in that case.
+						$relatedColl = $prev[$parent][$relationAlias];
+						$collIsObject = $relatedColl instanceof Doctrine_Collection;
 						$indexExists = isset($identifierMap[$path][$id[$parent]][$id[$dqlAlias]]);
 						$index = $indexExists ? $identifierMap[$path][$id[$parent]][$id[$dqlAlias]] : false;
-						$indexIsValid = $index !== false ? isset($prev[$parent][$relationAlias][$index]) : false;
+						$indexIsValid = $index !== false ? isset($relatedColl[$index]) : false;
 						if ( ! $indexExists || ! $indexIsValid) {
 							$element = $this->getElement($data, $componentName);
-							$event->set('data', $element);
-							$listeners[$componentName]->postHydrate($event);
-							$instances[$componentName]->postHydrate($event);
+							if ($postHooks) {
+								$event->set('data', $element);
+								$event->setInvoker($table);
+								$listeners[$componentName]->postHydrate($event);
+								$instances[$componentName]->postHydrate($event);
+							}
 							
-							if ($field = $this->_getCustomIndexField($dqlAlias)) {
+							if ($field = $indexField) {
 								if ( ! isset($element[$field])) {
 									throw new Doctrine_Hydrator_Exception("Couldn't hydrate. Found a non-existent key named '$field'.");
-								} elseif (isset($prev[$parent][$relationAlias][$element[$field]])) {
+								} elseif (isset($relatedColl[$element[$field]])) {
 									throw new Doctrine_Hydrator_Exception("Couldn't hydrate. Found non-unique key mapping named '$field'.");
 								}
-								$prev[$parent][$relationAlias][$element[$field]] = $element;
+								if ($collIsObject) {
+									$relatedColl[$element[$field]] = $element;
+								} else {
+									$prev[$parent][$relationAlias][$element[$field]] = $element;
+								}
+							} elseif ($collIsObject) {
+								// keep the checked add(): the identifier map is keyed by
+								// alias path, so a diamond join can feed the same physical
+								// collection through two paths and only add() catches that
+								$relatedColl[] = $element;
 							} else {
-								$prev[$parent][$relationAlias][] = $element; 
+								$prev[$parent][$relationAlias][] = $element;
 							}
-							$identifierMap[$path][$id[$parent]][$id[$dqlAlias]] = $this->getLastKey($prev[$parent][$relationAlias]);                            
+							$identifierMap[$path][$id[$parent]][$id[$dqlAlias]] = $collIsObject
+								? $this->getLastKey($relatedColl)
+								: $this->getLastKey($prev[$parent][$relationAlias]);
 						}
-						$collection = $prev[$parent][$relationAlias];
-						if ($collection instanceof Doctrine_Collection && $indexField) {
-							$collection->setKeyColumn($indexField);
+						if ($collIsObject) {
+							if ($indexField) {
+								$relatedColl->setKeyColumn($indexField);
+							}
+							// register collection for later snapshots
+							$this->registerCollection($relatedColl);
 						}
-						
-						// register collection for later snapshots
-						$this->registerCollection($collection);
 					}
 				} else {
 					// 1-1 relation
@@ -266,9 +349,12 @@ abstract class Doctrine_Hydrator_Graph extends Doctrine_Hydrator_Abstract
 						$element = $this->getElement($data, $componentName);
 						
 						// [FIX] Tickets #1205 and #1237
-						$event->set('data', $element);
-						$listeners[$componentName]->postHydrate($event);
-						$instances[$componentName]->postHydrate($event);
+						if ($postHooks) {
+							$event->set('data', $element);
+							$event->setInvoker($table);
+							$listeners[$componentName]->postHydrate($event);
+							$instances[$componentName]->postHydrate($event);
+						}
 						
 						$prev[$parent][$relationAlias] = $element;
 					}

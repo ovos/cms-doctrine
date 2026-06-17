@@ -54,6 +54,14 @@ abstract class Doctrine_Configurable extends Doctrine_Locator_Injectable
 	protected array $_params = [];
 	
 	/**
+	 * @var int $_attributeEpoch            incremented whenever any attribute changes
+	 *                                      anywhere in the configuration hierarchy;
+	 *                                      lets hot paths cache attribute lookups and
+	 *                                      cheaply detect staleness
+	 */
+	public static int $_attributeEpoch = 0;
+	
+	/**
 	 * setAttribute
 	 * sets a given attribute
 	 *
@@ -112,6 +120,7 @@ abstract class Doctrine_Configurable extends Doctrine_Locator_Injectable
 		}
 		
 		$this->attributes[$attribute] = $value;
+		self::$_attributeEpoch++;
 	}
 	
 	public function getParams($namespace = null)
@@ -346,6 +355,7 @@ abstract class Doctrine_Configurable extends Doctrine_Locator_Injectable
 	{
 		if (isset($this->attributes[$attribute])) {
 			unset($this->attributes[$attribute]);
+			self::$_attributeEpoch++;
 		}
 	}
 	

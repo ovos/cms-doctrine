@@ -38,7 +38,7 @@ class Doctrine_Hydrator_RecordDriver extends Doctrine_Hydrator_Graph
 	public function getElementCollection($component)
 	{
 		$coll = Doctrine_Collection::create($component);
-		$this->_collections[] = $coll;
+		$this->_collections[spl_object_id($coll)] = $coll;
 		
 		return $coll;
 	}
@@ -57,7 +57,9 @@ class Doctrine_Hydrator_RecordDriver extends Doctrine_Hydrator_Graph
 	
 	public function registerCollection($coll)
 	{
-		$this->_collections[] = $coll;
+		// keyed by object id so a collection that receives one element per row
+		// is snapshotted once in flush(), not once per row
+		$this->_collections[spl_object_id($coll)] = $coll;
 	}
 	
 	public function getNullPointer() 

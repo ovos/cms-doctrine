@@ -181,6 +181,22 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
 	protected static array $_customAccessors = [];
 	
 	/**
+	 * Negative cache for automatic accessor lookups: fields for which the
+	 * auto-accessor method probe already failed, keyed by component and field.
+	 *
+	 * @var array
+	 */
+	protected static array $_noAutoAccessor = [];
+	
+	/**
+	 * Negative cache for automatic mutator lookups: fields for which the
+	 * auto-mutator method probe already failed, keyed by component and field.
+	 *
+	 * @var array
+	 */
+	protected static array $_noAutoMutator = [];
+	
+	/**
 	 * Array of custom mutators for cache
 	 *
 	 * @var array
@@ -1025,6 +1041,42 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
 		if ($err) {
 			throw new Doctrine_Record_State_Exception('Unknown record state ' . $state);
 		}
+		
+		if ($this->_state === Doctrine_Record::STATE_TDIRTY ||
+				$this->_state === Doctrine_Record::STATE_DIRTY) {
+			$this->_pinInRepository();
+		} else {
+			$this->_unpinFromRepository();
+		}
+	}
+	
+	/**
+	 * Keeps this record strongly referenced in the table repository while it
+	 * carries unsaved changes, so that Doctrine_Connection::flush() can reach
+	 * it even when user code drops its last reference.
+	 *
+	 * @return void
+	 */
+	private function _pinInRepository(): void
+	{
+		$repository = $this->_table->getRepository();
+		if ($repository) {
+			$repository->pin($this);
+		}
+	}
+	
+	/**
+	 * Releases the strong repository reference kept while this record had
+	 * unsaved changes.
+	 *
+	 * @return void
+	 */
+	private function _unpinFromRepository(): void
+	{
+		$repository = $this->_table->getRepository();
+		if ($repository) {
+			$repository->unpin($this->_oid);
+		}
 	}
 	
 	/**
@@ -1412,17 +1464,22 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
 	 */
 	public function get($fieldName, $load = true)
 	{
-		if ($this->_table->getAttribute(Doctrine_Core::ATTR_AUTO_ACCESSOR_OVERRIDE) || $this->hasAccessor($fieldName)) {
-			$componentName = $this->_table->getComponentName();
-			
-			$accessor = $this->hasAccessor($fieldName)
-				? $this->getAccessor($fieldName)
-				: 'get' . Doctrine_Inflector::classify($fieldName);
-			
-			if ($this->hasAccessor($fieldName) || method_exists($this, $accessor)) {
-				$this->hasAccessor($fieldName, $accessor);
+		$componentName = $this->_table->getComponentName();
+		
+		$accessor = self::$_customAccessors[$componentName][$fieldName] ?? null;
+		if ($accessor) {
+			return $this->$accessor($load, $fieldName);
+		}
+		
+		if ( ! isset(self::$_noAutoAccessor[$componentName][$fieldName])
+				&& $this->_table->getAutoAccessorOverride()) {
+			$accessor = 'get' . Doctrine_Inflector::classify($fieldName);
+			if (method_exists($this, $accessor)) {
+				self::$_customAccessors[$componentName][$fieldName] = $accessor;
 				return $this->$accessor($load, $fieldName);
 			}
+			// remember the miss so the method_exists probe runs only once per field
+			self::$_noAutoAccessor[$componentName][$fieldName] = true;
 		}
 		return $this->_get($fieldName, $load);
 	}
@@ -1521,16 +1578,22 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
 	 */
 	public function set($fieldName, $value, $load = true)
 	{
-		if ($this->_table->getAttribute(Doctrine_Core::ATTR_AUTO_ACCESSOR_OVERRIDE) || $this->hasMutator($fieldName)) {
-			$componentName = $this->_table->getComponentName();
-			$mutator = $this->hasMutator($fieldName)
-				? $this->getMutator($fieldName):
-				'set' . Doctrine_Inflector::classify($fieldName);
-			
-			if ($this->hasMutator($fieldName) || method_exists($this, $mutator)) {
-				$this->hasMutator($fieldName, $mutator);
+		$componentName = $this->_table->getComponentName();
+		
+		$mutator = self::$_customMutators[$componentName][$fieldName] ?? null;
+		if ($mutator) {
+			return $this->$mutator($value, $load, $fieldName);
+		}
+		
+		if ( ! isset(self::$_noAutoMutator[$componentName][$fieldName])
+				&& $this->_table->getAutoAccessorOverride()) {
+			$mutator = 'set' . Doctrine_Inflector::classify($fieldName);
+			if (method_exists($this, $mutator)) {
+				self::$_customMutators[$componentName][$fieldName] = $mutator;
 				return $this->$mutator($value, $load, $fieldName);
 			}
+			// remember the miss so the method_exists probe runs only once per field
+			self::$_noAutoMutator[$componentName][$fieldName] = true;
 		}
 		return $this->_set($fieldName, $value, $load);
 	}
@@ -1567,9 +1630,11 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
 					case Doctrine_Record::STATE_CLEAN:
 					case Doctrine_Record::STATE_PROXY:
 						$this->_state = Doctrine_Record::STATE_DIRTY;
+						$this->_pinInRepository();
 						break;
 					case Doctrine_Record::STATE_TCLEAN:
 						$this->_state = Doctrine_Record::STATE_TDIRTY;
+						$this->_pinInRepository();
 						break;
 				}
 			}
@@ -2384,6 +2449,9 @@ abstract class Doctrine_Record extends Doctrine_Record_Abstract implements Count
 			$this->_state = Doctrine_Record::STATE_CLEAN;
 			$this->_resetModified();
 		}
+		
+		// every branch above leaves the record without unsaved changes
+		$this->_unpinFromRepository();
 	}
 	
 	/**
